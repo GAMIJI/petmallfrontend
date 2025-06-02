@@ -6,7 +6,7 @@ const Header = () => {
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const [activeSubmenu, setActiveSubmenu] = useState(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -22,14 +22,32 @@ const Header = () => {
     return "/profile";
   };
 
+  // Toggle submenu
+  const toggleSubmenu = (index) => {
+    setActiveSubmenu(activeSubmenu === index ? null : index);
+  };
+
+  // Close mobile menu when screen is resized to large
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       const mobileMenu = document.querySelector(".tgmobile__menu");
       const toggler = document.querySelector(".mobile-nav-toggler");
 
       if (mobileMenuOpen &&
-        !mobileMenu.contains(event.target) &&
-        !toggler.contains(event.target)) {
+        !mobileMenu?.contains(event.target) &&
+        !toggler?.contains(event.target)) {
         setMobileMenuOpen(false);
       }
     };
@@ -123,7 +141,7 @@ const Header = () => {
                         </Link>
                       </div>
                     </div>
-                    <div className="col-xl-5 col-lg-6">
+                    <div className="col-xl-5 col-lg-5">
                       <div className="tgmenu__search">
                         <form action="#" className="tgmenu__search-form">
                           <input type="text" placeholder="Search Here . . ." />
@@ -145,13 +163,13 @@ const Header = () => {
                               <option value={6}>Others</option>
                             </select>
                           </div>
-                          <button type="submit">
+                          <button style={{ margin: "4px" }} type="submit">
                             <i className="flaticon-loupe" />
                           </button>
                         </form>
                       </div>
                     </div>
-                    <div className="col-xl-4 col-lg-3 p-3">
+                    <div className="col-xl-4 col-lg-4 p-3">
                       <div className="tgmenu__action tgmenu__action-three d-none d-lg-block " style={{ fontSize: "14px", width: "90%" }}>
                         <ul className="list-wrap m-0" >
                           <Link style={{ fontSize: "14px", width: "100%", color: "#05576e" }} to="/register">
@@ -173,11 +191,8 @@ const Header = () => {
                           )}
                           <li className="header-wishlist">
                             <Link to="/wishList">
-
                               <i className="flaticon-love" />
-
                             </Link>
-
                           </li>
                           <li className="header-cart header-cart-two">
                             <Link to="/cart">
@@ -197,65 +212,168 @@ const Header = () => {
                   </nav>
                 </div>
                 {/* Mobile Menu  */}
-
-                <div
-                  className={`tgmobile__menu ${mobileMenuOpen ? "active" : ""}`}
-                  style={{ display: mobileMenuOpen ? "block" : "none" }}
-                >
+                <div className={`tgmobile__menu ${mobileMenuOpen ? 'show' : ''}`}>
                   <nav className="tgmobile__menu-box">
                     <div className="close-btn" onClick={() => setMobileMenuOpen(false)}>
                       <i className="fas fa-times" />
                     </div>
                     <div className="nav-logo">
-                      <Link to="/">
+                      <Link to="/" onClick={() => setMobileMenuOpen(false)}>
                         <img src="assets/img/logo/logo.png" alt="Logo" />
                       </Link>
                     </div>
                     <div className="tgmobile__search">
                       <form action="#">
                         <input type="text" placeholder="Search here..." />
-                        <button>
-                          <i className="fas fa-search" />
-                        </button>
+                        <button><i className="fas fa-search" /></button>
                       </form>
                     </div>
                     <div className="tgmobile__menu-outer">
-                      {/*Here Menu Will Come Automatically Via Javascript / Same Menu as in Header*/}
+                      <ul className="navigation">
+                        {/* Shop by category */}
+                        <li className={`menu-item-has-children ${activeSubmenu === 0 ? 'active' : ''}`}>
+                          <a onClick={() => toggleSubmenu(0)}>Shop by category</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/productList" onClick={() => setMobileMenuOpen(false)}>Dog Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" onClick={() => setMobileMenuOpen(false)}>Cat Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" onClick={() => setMobileMenuOpen(false)}>Fish Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" onClick={() => setMobileMenuOpen(false)}>Birds Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" onClick={() => setMobileMenuOpen(false)}>Rabbit Deals</Link>
+                            </li>
+                          </ul>
+                        </li>
+
+                        {/* Pet care */}
+                        <li className={`menu-item-has-children ${activeSubmenu === 1 ? 'active' : ''}`}>
+                          <a onClick={() => toggleSubmenu(1)}>Pet care</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Pet Care & Veterinary</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Pet Breed</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Pet Adopt</Link>
+                            </li>
+                          </ul>
+                        </li>
+
+                        {/* Dog */}
+                        <li className={`menu-item-has-children ${activeSubmenu === 2 ? 'active' : ''}`}>
+                          <a onClick={() => toggleSubmenu(2)}>Dog</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Labrador Retriever</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>German Shepherd</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Golden Retriever</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Bulldog</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Boxer</Link>
+                            </li>
+                          </ul>
+                        </li>
+
+                        {/* Cat */}
+                        <li className={`menu-item-has-children ${activeSubmenu === 3 ? 'active' : ''}`}>
+                          <a onClick={() => toggleSubmenu(3)}>Cat</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Persian</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Maine Coon</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Siamese</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>British Shorthair</Link>
+                            </li>
+                          </ul>
+                        </li>
+
+                        {/* Birds */}
+                        <li className={`menu-item-has-children ${activeSubmenu === 4 ? 'active' : ''}`}>
+                          <a onClick={() => toggleSubmenu(4)}>Birds</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Parakeet (Budgerigar)</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Cockatiel</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>African Grey Parrot</Link>
+                            </li>
+                            <li>
+                              <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Macaw</Link>
+                            </li>
+                          </ul>
+                        </li>
+
+                        {/* Simple links */}
+                        <li>
+                          <Link to="/animalList" onClick={() => setMobileMenuOpen(false)}>Pet Adopt</Link>
+                        </li>
+                        <li>
+                          <Link to="/doctorList" onClick={() => setMobileMenuOpen(false)}>Doctors</Link>
+                        </li>
+
+                        {/* Fish & Aquarium */}
+                        <li className={`menu-item-has-children ${activeSubmenu === 5 ? 'active' : ''}`}>
+                          <a onClick={() => toggleSubmenu(5)}>Fish & Aquarium</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/productList" onClick={() => setMobileMenuOpen(false)}>Our Products</Link>
+                            </li>
+                            <li>
+                              <Link to="/storeList" onClick={() => setMobileMenuOpen(false)}>Stores</Link>
+                            </li>
+                          </ul>
+                        </li>
+
+                        {/* Login/Profile */}
+                        {token ? (
+                          <li>
+                            <Link to={getProfileLink()} onClick={() => setMobileMenuOpen(false)}>
+                              <i className="flaticon-user" /> My Profile
+                            </Link>
+                          </li>
+                        ) : (
+                          <li>
+                            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Login/Register</Link>
+                          </li>
+                        )}
+                      </ul>
                     </div>
                     <div className="social-links">
                       <ul className="list-wrap">
-                        <li>
-                          <a href="https://www.facebook.com/" target="_blank">
-                            <i className="fab fa-facebook-f" />
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://twitter.com/" target="_blank">
-                            <i className="fab fa-twitter" />
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.whatsapp.com/" target="_blank">
-                            <i className="fab fa-whatsapp" />
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.instagram.com/" target="_blank">
-                            <i className="fab fa-instagram" />
-                          </a>
-                        </li>
-                        <li>
-                          <a href="https://www.youtube.com/" target="_blank">
-                            <i className="fab fa-youtube" />
-                          </a>
-                        </li>
+                        <li><a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer"><i className="fab fa-facebook-f" /></a></li>
+                        <li><a href="https://twitter.com/" target="_blank" rel="noopener noreferrer"><i className="fab fa-twitter" /></a></li>
+                        <li><a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer"><i className="fab fa-instagram" /></a></li>
                       </ul>
                     </div>
                   </nav>
                 </div>
                 <div
-                  className="tgmobile__menu-backdrop"
-                  style={{ display: mobileMenuOpen ? "block" : "none" }}
+                  className={`tgmobile__menu-backdrop ${mobileMenuOpen ? 'show' : ''}`}
                   onClick={() => setMobileMenuOpen(false)}
                 />
                 {/* End Mobile Menu */}
@@ -264,11 +382,13 @@ const Header = () => {
           </div>
         </div>
       </header>
+
       <div className="divider-area">
         <div className="container">
           <div className="divider-wrap" />
         </div>
       </div>
+
       <div className="container custom-container">
         <div>
           <div className="row">
@@ -277,8 +397,8 @@ const Header = () => {
                 <nav className="tgmenu__nav">
                   <div className="tgmenu__navbar-wrap tgmenu__main-menu d-none d-lg-flex">
                     <ul className="navigation">
-                      <li className="active menu-item-has-children">
-                        <a style={{ cursor: "pointer" }}>Shop by category</a>
+                      <li className=" menu-item-has-children">
+                     
 
                         <ul className="sub-menu">
                           <li className="active">
@@ -415,65 +535,12 @@ const Header = () => {
                   </div>
                 </nav>
               </div>
-              {/* Mobile Menu  */}
-              <div className="tgmobile__menu">
-                <nav className="tgmobile__menu-box">
-                  <div className="close-btn">
-                    <i className="fas fa-times" />
-                  </div>
-                  <div className="nav-logo">
-                    <Link to="/">
-                      <img src="assets/img/logo/logo.png" alt="Logo" />
-                    </Link>
-                  </div>
-                  <div className="tgmobile__search">
-                    <form action="#">
-                      <input type="text" placeholder="Search here..." />
-                      <button>
-                        <i className="fas fa-search" />
-                      </button>
-                    </form>
-                  </div>
-                  <div className="tgmobile__menu-outer">
-                    {/*Here Menu Will Come Automatically Via Javascript / Same Menu as in Header*/}
-                  </div>
-                  <div className="social-links">
-                    <ul className="list-wrap">
-                      <li>
-                        <a href="https://www.facebook.com/" target="_blank">
-                          <i className="fab fa-facebook-f" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://twitter.com/" target="_blank">
-                          <i className="fab fa-twitter" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.whatsapp.com/" target="_blank">
-                          <i className="fab fa-whatsapp" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.instagram.com/" target="_blank">
-                          <i className="fab fa-instagram" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://www.youtube.com/" target="_blank">
-                          <i className="fab fa-youtube" />
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </nav>
-              </div>
-              <div className="tgmobile__menu-backdrop" />
-              {/* End Mobile Menu */}
             </div>
           </div>
         </div>
       </div>
+
+
       <div className="divider-area">
         <div className="container">
           <div className="divider-wrap" />

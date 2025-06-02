@@ -1996,7 +1996,7 @@ textarea {
 }
 @media (max-width: 1199.98px) {
   .tgmenu__search-form {
-    width: 490px;
+    width: 395px;
   }
 }
 .tgmenu__search-form input {
@@ -2173,7 +2173,7 @@ textarea {
 }
 .tgmobile__menu {
   position: fixed;
-  right: 0;
+  right: 300px;
   top: 0;
   width: 300px;
   padding-right: 30px;
@@ -2464,12 +2464,12 @@ textarea {
 }
 @media (max-width: 991.98px) {
   .tgmobile__menu-outer .mobile-nav-toggler {
-    display: block !important;
+    /* display: block !important; */
   }
 }
 
 .mobile-menu-visible {
-  overflow: hidden;
+  overflow: auto;
 }
 .mobile-menu-visible .tgmobile__menu {
   -webkit-transform: translateX(0%);
