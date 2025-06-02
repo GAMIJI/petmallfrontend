@@ -12,7 +12,7 @@ const Cart = () => {
   const API_URL = import.meta.env.VITE_API_URLS;
 
   const token = localStorage.getItem("token");
-  
+
   const fetchCartItems = async () => {
     try {
       setLoading(true);
@@ -106,7 +106,7 @@ const Cart = () => {
                   <h2 className="cart-title">Your Shopping Cart</h2>
                   <p className="cart-subtitle">{cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}</p>
                 </div>
-                
+
                 <div className="table-responsive">
                   <table className="table shipping__maincart">
                     <thead>
@@ -130,8 +130,8 @@ const Cart = () => {
                         </tr>
                       ) : cartItems.length > 0 ? (
                         cartItems.map((item, index) => (
-                          <tr 
-                            key={item._id} 
+                          <tr
+                            key={item._id}
                             className={`cart_list_product ${removingItem === item.productId._id ? 'removing' : ''}`}
                           >
                             <th scope="row">{index + 1}</th>
@@ -162,15 +162,18 @@ const Cart = () => {
                                 </div>
                               </div>
                             </td>
-                            <td className="cart__price">
-                              <p>₹{item.productId.price.toFixed(2)}</p>
+                            <td className="cart__price" style={{fontWeight:'bold'}}>
+                              <p style={{fontWeight:'bold'}}>₹{item.productId.price.toFixed(2)}</p>
                             </td>
+
+
                             <td className="cart__quantity">
                               <div className="quantity-control">
                                 <button
                                   onClick={() => handleDecrease(item)}
                                   className="qty-btn qty-decrease"
                                   disabled={item.quantity <= 1}
+                                  aria-label="Decrease quantity"
                                 >
                                   −
                                 </button>
@@ -178,11 +181,14 @@ const Cart = () => {
                                 <button
                                   onClick={() => handleIncrease(item)}
                                   className="qty-btn qty-increase"
+                                  aria-label="Increase quantity"
                                 >
                                   +
                                 </button>
                               </div>
                             </td>
+
+
                             <td className="cart__subtotal">
                               <p>₹{(item.productId.price * item.quantity).toFixed(2)}</p>
                             </td>
@@ -220,7 +226,7 @@ const Cart = () => {
               </div>
 
               <div className="col-lg-3 col-md-12">
-                <div className="cart-summary">
+                <div className="cart-summary" style={{ borderLeft: '3px inset black' }}>
                   <h4 className="summary-title">Cart Summary</h4>
                   <div className="summary-content">
                     <div className="summary-row">
@@ -241,21 +247,21 @@ const Cart = () => {
                     {/* <Link to="/checkout" className="btn btn-checkout">
                       Proceed to Checkout <FaArrowRight className="ms-2" /> 
                     </Link> */}
-                    <Link to="/checkout"  className="header-btn">
-                    <div className="tgmenu__action d-none d-md-block">
-                    <ul className="list-wrap">
-                      <li className="header-btn">
-                        <a href="contact.html" className="btn">
-                          <FaArrowRight className="ms-2" />
-                           Proceed to Checkout
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                      </Link>
+                    <Link to="/checkout" className="header-btn">
+                      <div className="tgmenu__action d-none d-md-block">
+                        <ul className="list-wrap">
+                          <li className="header-btn">
+                            <a href="contact.html" className="btn">
+                              <FaArrowRight className="ms-2" />
+                              Proceed to Checkout
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    </Link>
                     <Link to="/productList" className="btn btn-continue" style={{ marginTop: '10px' }}>
-                  
-                     <FaArrowLeft className="ms-2" />
+
+                      <FaArrowLeft className="ms-2" />
                       Continue Shopping
                     </Link>
                   </div>
@@ -368,39 +374,63 @@ const Cart = () => {
           color: #0d6efd;
         }
         
-        .quantity-control {
-          display: flex;
-          align-items: center;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          overflow: hidden;
-          width: fit-content;
-        }
-        
-        .qty-btn {
-          background: #f8f9fa;
-          border: none;
-          padding: 5px 12px;
-          cursor: pointer;
-          font-size: 16px;
-          transition: all 0.2s ease;
-        }
-        
-        .qty-btn:hover {
-          background: #e9ecef;
-        }
-        
-        .qty-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        
-        .qty-value {
-          min-width: 30px;
-          text-align: center;
-          font-weight: 500;
-        }
-        
+     .quantity-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px; /* Fully rounded ends */
+  overflow: hidden;
+  width: fit-content;
+  background: #f8fafc;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.quantity-control:hover {
+  border-color: #cbd5e1;
+}
+
+.qty-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #64748b;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qty-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.qty-value {
+  min-width: 36px;
+  text-align: center;
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+/* Plus/minus buttons styling */
+.qty-decrease {
+  padding-left: 18px;
+}
+
+.qty-increase {
+  padding-right: 18px;
+}
+  
         .btn-remove {
           background: none;
           border: none;
