@@ -134,7 +134,7 @@ const Cart = () => {
                             key={item._id}
                             className={`cart_list_product ${removingItem === item.productId._id ? 'removing' : ''}`}
                           >
-                            <th scope="row">{index + 1}</th>
+                            <th scope="row ">{index + 1}</th>
                             <td className="cart__item">
                               <div className="cart__image">
                                 <Link to={`/product/${item.productId._id}`}>
@@ -162,12 +162,12 @@ const Cart = () => {
                                 </div>
                               </div>
                             </td>
-                            <td className="cart__price" style={{fontWeight:'bold'}}>
-                              <p style={{fontWeight:'bold'}}>₹{item.productId.price.toFixed(2)}</p>
+                            <td className="cart__price" style={{ fontWeight: 'bold' }}>
+                              <p style={{ fontWeight: 'bold' }}>₹{item.productId.price.toFixed(2)}</p>
                             </td>
 
 
-                            <td className="cart__quantity">
+                            <td className="cart__quantity" >
                               <div className="quantity-control">
                                 <button
                                   onClick={() => handleDecrease(item)}
@@ -226,27 +226,48 @@ const Cart = () => {
               </div>
 
               <div className="col-lg-3 col-md-12 mt-5 pt-4">
-                <div className="cart-summary" style={{ border: '1px solid #eae6e6' }}>
-                  <h4 className="summary-title">Cart Summary</h4>
+                <div className="cart-summary" style={{ border: '1px solid #eae6e6', borderRadius: '8px', padding: '20px' }}>
+                  <h4 className="summary-title mb-4">Cart Summary</h4>
                   <div className="summary-content">
                     <div className="summary-row">
-                      <span>Subtotal</span>
+                      <span>Price ({cartItems.length} items)</span>
                       <span>₹{total.toFixed(2)}</span>
                     </div>
+
                     <div className="summary-row">
-                      <span>Shipping</span>
-                      <span className="text-success">FREE</span>
+                      <span>Discount</span>
+                      <span className="text-success">− ₹10</span>
                     </div>
-                    <div className="summary-divider"></div>
-                    <div className="summary-row total">
-                      <span>Total</span>
+
+                    <div className="summary-row">
+                      <span>Coupon</span>
+                      <span className="text-success">− ₹350</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Protect Promise Fee</span>
+                      <span>₹ 15</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Delivery Charges</span>
+                      <span> <span className="text-success">FREE</span></span>
+                    </div>
+
+                    <div className="summary-divider my-2"></div>
+
+                    <div className="summary-row total fw-bold">
+                      <span>Total Amount</span>
                       <span>₹{total.toFixed(2)}</span>
+                    </div>
+
+                    <div className="summary-row text-success mt-2" style={{ fontSize: '14px' }}>
+                      You will save ₹350 on this order
                     </div>
                   </div>
+
                   <div className="checkout-actions">
-                    {/* <Link to="/checkout" className="btn btn-checkout">
-                      Proceed to Checkout <FaArrowRight className="ms-2" /> 
-                    </Link> */}
+
                     <Link to="/checkout" className="header-btn">
                       <div className="tgmenu__action d-none d-md-block">
                         <ul className="list-wrap">
@@ -265,8 +286,12 @@ const Cart = () => {
                       Continue Shopping
                     </Link>
                   </div>
+
+
                 </div>
               </div>
+
+
             </div>
           </div>
         </section>
@@ -302,8 +327,9 @@ const Cart = () => {
           padding: 15px;
           background-color: #f8f9fa;
           font-weight: 600;
-          text-align: left;
+          text-align: center;
           border-bottom: 1px solid #dee2e6;
+          color: #05576e;
         }
         
         .cart_list_product td {
@@ -431,7 +457,7 @@ const Cart = () => {
 .qty-increase {
   padding-right: 18px;
 }
-  
+
   
         .btn-remove {
           background: none;

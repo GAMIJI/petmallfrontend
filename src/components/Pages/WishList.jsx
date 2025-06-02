@@ -124,7 +124,7 @@ const Wishlist = () => {
                     overflow: 'hidden',
                 }}
             >
-                <Toast.Header className=" text-white" style={{backgroundColor: '#05576e'}}>
+                <Toast.Header className=" text-white" style={{ backgroundColor: '#05576e' }}>
                     <strong className="me-auto">Notification</strong>
                 </Toast.Header>
                 <Toast.Body className="text-dark">{toastMessage}</Toast.Body>
@@ -138,7 +138,7 @@ const Wishlist = () => {
                 transition={{ duration: 0.3 }}
                 className="d-flex justify-content-between align-items-center mb-4"
             >
-                <h2 className="mb-0" style={{ color: '#05576e'}}>
+                <h2 className="mb-0" style={{ color: '#05576e' }}>
                     <FaHeart className="text-danger me-2" />
                     My Wishlist <Badge bg="secondary" pill>{wishlist.length}</Badge>
                 </h2>
@@ -182,7 +182,7 @@ const Wishlist = () => {
                                 style={{ cursor: "pointer" }}
                             >
                                 <div className="d-flex align-items-center m-2">
-                                    <div className="position-relative me-3 mt-1" style={{ width: "80px", height: "80px" }}>
+                                    <div className="position-relative me-3" style={{ width: "80px", height: "80px" }}>
                                         <img
                                             src={`${API_URL}${item.productImages[0]}`}
                                             alt={item.productName}
