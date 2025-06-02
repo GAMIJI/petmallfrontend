@@ -33,7 +33,7 @@ const Wishlist = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchWishlist();
     }, []);
 
@@ -62,7 +62,7 @@ const Wishlist = () => {
     const handleAddToCart = async (productId) => {
         try {
             // Replace with your actual add to cart API call
-            await axios.post(`${API_URL}api/user/addToCart`, 
+            await axios.post(`${API_URL}api/user/addToCart`,
                 { productId, quantity: 1 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -85,10 +85,10 @@ const Wishlist = () => {
 
     if (loading) {
         return (
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="d-flex justify-content-center align-items-center" 
+                className="d-flex justify-content-center align-items-center"
                 style={{ minHeight: "60vh" }}
             >
                 <Spinner animation="border" variant="primary" />
@@ -98,7 +98,7 @@ const Wishlist = () => {
 
     if (error) {
         return (
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="container mt-5"
@@ -111,31 +111,38 @@ const Wishlist = () => {
     return (
         <div className="container my-4">
             {/* Toast Notification */}
-            <Toast 
-                onClose={() => setShowToast(false)} 
-                show={showToast} 
-                delay={3000} 
+            <Toast
+                onClose={() => setShowToast(false)}
+                show={showToast}
+                delay={3000}
                 autohide
-                className="position-fixed top-20 end-20 z-index-9999"
+                className="position-fixed bottom-0 start-50 translate-middle-x mb-4 shadow-lg"
+                style={{
+                    minWidth: '300px',
+                    zIndex: 9999,
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                }}
             >
-                <Toast.Header className="bg-primary text-white">
+                <Toast.Header className=" text-white" style={{backgroundColor: '#05576e'}}>
                     <strong className="me-auto">Notification</strong>
                 </Toast.Header>
-                <Toast.Body>{toastMessage}</Toast.Body>
+                <Toast.Body className="text-dark">{toastMessage}</Toast.Body>
             </Toast>
 
+
             {/* Header */}
-            <motion.div 
+            <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 className="d-flex justify-content-between align-items-center mb-4"
             >
-                <h2 className="mb-0">
+                <h2 className="mb-0" style={{ color: '#05576e'}}>
                     <FaHeart className="text-danger me-2" />
                     My Wishlist <Badge bg="secondary" pill>{wishlist.length}</Badge>
                 </h2>
-            
+
             </motion.div>
 
             {wishlist.length === 0 ? (
@@ -159,13 +166,13 @@ const Wishlist = () => {
                                 key={item._id}
                                 layout
                                 initial={{ opacity: 0, x: -20 }}
-                                animate={{ 
-                                    opacity: 1, 
+                                animate={{
+                                    opacity: 1,
                                     x: 0,
                                     transition: { duration: 0.3 }
                                 }}
-                                exit={{ 
-                                    opacity: 0, 
+                                exit={{
+                                    opacity: 0,
                                     x: 20,
                                     transition: { duration: 0.3 }
                                 }}
@@ -174,65 +181,108 @@ const Wishlist = () => {
                                 onClick={() => navigate(`/product/${item._id}`)}
                                 style={{ cursor: "pointer" }}
                             >
-                                <div className="d-flex align-items-center">
-                                    <div className="position-relative me-3" style={{ width: "80px", height: "80px" }}>
+                                <div className="d-flex align-items-center m-2">
+                                    <div className="position-relative me-3 mt-1" style={{ width: "80px", height: "80px" }}>
                                         <img
                                             src={`${API_URL}${item.productImages[0]}`}
                                             alt={item.productName}
                                             className="img-fluid rounded"
-                                            style={{ 
-                                                width: "100%", 
-                                                height: "100%", 
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
                                                 objectFit: "cover",
                                                 transition: "transform 0.3s ease"
                                             }}
                                         />
-                                        {item.discount && (
-                                            <Badge 
-                                                bg="danger" 
+                                        {true && (
+                                            <Badge
+                                                bg="danger"
                                                 className="position-absolute top-0 start-0 translate-middle-y"
                                             >
-                                                {item.discount}% OFF
+
+                                                40% OFF
                                             </Badge>
                                         )}
                                     </div>
                                     <div className="flex-grow-1">
-                                        <h6 className="mb-1">{item.productName}</h6>
+                                        <h5 className="mb-1">{item.productName}</h5>
                                         <div className="d-flex align-items-center">
                                             <h5 className="mb-0 text-dark me-2">
                                                 <FaRupeeSign size={14} className="align-text-top" />
                                                 {item.price.toLocaleString()}
                                             </h5>
-                                            {item.originalPrice && (
+                                            {true && (
                                                 <del className="small text-muted">
                                                     <FaRupeeSign size={10} className="align-text-top" />
-                                                    {item.originalPrice.toLocaleString()}
+                                                    {/* {item.originalPrice.toLocaleString()} */}
+                                                    1000
                                                 </del>
                                             )}
                                         </div>
                                     </div>
                                     <div className="d-flex align-items-center ms-3">
-                                        <Button 
-                                            variant="outline-success" 
-                                            size="sm" 
-                                            className="me-2"
+                                        <a
+                                            className="me-3"
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#05576e',
+                                                fontSize: '16px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease',
+                                                padding: '10px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                textDecoration: 'none',
+                                            }}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleAddToCart(item._id);
                                             }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'scale(1.2)';
+                                                e.currentTarget.style.color = '#05576e';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                                e.currentTarget.style.color = '#05576e';
+                                            }}
                                         >
                                             <FaShoppingCart />
-                                        </Button>
-                                        <Button 
-                                            variant="outline-danger" 
+                                        </a>
+
+
+
+                                        <a
+                                            variant="outline-danger"
                                             size="sm"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleRemoveFromWishlist(item._id);
                                             }}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: '#dc3545',
+                                                fontSize: '16px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease',
+                                                padding: '5px'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'scale(1.2)';
+                                                e.currentTarget.style.color = '#05576e';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'scale(1)';
+                                                e.currentTarget.style.color = '#dc3545';
+                                            }}
                                         >
                                             <FaTrash />
-                                        </Button>
+                                        </a>
+
+
                                         <FaChevronRight className="ms-3 text-muted" />
                                     </div>
                                 </div>

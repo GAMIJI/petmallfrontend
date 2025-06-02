@@ -153,9 +153,9 @@ const Cart = () => {
                                   <button className="btn-action" title="Add to wishlist">
                                     <FaHeart />
                                   </button>
-                                  <button className="btn-action" title="View details">
+                                  {/* <button className="btn-action" title="View details">
                                     <FaSearch />
-                                  </button>
+                                  </button> */}
                                   <button className="btn-action" title="Compare">
                                     <FaExchangeAlt />
                                   </button>
@@ -225,8 +225,8 @@ const Cart = () => {
                 </div>
               </div>
 
-              <div className="col-lg-3 col-md-12">
-                <div className="cart-summary" style={{ borderLeft: '3px inset black' }}>
+              <div className="col-lg-3 col-md-12 mt-5 pt-4">
+                <div className="cart-summary" style={{ border: '1px solid #eae6e6' }}>
                   <h4 className="summary-title">Cart Summary</h4>
                   <div className="summary-content">
                     <div className="summary-row">
@@ -259,7 +259,7 @@ const Cart = () => {
                         </ul>
                       </div>
                     </Link>
-                    <Link to="/productList" className="btn btn-continue" style={{ marginTop: '10px' }}>
+                    <Link to="/productList" className="btn btn-continue" style={{ marginTop: '10px', paddingTop: '15px' }}>
 
                       <FaArrowLeft className="ms-2" />
                       Continue Shopping
@@ -278,13 +278,14 @@ const Cart = () => {
         }
         
         .cart-header {
+          color: 05576e;
           margin-bottom: 30px;
         }
         
         .cart-title {
           font-size: 28px;
           font-weight: 600;
-          color: #333;
+          color: #05576e;
         }
         
         .cart-subtitle {
@@ -371,7 +372,7 @@ const Cart = () => {
         }
         
         .btn-action:hover {
-          color: #0d6efd;
+          color: #05576e;
         }
         
      .quantity-control {
@@ -430,6 +431,7 @@ const Cart = () => {
 .qty-increase {
   padding-right: 18px;
 }
+  
   
         .btn-remove {
           background: none;
@@ -532,8 +534,8 @@ const Cart = () => {
         
         .btn-continue {
           background: white;
-          color: #0d6efd;
-          border: 1px solid #0d6efd;
+          color: #05576e;
+          border: 1px solid #05576e;
           padding: 12px;
           font-weight: 500;
           transition: all 0.3s ease;
