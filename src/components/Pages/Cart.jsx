@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { FaShoppingBasket, FaArrowRight, FaTimes, FaTrash, FaHeart, FaSearch, FaExchangeAlt, FaArrowLeft } from "react-icons/fa";
+import { FaShoppingBasket, FaArrowRight, FaTimes, FaTrash, FaHeart, FaSearch, FaExchangeAlt, FaArrowLeft, FaBookmark, FaShoppingCart } from "react-icons/fa";
 import { FiShoppingBag } from "react-icons/fi";
 
 const Cart = () => {
@@ -10,6 +10,36 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
   const [removingItem, setRemovingItem] = useState(null);
   const API_URL = import.meta.env.VITE_API_URLS;
+
+  // Static saved for later data
+  const [savedItems, setSavedItems] = useState([
+    {
+      id: 1,
+      productName: "super deodorizing shampoo",
+      variant: "shampoo",
+      price: 299,
+      originalPrice: 999,
+      discount: 70,
+      image: "assets/img/products/products_img02.jpg",
+      payOptions: {
+        total: 269,
+        fee: 30
+      }
+    },
+    {
+      id: 2,
+      productName: "Calming bites",
+      size: "100 gm",
+      price: 211,
+      originalPrice: 595,
+      discount: 64,
+      image: "assets/img/products/latest_products_img06.jpg",
+      payOptions: {
+        total: 186,
+        fee: 25
+      }
+    }
+  ]);
 
   const token = localStorage.getItem("token");
 
@@ -95,6 +125,34 @@ const Cart = () => {
     }
   };
 
+  const moveToSaved = async (item) => {
+    try {
+      // First remove from cart
+      await handleDelete(item.productId._id);
+
+      // Then add to saved items (client-side only for static data)
+      setSavedItems([...savedItems, {
+        id: Date.now(), // temporary ID
+        productName: item.productId.productName,
+        variant: item.productId.variant || "",
+        price: item.productId.price,
+        originalPrice: item.productId.originalPrice || item.productId.price * 1.5,
+        discount: Math.floor(Math.random() * 50) + 10,
+        image: `${API_URL}${item.productId.productImages[0]}`,
+        payOptions: {
+          total: Math.floor(item.productId.price * 0.9),
+          fee: Math.floor(Math.random() * 30) + 10
+        }
+      }]);
+    } catch (err) {
+      console.error("Error moving item to saved", err);
+    }
+  };
+
+  const removeSaved = (id) => {
+    setSavedItems(savedItems.filter(item => item.id !== id));
+  };
+
   return (
     <div className="cart-page">
       <main className="fix">
@@ -134,7 +192,7 @@ const Cart = () => {
                             key={item._id}
                             className={`cart_list_product ${removingItem === item.productId._id ? 'removing' : ''}`}
                           >
-                            <th scope="row">{index + 1}</th>
+                            <th scope="row ">{index + 1}</th>
                             <td className="cart__item">
                               <div className="cart__image">
                                 <Link to={`/product/${item.productId._id}`}>
@@ -153,19 +211,15 @@ const Cart = () => {
                                   <button className="btn-action" title="Add to wishlist">
                                     <FaHeart />
                                   </button>
-                                  <button className="btn-action" title="View details">
-                                    <FaSearch />
-                                  </button>
                                   <button className="btn-action" title="Compare">
                                     <FaExchangeAlt />
                                   </button>
                                 </div>
                               </div>
                             </td>
-                            <td className="cart__price" style={{fontWeight:'bold'}}>
-                              <p style={{fontWeight:'bold'}}>₹{item.productId.price.toFixed(2)}</p>
+                            <td className="cart__price" style={{ fontWeight: 'bold' }}>
+                              <p style={{ fontWeight: 'bold' }}>₹{item.productId.price.toFixed(2)}</p>
                             </td>
-
 
                             <td className="cart__quantity">
                               <div className="quantity-control">
@@ -188,11 +242,17 @@ const Cart = () => {
                               </div>
                             </td>
 
-
                             <td className="cart__subtotal">
                               <p>₹{(item.productId.price * item.quantity).toFixed(2)}</p>
                             </td>
                             <td className="cart__remove">
+                              <button
+                                onClick={() => moveToSaved(item)}
+                                className="btn-save"
+                                title="Save for later"
+                              >
+                                <FaBookmark />
+                              </button>
                               <button
                                 onClick={() => handleDelete(item.productId._id)}
                                 className="btn-remove"
@@ -223,30 +283,100 @@ const Cart = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
 
-              <div className="col-lg-3 col-md-12">
-                <div className="cart-summary" style={{ borderLeft: '3px inset black' }}>
-                  <h4 className="summary-title">Cart Summary</h4>
-                  <div className="summary-content">
-                    <div className="summary-row">
-                      <span>Subtotal</span>
-                      <span>₹{total.toFixed(2)}</span>
+                {/* Saved For Later Section - Static Data */}
+                {savedItems.length > 0 && (
+                  <div className="saved-later-section">
+                    <div className="saved-header">
+                      <h3 className="saved-title">Saved For Later ({savedItems.length})</h3>
                     </div>
-                    <div className="summary-row">
-                      <span>Shipping</span>
-                      <span className="text-success">FREE</span>
-                    </div>
-                    <div className="summary-divider"></div>
-                    <div className="summary-row total">
-                      <span>Total</span>
-                      <span>₹{total.toFixed(2)}</span>
+
+                    <div className="saved-items">
+                      {savedItems.map((item) => (
+                        <div key={item.id} className="saved-item">
+                          <div className="saved-item-image">
+                            <img
+                              src={item.image}
+                              alt={item.productName}
+                            />
+                          </div>
+                          <div className="saved-item-details">
+                            <h5>{item.productName}</h5>
+                            <p className="variant">{item.variant || item.size}</p>
+                            <p className="price">
+                              ₹{item.price.toFixed(2)}
+                              <span className="original-price">₹{item.originalPrice.toFixed(2)}</span>
+                              <span className="discount">{item.discount}% Off</span>
+                            </p>
+                            <p className="pay-options">
+                              Or Pay ₹{item.payOptions.total} + ₹{item.payOptions.fee}
+                            </p>
+                          </div>
+                          <div className="saved-item-actions">
+                            <button
+                              className="btn-move-to-cart"
+                              title="Move to cart"
+                            >
+                              <FaShoppingCart />
+                            </button>
+                            <button
+                              onClick={() => removeSaved(item.id)}
+                              className="btn-remove-saved"
+                              title="Remove item"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
+                )}
+
+              </div>
+
+              <div className="col-lg-3 col-md-12 mt-5 pt-4">
+                <div className="cart-summary" style={{ border: '1px solid #eae6e6', borderRadius: '8px', padding: '20px' }}>
+                  <h4 className="summary-title mb-4">Cart Summary</h4>
+                  <div className="summary-content">
+                    <div className="summary-row">
+                      <span>Price ({cartItems.length} items)</span>
+                      <span>₹{total.toFixed(2)}</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Discount</span>
+                      <span className="text-success">− ₹10</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Coupon</span>
+                      <span className="text-success">− ₹350</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Protect Promise Fee</span>
+                      <span>₹ 15</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Delivery Charges</span>
+                      <span> <span className="text-success">FREE</span></span>
+                    </div>
+
+                    <div className="summary-divider my-2"></div>
+
+                    <div className="summary-row total fw-bold">
+                      <span>Total Amount</span>
+                      <span>₹{total.toFixed(2)}</span>
+                    </div>
+
+                    <div className="summary-row text-success mt-2" style={{ fontSize: '14px' }}>
+                      You will save ₹350 on this order
+                    </div>
+                  </div>
+
                   <div className="checkout-actions">
-                    {/* <Link to="/checkout" className="btn btn-checkout">
-                      Proceed to Checkout <FaArrowRight className="ms-2" /> 
-                    </Link> */}
                     <Link to="/checkout" className="header-btn">
                       <div className="tgmenu__action d-none d-md-block">
                         <ul className="list-wrap">
@@ -259,8 +389,7 @@ const Cart = () => {
                         </ul>
                       </div>
                     </Link>
-                    <Link to="/productList" className="btn btn-continue" style={{ marginTop: '10px' }}>
-
+                    <Link to="/productList" className="btn btn-continue" style={{ marginTop: '10px', paddingTop: '15px' }}>
                       <FaArrowLeft className="ms-2" />
                       Continue Shopping
                     </Link>
@@ -278,13 +407,14 @@ const Cart = () => {
         }
         
         .cart-header {
+          color: 05576e;
           margin-bottom: 30px;
         }
         
         .cart-title {
           font-size: 28px;
           font-weight: 600;
-          color: #333;
+          color: #05576e;
         }
         
         .cart-subtitle {
@@ -301,8 +431,9 @@ const Cart = () => {
           padding: 15px;
           background-color: #f8f9fa;
           font-weight: 600;
-          text-align: left;
+          text-align: center;
           border-bottom: 1px solid #dee2e6;
+          color: #05576e;
         }
         
         .cart_list_product td {
@@ -371,66 +502,65 @@ const Cart = () => {
         }
         
         .btn-action:hover {
-          color: #0d6efd;
+          color: #05576e;
         }
         
-     .quantity-control {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid #e2e8f0;
-  border-radius: 9999px; /* Fully rounded ends */
-  overflow: hidden;
-  width: fit-content;
-  background: #f8fafc;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-}
+        .quantity-control {
+          display: inline-flex;
+          align-items: center;
+          border: 1px solid #e2e8f0;
+          border-radius: 9999px;
+          overflow: hidden;
+          width: fit-content;
+          background: #f8fafc;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+        }
 
-.quantity-control:hover {
-  border-color: #cbd5e1;
-}
+        .quantity-control:hover {
+          border-color: #cbd5e1;
+        }
 
-.qty-btn {
-  background: transparent;
-  border: none;
-  padding: 6px 16px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #64748b;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+        .qty-btn {
+          background: transparent;
+          border: none;
+          padding: 6px 16px;
+          cursor: pointer;
+          font-size: 16px;
+          color: #64748b;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-.qty-btn:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
+        .qty-btn:hover {
+          background: #f1f5f9;
+          color: #334155;
+        }
 
-.qty-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  background: transparent;
-}
+        .qty-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+          background: transparent;
+        }
 
-.qty-value {
-  min-width: 36px;
-  text-align: center;
-  font-weight: 500;
-  color: #1e293b;
-  font-size: 0.95rem;
-}
+        .qty-value {
+          min-width: 36px;
+          text-align: center;
+          font-weight: 500;
+          color: #1e293b;
+          font-size: 0.95rem;
+        }
 
-/* Plus/minus buttons styling */
-.qty-decrease {
-  padding-left: 18px;
-}
+        .qty-decrease {
+          padding-left: 18px;
+        }
 
-.qty-increase {
-  padding-right: 18px;
-}
-  
+        .qty-increase {
+          padding-right: 18px;
+        }
+        
         .btn-remove {
           background: none;
           border: none;
@@ -443,6 +573,22 @@ const Cart = () => {
         
         .btn-remove:hover {
           transform: scale(1.2);
+        }
+        
+        .btn-save {
+          background: none;
+          border: none;
+          color: #6c757d;
+          font-size: 16px;
+          cursor: pointer;
+          transition: transform 0.2s ease;
+          padding: 5px;
+          margin-right: 10px;
+        }
+        
+        .btn-save:hover {
+          color: #05576e;
+          transform: scale(1.1);
         }
         
         .empty-cart {
@@ -532,8 +678,8 @@ const Cart = () => {
         
         .btn-continue {
           background: white;
-          color: #0d6efd;
-          border: 1px solid #0d6efd;
+          color: #05576e;
+          border: 1px solid #05576e;
           padding: 12px;
           font-weight: 500;
           transition: all 0.3s ease;
@@ -542,6 +688,184 @@ const Cart = () => {
         .btn-continue:hover {
           background: #f8f9fa;
         }
+
+        /* Saved For Later Section */
+        .saved-later-section {
+          border-top: 1px solid #eee;
+          padding-top: 30px;
+          margin-top: 40px;
+        }
+
+        .saved-header {
+          margin-bottom: 20px;
+        }
+
+        .saved-title {
+          font-size: 22px;
+          font-weight: 600;
+          color: #05576e;
+        }
+
+        .saved-items {
+          display: grid;
+          gap: 20px;
+        }
+
+        .saved-item {
+          display: flex;
+          gap: 20px;
+          padding: 20px;
+          border: 1px solid #eee;
+          border-radius: 8px;
+          background: #fff;
+          position: relative;
+        }
+
+        .saved-item-image {
+          width: 120px;
+          height: 120px;
+          flex-shrink: 0;
+        }
+
+        .saved-item-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+
+        .saved-item-details {
+          flex: 1;
+        }
+
+        .saved-item-details h5 {
+          font-size: 16px;
+          margin-bottom: 5px;
+          color: #333;
+        }
+
+        .variant, .size {
+          color: #666;
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .price {
+          font-weight: 600;
+          color: #05576e;
+          margin-bottom: 5px;
+        }
+
+        .original-price {
+          text-decoration: line-through;
+          color: #999;
+          margin-left: 8px;
+          font-size: 14px;
+        }
+
+        .discount {
+          color: #28a745;
+          font-size: 14px;
+          margin-left: 8px;
+        }
+
+        .pay-options {
+          color: #666;
+          font-size: 14px;
+          margin-bottom: 10px;
+        }
+
+        .saved-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 10px;
+        }
+
+        .btn-move-to-cart {
+          background: #05576e;
+          color: white;
+          border: none;
+          padding: 8px 15px;
+          border-radius: 4px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-move-to-cart:hover {
+          // background: #033d4d;
+        }
+
+        .btn-remove-saved {
+          background: none;
+          color: #dc3545;
+          border: 1px solid #dc3545;
+          padding: 8px 15px;
+          border-radius: 4px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-remove-saved:hover {
+          background: #f8f9fa;
+        }
+       .saved-item {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+  position: relative;
+  align-items: center;
+}
+
+.saved-item-details {
+  flex: 1;
+}
+
+.saved-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-right: 10px;
+}
+
+.btn-move-to-cart {
+  background: none;
+  border: none;
+  color: #05576e;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-move-to-cart:hover {
+  color: #033d4d;
+  transform: scale(1.1);
+}
+
+.btn-remove-saved {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-saved:hover {
+  transform: scale(1.1);
+}
+
       `}</style>
     </div>
   );
