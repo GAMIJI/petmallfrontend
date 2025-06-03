@@ -1,44 +1,82 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FaCartPlus, FaStar, FaFileAlt, FaRegStar } from 'react-icons/fa';
+import { MdPayment, MdCancel } from 'react-icons/md';
+
+
+const TABS = ['Placed', 'Dispatched', 'Completed', 'Cancelled'];
+const ICONS = {
+    Placed: 'bi-cart-check-fill',
+    Dispatched: 'bi-truck',
+    Completed: 'bi-check-circle-fill',
+    Cancelled: 'bi-x-circle-fill'
+};
 
 const UserOrderHeader = () => {
-    const [activeTab, setActiveTab] = useState('Placed'); // Capitalized
+    const [activeTab, setActiveTab] = useState('Placed');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [reviewData, setReviewData] = useState({ orderId: '', productId: '', rating: 5, comment: '' });
     const API_URL = import.meta.env.VITE_API_URLS;
+    const [showReviewModal, setShowReviewModal] = useState(false);
+
 
     const [orders, setOrders] = useState({
         Placed: [],
         Dispatched: [],
-        Completed: [],
+        Completed: [
+            {
+                id: 'static-order-1',
+                date: 'Oct 17, 2024',
+                total: '₹699',
+                paymentMode: 'Online',
+                items: [
+                    {
+                        id: 'static-product-1',
+                        name: 'Whiskar',
+                        image: 'assets/img/products/products_img13.jpg',
+                        status: 'Delivered',
+                        quantity: 1
+                    }
+                ]
+            },
+            {
+                id: 'static-order-2',
+                date: 'Nov 5, 2024',
+                total: '₹1,299',
+                paymentMode: 'COD',
+                items: [
+                    {
+                        id: 'static-product-2',
+                        name: 'prosense',
+                        image: 'assets/img/products/products_img12.jpg',
+                        status: 'Delivered',
+                        quantity: 2
+                    }
+                ]
+            }
+        ],
         Cancelled: []
     });
 
-
     useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                setLoading(true);
-                const token = localStorage.getItem('token');
+        if (activeTab === 'Completed') return;
 
-                const res = await axios.get(
-                    `${API_URL}api/user/getUserOrdersByStatus?status=${activeTab}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-                console.log("Response from API:", res.data);
+        const fetchOrders = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`${API_URL}api/user/getUserOrdersByStatus?status=${activeTab}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
 
                 if (res.status === 200) {
-                    const formattedOrders = res.data.orders.map(order => ({
+                    const formatted = res.data.orders.map(order => ({
                         id: order._id,
-                        
-                
                         date: new Date(order.createdAt).toLocaleDateString(),
-                        total: `₹${order.products.reduce((sum, p) => sum + (p.product.price * p.quantity), 0)}`,
+                        total: `₹${order.products.reduce((sum, p) => sum + p.product.price * p.quantity, 0)}`,
                         items: order.products.map(p => ({
                             id: p.product._id,
                             name: p.product.productName,
@@ -46,13 +84,13 @@ const UserOrderHeader = () => {
                             status: order.status === "Placed" && order.paymentMode === "Online" ? "Payment pending" : order.status,
                             quantity: p.quantity,
                         })),
-                        paymentMode: order.paymentMode // ✅ Added
+                        paymentMode: order.paymentMode
                     }));
-                    
 
-                    // console.log("Formatted Orders:", res);
-
-                    setOrders(prev => ({ ...prev, [activeTab]: formattedOrders }));
+                    setOrders(prev => ({
+                        ...prev,
+                        [activeTab]: formatted
+                    }));
                 } else {
                     setError("Failed to fetch orders.");
                 }
@@ -63,240 +101,302 @@ const UserOrderHeader = () => {
                 setLoading(false);
             }
         };
+
         fetchOrders();
-    }, [activeTab]); // 👈 add activeTab here
+    }, [activeTab]);
 
-
-    const renderOrders = () => {
-        const currentOrders = orders[activeTab] || [];
-
-        console.log(orders);
-
-        if (loading) {
-            return <p className="text-center py-4">Loading orders...</p>;
-        }
-
-        if (error) {
-            return <p className="text-center text-danger py-4">{error}</p>;
-        }
-
-        return (
-            <div className="mt-4" style={{ transition: 'opacity 0.5s ease-in-out' }}>
-                {currentOrders.length === 0 ? (
-                    <div
-                        className="text-center py-5"
-                        style={{
-                            animation: 'fadeIn 0.5s ease',
-                            backgroundColor: '#f8f9fa',
-                            borderRadius: '12px',
-                            padding: '40px 20px',
-                            marginTop: '20px'
-                        }}
-                    >
-                        <i
-                            className="bi bi-emoji-frown"
-                            style={{ fontSize: '4rem', color: '#adb5bd', marginBottom: '20px', display: 'block' }}
-                        ></i>
-                        <p className="mt-3" style={{ fontSize: '1.1em', color: '#6c757d' }}>
-                            No {activeTab} orders found.
-                        </p>
-                        {activeTab === 'placed' && <p style={{ color: '#6c757d' }}>Why not place one now?</p>}
-                    </div>
-                ) : (
-                    currentOrders.map((order, orderIndex) => (
-                        <div
-                            key={`${order.id}-${orderIndex}`}
-                            className="card mb-4 shadow-sm order-card"
-                            style={{
-                                backgroundColor: '#ffffff',
-                                borderRadius: '12px',
-                                border: '1px solid #e9ecef',
-                                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                            }}
-                        >
-                            <div
-                                className="card-header d-flex justify-content-between align-items-center"
-                                style={{
-                                    backgroundColor: '#f8f9fa',
-                                    padding: '15px 20px',
-                                    borderBottom: '1px solid #e9ecef',
-                                    borderTopLeftRadius: '12px',
-                                    borderTopRightRadius: '12px'
-                                }}
-                            >
-                                <div className="d-flex align-items-center gap-3">
-                                    <span style={{ fontSize: '0.85em', color: '#6c757d' }}>
-                                        <strong style={{ color: '#495057' }}>Payment Mode:</strong> {order.paymentMode}
-                                    </span>
-                                    <span style={{ fontSize: '0.85em', color: '#6c757d' }}>
-                                        <strong style={{ color: '#495057' }}>Date:</strong> {order.date}
-                                    </span>
-                                </div>
-
-
-                                <div className="text-end">
-                                    <span className="fw-bold" style={{ fontSize: '1.1em', color: '#198754' }}>{order.total}</span>
-                                </div>
-                            </div>
-                            <div className="card-body" style={{ padding: '20px' }}>
-                                {order.items.map((item, itemIndex) => (
-                                    <div
-                                        key={item.id}
-                                        className="d-flex align-items-center item-row"
-                                        style={{
-                                            paddingBottom: order.items.length - 1 === itemIndex ? '0' : '15px',
-                                            marginBottom: order.items.length - 1 === itemIndex ? '0' : '15px',
-                                            borderBottom: order.items.length - 1 === itemIndex ? 'none' : '1px solid #f0f0f0',
-                                        }}
-                                    >
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            width="70"
-                                            height="70"
-                                            className="rounded me-3 product-image"
-                                            style={{ objectFit: 'cover', borderRadius: '8px' }}
-                                        />
-                                        <div className="flex-grow-1">
-                                            <h6 className="mb-1" style={{ fontWeight: '500', color: '#333' }}>{item.name}</h6>
-                                            <p style={{ fontSize: '0.85em', margin: 0, color: '#6c757d' }}>
-                                                Quantity: {item.quantity}
-                                            </p>
-                                            <small
-                                                className={`d-block ${activeTab === 'Completed' ? 'text-success' :
-                                                    activeTab === 'Cancelled' ? 'text-danger' : 'text-primary'}`}
-                                                style={{ fontSize: '0.85em', fontWeight: '500' }}
-                                            >
-                                                {item.status}
-                                            </small>
-
-                                        </div>
-                                        {activeTab === 'completed' && (
-                                            <button className="btn btn-sm btn-primary buy-again-btn">
-                                                Buy Again
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                                <div className="d-flex justify-content-between align-items-center mt-4 pt-3" style={{ borderTop: order.items.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
-                                    <Link to='/order' state={{ orderId: order.id }}>
-                                    <button className="btn btn-sm btn-outline-secondary action-btn">Order Details</button>
-                                    </Link>
-                                    {activeTab === 'completed' && (
-                                        <button className="btn btn-sm btn-success rate-product-btn">Rate Products</button>
-                                    )}
-                                    {activeTab === 'placed' && order.items.some(item => item.status === 'Payment pending') && (
-                                        <button className="btn btn-sm btn-warning">Complete Payment</button>
-                                    )}
-                                    {activeTab === 'placed' && !order.items.some(item => item.status === 'Payment pending') && (
-                                        <button className="btn btn-sm btn-outline-danger cancel-order-btn">Cancel Order</button>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
-        );
+    const openReviewModal = (orderId, productId) => {
+        setReviewData({ orderId, productId, rating: 0, comment: '' });
+        setShowReviewModal(true);
     };
 
+    const handleReviewSubmit = () => {
+        console.log('Submit review:', reviewData);
+        // TODO: POST to backend
+        setShowReviewModal(false);
+    };
+
+
     return (
-        <div className="container py-4"  style={{borderRadius: '25px', backgroundColor: '#f4f7f9', minHeight: '100vh', padding: '25px' }}>
-            <h2 className="mb-4" style={{
-                color: '#2c3e50',
-                fontWeight: '600',
-                paddingBottom: '15px',
-                borderBottom: '1px solid #e0e0e0'
-            }}>
-                My Orders
-            </h2>
+        <div className="container py-4" style={{ borderRadius: '25px', backgroundColor: '#f4f7f9', minHeight: '100vh' }}>
+            <h2 className="mb-4" style={{ color: '#2c3e50', fontWeight: '600' }}>My Orders</h2>
 
-            <div className="d-flex justify-content-center flex-wrap gap-3 mb-4" style={{ backgroundColor: '#f4f7f9' }}>
-                {['Placed', 'Dispatched', 'Completed', 'Cancelled'].map((tab) => {
-                    const icons = {
-                        Placed: 'bi-cart-check-fill',
-                        Dispatched: 'bi-truck',
-                        Completed: 'bi-check-circle-fill',
-                        Cancelled: 'bi-x-circle-fill'
-                    };
+            <div className="d-flex justify-content-center flex-wrap gap-3 mb-4">
+                {TABS.map(tab => {
                     const isActive = activeTab === tab;
-
                     return (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`btn tab-pill ${isActive ? 'active-pill' : ''}`}
-                            style={{
-                                backgroundColor: isActive ? '#0d6efd' : '#ffffff',
-                                color: isActive ? '#ffffff' : '#6c757d',
-                                border: isActive ? '1px solid #0d6efd' : '1px solid #dee2e6',
-                                borderRadius: '50px',
-                                fontWeight: 500,
-                                fontSize: '0.95em',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                boxShadow: isActive ? '0 4px 12px rgba(13, 110, 253, 0.2)' : 'none',
-                                transition: 'all 0.3s ease'
-                            }}
+                            className={`btn ${isActive ? 'btn-primary' : 'btn-outline-secondary'}`}
+                            style={{ borderRadius: '50px', backgroundColor: 'white', color: 'black', border: '1px #05576e solid' }}
                         >
-                            <i className={`bi ${icons[tab]}`} style={{ fontSize: '1.1em' }}></i>
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            <i className={`bi ${ICONS[tab]} me-1`}></i> {tab}
                         </button>
                     );
                 })}
             </div>
 
-            {renderOrders()}
+            {loading && <p className="text-center">Loading orders...</p>}
+            {error && <p className="text-center text-danger">{error}</p>}
 
-            <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(15px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
+            {!loading && !error && (orders[activeTab]?.length === 0 ? (
+                <p className="text-center text-muted">No {activeTab} orders found.</p>
+            ) : (
+                <div className="order-list">
+                    {orders[activeTab].map(order => (
+                        <div key={order.id} className="card mb-4 shadow-sm">
+                            <div className="card-header d-flex justify-content-between">
+                                <div>
+                                    <strong>Payment:</strong> {order.paymentMode} <br />
+                                    <strong>Date:</strong> {order.date}
+                                </div>
+                                <div className="fw-bold text-success">{order.total}</div>
+                            </div>
+                            <div className="card-body">
+                                {order.items.map(item => (
 
-                .order-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-                }
+                                    <div key={item.id} className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
+                                        <Link to='/order' state={{ orderId: order.id }} style={{ width: '100%' }}>
+                                            <div className="d-flex align-items-center">
+                                                <img src={item.image} alt={item.name} className="rounded me-3" width="60" height="60" />
+                                                <div>
+                                                    <div className="fw-semibold">{item.name}</div>
+                                                    <small className="text-muted">Qty: {item.quantity}</small><br />
+                                                    <small className={`text-${activeTab === 'Completed' ? 'success' : activeTab === 'Cancelled' ? 'danger' : 'primary'}`}>
+                                                        {item.status}
+                                                    </small>
+                                                    {activeTab === 'Completed' && (
+                                                        <div className="mt-1">
+                                                            <small className="text-muted">Delivered on {order.date}</small>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                        <div className="d-flex gap-2">
 
-                .product-image:hover {
-                    transform: scale(1.08);
-                    transition: transform 0.2s ease-in-out;
-                }
+                                            {activeTab === 'Completed' && (
+                                                <> 
+                                                <Link to='/checkout'>
+                                                    <button className="btn1 btn-light btn-sm" title="Buy Again">
+                                                        <FaCartPlus />
+                                                    </button>
+                                                    </Link>
+                                                    <button
+                                                        className="btn1 btn-light btn-sm"
 
-                .buy-again-btn:hover {
-                    background-color: #0056b3 !important;
-                    border-color: #0056b3 !important;
-                }
+                                                        title="Review Product"
+                                                        onClick={() => openReviewModal(order.id, item.id)}
+                                                    >
+                                                        <FaStar className="text-warning" />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {activeTab === 'Placed' && item.status === 'Payment pending' && (
+                                                <button className="btn1 btn-warning btn-sm" title="Complete Payment">
+                                                    <MdPayment />
+                                                </button>
+                                            )}
+                                            {activeTab === 'Placed' && item.status !== 'Payment pending' && (
+                                                <button className="btn1 btn-outline-danger btn-sm" title="Cancel Order">
+                                                    <MdCancel />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
 
-                .action-btn:hover {
-                    background-color: #f0f0f0 !important;
-                    color: #333 !important;
-                }
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ))}
 
-                .rate-product-btn:hover {
-                    background-color: #157347 !important;
-                    border-color: #157347 !important;
-                }
+            {/* Review Modal */}
+            {/* <div className="modal fade" id="reviewModal" tabIndex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content border-0">
+            <div className="modal-header border-0 pb-0">
+              <h5 className="modal-title fw-bold" id="reviewModalLabel">Rate this product</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body pt-0">
+              <div className="text-center mb-4">
+                <div className="star-rating mb-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      className="btn btn-link p-0 border-0 bg-transparent"
+                      onClick={() => setReviewData({...reviewData, rating: star})}
+                    >
+                      {star <= reviewData.rating ? (
+                        <FaStar className="text-warning" style={{ fontSize: '2rem' }} />
+                      ) : (
+                        <FaRegStar className="text-secondary" style={{ fontSize: '2rem' }} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <small className="text-muted">
+                  {reviewData.rating} Star{reviewData.rating !== 1 ? 's' : ''}
+                </small>
+              </div>
 
-                .cancel-order-btn:hover {
-                    background-color: #dc3545 !important;
-                    color: white !important;
-                }
-
-                .tab-pill:hover {
-                    background-color: #e9ecef !important;
-                    color: #343a40 !important;
-                    border-color: #ced4da !important;
-                }
-
-                .active-pill:hover {
-                    background-color: #0b5ed7 !important;
-                    border-color: #0b5ed7 !important;
-                }
-            `}</style>
+              <div className="form-floating mb-3">
+                <textarea
+                  className="form-control"
+                  id="reviewText"
+                  placeholder="Share your experience"
+                  style={{ height: '100px' }}
+                  value={reviewData.comment}
+                  onChange={(e) => setReviewData({...reviewData, comment: e.target.value})}
+                ></textarea>
+                <label htmlFor="reviewText">Your review (optional)</label>
+              </div>
+            </div>
+            <div className="modal-footer border-0 pt-0">
+              <button 
+                type="button" 
+                className="btn btn-outline-secondary" 
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleReviewSubmit}
+              >
+                Submit Review
+              </button>
+            </div>
+          </div>
         </div>
+      </div> */}
+            {showReviewModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 9999,
+                    }}
+                >
+                    <div
+                        style={{
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            width: '90%',
+                            maxWidth: '500px',
+                            padding: '20px',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <h5 style={{ margin: 0 }}>Rate this product</h5>
+                            <button
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    fontSize: '1.5rem',
+                                    cursor: 'pointer',
+                                    lineHeight: 1,
+                                }}
+                                onClick={() => setShowReviewModal(false)}
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    onClick={() => setReviewData({ ...reviewData, rating: star })}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '1.8rem',
+                                        cursor: 'pointer',
+                                        color: star <= reviewData.rating ? '#ffc107' : '#ccc',
+                                    }}
+                                >
+                                    {star <= reviewData.rating ? <FaStar /> : <FaRegStar />}
+                                </button>
+                            ))}
+                            <div style={{ fontSize: '0.9rem', color: '#555' }}>
+                                {reviewData.rating} Star{reviewData.rating !== 1 ? 's' : ''}
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '15px' }}>
+                            <textarea
+                                style={{
+                                    width: '100%',
+                                    height: '100px',
+                                    padding: '10px',
+                                    borderRadius: '8px',
+                                    border: '1px solid #ccc',
+                                    resize: 'none',
+                                    fontSize: '0.95rem',
+                                }}
+                                placeholder="Share your experience"
+                                value={reviewData.comment}
+                                onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <button
+                                onClick={() => setShowReviewModal(false)}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#ccc',
+                                    border: '1px solid #05576e',
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleReviewSubmit}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#05576e',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Submit Review
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+
+        </div>
+
+
+
     );
 };
 

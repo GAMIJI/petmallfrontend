@@ -407,6 +407,8 @@ const ProductDetails = () => {
             <div className="row " >
               <div className="col-12">
                 <div className="product-desc-wrap">
+
+
                   <ul className="nav nav-tabs" id="myTab2" role="tablist">
                     <li className="nav-item" role="presentation">
                       <button
@@ -438,6 +440,20 @@ const ProductDetails = () => {
                       </button>
                     </li>
 
+                    <li className="nav-item" role="presentation">
+                      <button
+                        className="nav-link"
+                        id="FAQ-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#FAQ-tab-pane"
+                        type="button"
+                        role="tab"
+                        aria-controls="FAQ-tab-pane"
+                        aria-selected="false"
+                      >
+                        FAQ
+                      </button>
+                    </li>
 
                     <li className="nav-item" role="presentation">
                       <button
@@ -453,11 +469,10 @@ const ProductDetails = () => {
                         Sold By
                       </button>
                     </li>
-
                   </ul>
-                  <div className="tab-content" id="myTabContent2">
 
-                    {/* description-tab-pane  */}
+                  <div className="tab-content" id="myTabContent2">
+                    {/* description-tab-pane */}
                     <div
                       className="tab-pane fade show active"
                       id="description-tab-pane"
@@ -495,13 +510,143 @@ const ProductDetails = () => {
                     >
                       <div className="product-desc-review">
                         <div className="product-desc-review-title mb-15">
-                          <h5 className="title">Customer Reviews (0)</h5>
+                          <h5 className="title">Customer Reviews (3)</h5>
                         </div>
-                        <div className="left-rc">
-                          <p>No reviews yet</p>
+
+                        {/* Review Form */}
+                        {/* <div className="review-form mb-30">
+                          <h6 className="mb-3">Add Your Review</h6>
+                          <div className="rating mb-3">
+                            <span className="me-2">Your Rating:</span>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span key={star} className="star">★</span>
+                            ))}
+                          </div>
+                          <div className="mb-3">
+                            <textarea
+                              className="form-control"
+                              rows="4"
+                              placeholder="Write your review here..."
+                            ></textarea>
+                          </div>
+                          <button className="btn btn-primary">Submit Review</button>
+                        </div> */}
+
+                        {/* Reviews List */}
+                        <div className="review-list">
+                          <div className="single-review mb-4">
+                            <div className="review-header d-flex justify-content-between mb-2">
+                              <div className="reviewer-name fw-bold">John Doe</div>
+                              <div className="review-date text-muted">2023-10-15</div>
+                            </div>
+                            <div className="review-rating mb-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <span key={star} className="star">★</span>
+                              ))}
+                            </div>
+                            <div className="review-content">
+                              <p>Great product! Exactly as described and arrived quickly.</p>
+                            </div>
+                          </div>
+
+                          <div className="single-review mb-4">
+                            <div className="review-header d-flex justify-content-between mb-2">
+                              <div className="reviewer-name fw-bold">Jane Smith</div>
+                              <div className="review-date text-muted">2023-09-28</div>
+                            </div>
+                            <div className="review-rating mb-2">
+                              {[1, 2, 3, 4].map((star) => (
+                                <span key={star} className="star">★</span>
+                              ))}
+                            </div>
+                            <div className="review-content">
+                              <p>Good quality but shipping took longer than expected.</p>
+                            </div>
+                          </div>
+
+                          <div className="single-review mb-4">
+                            <div className="review-header d-flex justify-content-between mb-2">
+                              <div className="reviewer-name fw-bold">Mike Johnson</div>
+                              <div className="review-date text-muted">2023-08-10</div>
+                            </div>
+                            <div className="review-rating mb-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <span key={star} className="star">★</span>
+                              ))}
+                            </div>
+                            <div className="review-content">
+                              <p>Excellent service and product quality. Will buy again!</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="right-rc">
-                          <a href="#">Write a review</a>
+                      </div>
+                    </div>
+
+                    {/* FAQ tab */}
+                    <div
+                      className="tab-pane fade"
+                      id="FAQ-tab-pane"
+                      role="tabpanel"
+                      aria-labelledby="FAQ-tab"
+                      tabIndex={0}
+                    >
+                      <div className="product-desc-review">
+                        <div className="product-desc-review-title mb-15">
+                          <h5 className="title">Frequently Asked Questions</h5>
+                        </div>
+
+                        <div className="accordion" id="faqAccordion">
+                          <div className="accordion-item">
+                            <h2 className="accordion-header" id="headingOne">
+                              <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                What is the return policy?
+                              </button>
+                            </h2>
+                            <div id="collapseOne" className="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                              <div className="accordion-body">
+                                You can return this product within 30 days of purchase. The product must be in its original condition with all tags attached.
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="accordion-item">
+                            <h2 className="accordion-header" id="headingTwo">
+                              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                How long does shipping take?
+                              </button>
+                            </h2>
+                            <div id="collapseTwo" className="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                              <div className="accordion-body">
+                                Standard shipping typically takes 3-5 business days. Express shipping options are available at checkout for faster delivery.
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="accordion-item">
+                            <h2 className="accordion-header" id="headingThree">
+                              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                Is international shipping available?
+                              </button>
+                            </h2>
+                            <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                              <div className="accordion-body">
+                                Yes, we ship internationally. Shipping costs and delivery times vary depending on the destination country.
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="accordion-item">
+                            <h2 className="accordion-header" id="headingFour">
+                              <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                How do I track my order?
+                              </button>
+                            </h2>
+                            <div id="collapseFour" className="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                              <div className="accordion-body">
+                                Once your order ships, you'll receive a tracking number via email. You can use this number to track your package on our website or the carrier's website.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -564,8 +709,8 @@ const ProductDetails = () => {
                         </div>
                       </div>
                     </div>
-
                   </div>
+
 
                 </div>
               </div>

@@ -159,7 +159,7 @@ const Cart = () => {
         <section className="shipping__cart">
           <div className="container">
             <div className="row">
-              <div className="col-lg-9 col-md-12">
+              <div className="col-lg-8 col-md-12">
                 <div className="cart-header">
                   <h2 className="cart-title">Your Shopping Cart</h2>
                   <p className="cart-subtitle">{cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}</p>
@@ -335,7 +335,7 @@ const Cart = () => {
 
               </div>
 
-              <div className="col-lg-3 col-md-12 mt-5 pt-4">
+              <div className="col-lg-4 col-md-12 mt-5 pt-4">
                 <div className="cart-summary" style={{ border: '1px solid #eae6e6', borderRadius: '8px', padding: '20px' }}>
                   <h4 className="summary-title mb-4">Cart Summary</h4>
                   <div className="summary-content">
@@ -389,7 +389,7 @@ const Cart = () => {
                         </ul>
                       </div>
                     </Link>
-                    <Link to="/productList" className="btn btn-continue" style={{ marginTop: '10px', paddingTop: '15px' }}>
+                    <Link to="/productList" className="btn btn-continue" style={{marginTop: '10px',paddingTop: '15px',width: 'fit-content',marginLeft: '10px' }}>
                       <FaArrowLeft className="ms-2" />
                       Continue Shopping
                     </Link>

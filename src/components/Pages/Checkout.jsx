@@ -731,9 +731,9 @@ const Checkout = () => {
             <h4 className="title">Payment Method</h4>
 
             <div className="sub__registration-detials mt-3">
-              <div className="row gutter-20">
+              <div className="row gutter-20" style={{display:"flex",justifyContent:"space-around"}}>
                 {/* Cash on Delivery Option */}
-                <div className="payment__type" style={{ marginBottom: '1rem' }}>
+                <div className="payment__type" style={{ marginBottom: '1rem' ,width:"70%" }}>
                   <input
                     type="radio"
                     id="Cash on Delivery"
@@ -748,7 +748,7 @@ const Checkout = () => {
                 </div>
 
                 {/* Online Payment Option */}
-                <div className="payment__type" style={{ marginBottom: '1rem' }}>
+                <div className="payment__type" style={{ marginBottom: '1rem' , width:"70%"}}>
                   <input
                     type="radio"
                     id="Online"
