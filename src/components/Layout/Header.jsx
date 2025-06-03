@@ -398,7 +398,28 @@ const Header = () => {
                   <div className="tgmenu__navbar-wrap tgmenu__main-menu d-none d-lg-flex">
                     <ul className="navigation">
                       <li className=" menu-item-has-children">
-                     
+                       {/* Shop by category */}
+                       
+                        <li className="menu-item-has-children">
+                          <a href="#" >Shop by category</a>
+                          <ul className="sub-menu">
+                            <li>
+                              <Link to="/productList">Dog Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" >Cat Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" >Fish Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList" >Birds Deals</Link>
+                            </li>
+                            <li>
+                              <Link to="/productList">Rabbit Deals</Link>
+                            </li>
+                          </ul>
+                        </li>
 
                         <ul className="sub-menu">
                           <li className="active">
@@ -419,10 +440,11 @@ const Header = () => {
                         </ul>
                       </li>
                       <li className="menu-item-has-children">
-                        <a style={{ cursor: "pointer" }}>Pet care</a>
+                         
+                        <a  href="#"   style={{ cursor: "pointer" }}>Pet care</a>
                         <ul className="sub-menu">
                           <li className="active">
-                            <Link to="/animalList">
+                            <Link to="/animalList" >
                               Pet Care &amp; Veterinary
                             </Link>
                           </li>
@@ -435,7 +457,7 @@ const Header = () => {
                         </ul>
                       </li>
                       <li className="menu-item-has-children">
-                        <a style={{ cursor: "pointer" }}>Dog</a>
+                        <a href="#"   style={{ cursor: "pointer" }}>Dog</a>
                         <ul className="sub-menu">
                           <li className="active">
                             <Link to="/animalList">Labrador Retriever</Link>
@@ -455,7 +477,7 @@ const Header = () => {
                         </ul>
                       </li>
                       <li className="menu-item-has-children">
-                        <a style={{ cursor: "pointer" }}>Cat</a>
+                        <a href="#"   style={{ cursor: "pointer" }}>Cat</a>
                         <ul className="sub-menu">
                           <li className="active">
                             <Link to="/animalList">Persian</Link>
@@ -472,7 +494,7 @@ const Header = () => {
                         </ul>
                       </li>
                       <li className="menu-item-has-children">
-                        <a style={{ cursor: "pointer" }}>Birds</a>
+                        <a href="#"   style={{ cursor: "pointer" }}>Birds</a>
                         <ul className="sub-menu">
                           <li className="active">
                             <Link to="/animalList">Parakeet (Budgerigar)</Link>

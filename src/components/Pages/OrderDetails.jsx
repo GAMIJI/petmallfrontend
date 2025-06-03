@@ -17,6 +17,11 @@ const OrderDetails = () => {
     const location = useLocation();
     const { orderId } = location.state || {};
     const API_URL = import.meta.env.VITE_API_URLS;
+        const [showOtherReason, setShowOtherReason] = useState(false);
+    const [selectedReason, setSelectedReason] = useState('');
+    const [otherReason, setOtherReason] = useState('');
+    const [showModal, setShowModal] = useState(false);
+
 
     useEffect(() => {
         const fetchOrderDetails = async () => {
@@ -91,6 +96,41 @@ const OrderDetails = () => {
 
     const deliveryDate = new Date(createdAt);
     deliveryDate.setDate(deliveryDate.getDate() + 3);
+
+
+    //cancle model 
+
+    const handleReasonChange = (e) => {
+        const value = e.target.value;
+        setSelectedReason(value);
+        setShowOtherReason(value === 'Other');
+    };
+
+    const handleCancelSubmit = () => {
+        if (!selectedReason) {
+            alert('Please select a cancellation reason');
+            return;
+        }
+
+        let reason = selectedReason;
+        if (reason === 'Other') {
+            reason = otherReason.trim();
+            if (!reason) {
+                alert('Please specify your reason for cancellation');
+                return;
+            }
+        }
+
+        // Here you would typically send this to your backend
+        console.log('Cancellation reason:', reason);
+        alert('Your order cancellation request has been submitted');
+
+        // Close the modal and reset form
+        setShowModal(false);
+        setSelectedReason('');
+        setOtherReason('');
+        setShowOtherReason(false);
+    };
 
     return (
         <div className="container py-4">
@@ -212,6 +252,125 @@ const OrderDetails = () => {
                                             {activeStatus === 'delivered' ? ' It was delivered successfully.' : ' Expected delivery by ' + formatDate(deliveryDate)}
                                         </div>
                                     </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="d-flex gap-2 mt-3">
+                                        <button
+                                            className="btn btn-outline-danger"
+                                            onClick={() => setShowModal(true)}
+                                        >
+                                            Cancel Order
+                                        </button>
+                                        <button className="btn btn-outline-primary">
+                                            Chat with Us
+                                        </button>
+                                    </div>
+
+                                    {/* Cancel Order Modal */}
+                                    {showModal && (
+                                        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                                            <div className="modal-dialog">
+                                                <div className="modal-content">
+                                                    <div className="modal-header">
+                                                        <h5 className="modal-title">Cancel Order</h5>
+                                                        <button
+                                                            type="button"
+                                                            className="btn-close"
+                                                            onClick={() => setShowModal(false)}
+                                                            aria-label="Close"
+                                                        ></button>
+                                                    </div>
+                                                    <div className="modal-body" style={{padding:"22px"}}>
+                                                        <p>Please select the reason for cancellation:</p>
+                                                        <div className="form-check mb-2">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="radio"
+                                                                name="cancelReason"
+                                                                id="reason1"
+                                                                value="Changed my mind"
+                                                                checked={selectedReason === 'Changed my mind'}
+                                                                onChange={handleReasonChange}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="reason1">
+                                                                Changed my mind
+                                                            </label>
+                                                        </div>
+                                                        <div className="form-check mb-2">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="radio"
+                                                                name="cancelReason"
+                                                                id="reason2"
+                                                                value="Found better price"
+                                                                checked={selectedReason === 'Found better price'}
+                                                                onChange={handleReasonChange}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="reason2">
+                                                                Found better price elsewhere
+                                                            </label>
+                                                        </div>
+                                                        <div className="form-check mb-2">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="radio"
+                                                                name="cancelReason"
+                                                                id="reason3"
+                                                                value="Delivery too long"
+                                                                checked={selectedReason === 'Delivery too long'}
+                                                                onChange={handleReasonChange}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="reason3">
+                                                                Delivery time is too long
+                                                            </label>
+                                                        </div>
+                                                        <div className="form-check mb-2">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="radio"
+                                                                name="cancelReason"
+                                                                id="reason4"
+                                                                value="Other"
+                                                                checked={selectedReason === 'Other'}
+                                                                onChange={handleReasonChange}
+                                                            />
+                                                            <label className="form-check-label" htmlFor="reason4">
+                                                                Other reason
+                                                            </label>
+                                                        </div>
+                                                        {showOtherReason && (
+                                                            <div className="mt-3">
+                                                                <label htmlFor="otherReason" className="form-label">Please specify:</label>
+                                                                <textarea
+                                                                    className="form-control"
+                                                                    id="otherReason"
+                                                                    rows="3"
+                                                                    value={otherReason}
+                                                                    onChange={(e) => setOtherReason(e.target.value)}
+                                                                ></textarea>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="modal-footer">
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-secondary"
+                                                            onClick={() => setShowModal(false)}
+                                                        >
+                                                            Close
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-danger"
+                                                            onClick={handleCancelSubmit}
+                                                        >
+                                                            Confirm Cancellation
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -256,7 +415,7 @@ const OrderDetails = () => {
 
                 {/* Right Column - Order Summary */}
                 <div className="col-lg-4">
-                    <div className="card border-0 shadow-sm sticky-top" style={{ top: '20px' }}>
+                    <div className="card border-0 shadow-sm" style={{ top: '20px' }}>
                         <div className="card-body">
                             <h5 className="card-title mb-4">Order Total</h5>
 
@@ -364,199 +523,199 @@ const OrderDetails = () => {
             </div>
 
             <style jsx>{`
-                .breadcrumb {
-                    background-color: transparent;
-                    padding: 0.75rem 1rem;
-                    border-radius: 0.5rem;
-                    background-color: #f8f9fa;
-                }
-                
-                .breadcrumb-item a {
-                    color: #6c757d;
-                    transition: color 0.2s;
-                }
-                
-                .breadcrumb-item a:hover {
-                    color: #0d6efd;
-                    text-decoration: none;
-                }
-                
-              /* Vertical Progress Bar Styles */
-/* Vertical Progress Bar Styles */
-.vertical-progress-container {
-    position: relative;
-    height: 100%;
-    width: 100%;
+                    .breadcrumb {
+                        background-color: transparent;
+                        padding: 0.75rem 1rem;
+                        border-radius: 0.5rem;
+                        background-color: #f8f9fa;
+                    }
+                    
+                    .breadcrumb-item a {
+                        color: #6c757d;
+                        transition: color 0.2s;
+                    }
+                    
+                    .breadcrumb-item a:hover {
+                        color: #0d6efd;
+                        text-decoration: none;
+                    }
+                    
+                /* Vertical Progress Bar Styles */
+    /* Vertical Progress Bar Styles */
+    .vertical-progress-container {
+        position: relative;
+        height: 100%;
+        width: 100%;
 
-}
-
-.vertical-progress-bar {
-    position: absolute;
-    left: 20px; /* Half of step-icon width (40px/2) */
-    top: 0;
-    width: 4px;
-    background-color: #0d6efd;
-    transition: height 0.5s ease;
-    z-index: 1;
-}
-
-.vertical-progress-steps {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-    z-index: 2;
-}
-
-.vertical-progress-step {
-    display: flex;
-    align-items: center;
-    margin-bottom: 2rem;
-    position: relative;
-    gap: 8px;
-}
-
-.vertical-progress-step:last-child {
-    margin-bottom: 0;
-}
-
-.vertical-progress-step .step-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e9ecef;
-    color: #6c757d;
-    border: 3px solid #e9ecef;
-    font-size: 1rem;
-    position: relative;
-    flex-shrink: 0; /* Prevent icon from shrinking */
-}
-
-.vertical-progress-step.completed .step-icon {
-    background-color: #198754;
-    border-color: #198754;
-    color: white;
-}
-
-.vertical-progress-step.active .step-icon {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-    color: white;
-    animation: pulse 1.5s infinite;
-}
-
-.vertical-progress-step .step-content {
-    margin-left: 1rem; /* Space between icon and text */
-}
-
-.vertical-progress-step .step-label {
-    font-weight: 500;
-    font-size: 0.85rem;
-    color: #212529;
-}
-
-.vertical-progress-step .step-date {
-    font-size: 0.75rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
     }
-    70% {
-        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+
+    .vertical-progress-bar {
+        position: absolute;
+        left: 20px; /* Half of step-icon width (40px/2) */
+        top: 0;
+        width: 4px;
+        background-color: #0d6efd;
+        transition: height 0.5s ease;
+        z-index: 1;
     }
-    100% {
-        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+
+    .vertical-progress-steps {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+        z-index: 2;
     }
-}
-                
-                /* Horizontal Progress Bar (for mobile) */
-                .progress-container {
-                    position: relative;
-                    width: 100%;
-                    margin: 1rem 0;
-                }
-                
-                .progress-bar {
-                    position: absolute;
-                    top: 20px;
-                    left: 0;
-                    height: 4px;
-                    background-color: #0d6efd;
-                    transition: width 0.5s ease;
-                    z-index: 1;
-                }
-                
-                .progress-steps {
-                    display: flex;
-                    justify-content: space-between;
-                    position: relative;
-                    z-index: 2;
-                }
-                
-                .progress-step {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: start;
-                    flex: 1;
-                    position: relative;
-                }
-                
-                .progress-step .step-icon {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 0.5rem;
-                    background-color: #e9ecef;
-                    color: #6c757d;
-                    border: 3px solid #e9ecef;
-                    font-size: 1rem;
-                }
-                
-                .progress-step.completed .step-icon {
-                    background-color: #198754;
-                    border-color: #198754;
-                    color: white;
-                }
-                
-                .progress-step.active .step-icon {
-                    background-color: #0d6efd;
-                    border-color: #0d6efd;
-                    color: white;
-                    animation: pulse 1.5s infinite;
-                }
-                
-                .progress-step .step-label {
-                    font-weight: 500;
-                    font-size: 0.75rem;
-                    text-align: center;
-                }
-                
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.1); }
-                    100% { transform: scale(1); }
-                }
-                
-                .card {
-                    border-radius: 0.75rem;
-                    overflow: hidden;
-                }
-                
-                .card-title {
-                    font-weight: 600;
-                    color: #2c3e50;
-                }
-            `}</style>
+
+    .vertical-progress-step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        position: relative;
+        gap: 8px;
+    }
+
+    .vertical-progress-step:last-child {
+        margin-bottom: 0;
+    }
+
+    .vertical-progress-step .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        color: #6c757d;
+        border: 3px solid #e9ecef;
+        font-size: 1rem;
+        position: relative;
+        flex-shrink: 0; /* Prevent icon from shrinking */
+    }
+
+    .vertical-progress-step.completed .step-icon {
+        background-color: #198754;
+        border-color: #198754;
+        color: white;
+    }
+
+    .vertical-progress-step.active .step-icon {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+        animation: pulse 1.5s infinite;
+    }
+
+    .vertical-progress-step .step-content {
+        margin-left: 1rem; /* Space between icon and text */
+    }
+
+    .vertical-progress-step .step-label {
+        font-weight: 500;
+        font-size: 0.85rem;
+        color: #212529;
+    }
+
+    .vertical-progress-step .step-date {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+        }
+    }
+                    
+                    /* Horizontal Progress Bar (for mobile) */
+                    .progress-container {
+                        position: relative;
+                        width: 100%;
+                        margin: 1rem 0;
+                    }
+                    
+                    .progress-bar {
+                        position: absolute;
+                        top: 20px;
+                        left: 0;
+                        height: 4px;
+                        background-color: #0d6efd;
+                        transition: width 0.5s ease;
+                        z-index: 1;
+                    }
+                    
+                    .progress-steps {
+                        display: flex;
+                        justify-content: space-between;
+                        position: relative;
+                        z-index: 2;
+                    }
+                    
+                    .progress-step {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: start;
+                        flex: 1;
+                        position: relative;
+                    }
+                    
+                    .progress-step .step-icon {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 0.5rem;
+                        background-color: #e9ecef;
+                        color: #6c757d;
+                        border: 3px solid #e9ecef;
+                        font-size: 1rem;
+                    }
+                    
+                    .progress-step.completed .step-icon {
+                        background-color: #198754;
+                        border-color: #198754;
+                        color: white;
+                    }
+                    
+                    .progress-step.active .step-icon {
+                        background-color: #0d6efd;
+                        border-color: #0d6efd;
+                        color: white;
+                        animation: pulse 1.5s infinite;
+                    }
+                    
+                    .progress-step .step-label {
+                        font-weight: 500;
+                        font-size: 0.75rem;
+                        text-align: center;
+                    }
+                    
+                    @keyframes pulse {
+                        0% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                        100% { transform: scale(1); }
+                    }
+                    
+                    .card {
+                        border-radius: 0.75rem;
+                        overflow: hidden;
+                    }
+                    
+                    .card-title {
+                        font-weight: 600;
+                        color: #2c3e50;
+                    }
+                `}</style>
         </div>
     );
 };

@@ -975,15 +975,9 @@ const Checkout = () => {
             <h4 className="title">Payment Method</h4>
 
             <div className="sub__registration-detials mt-3">
-<<<<<<< HEAD
-              <div className="row gutter-20" style={{display:"flex",justifyContent:"space-around"}}>
-                {/* Cash on Delivery Option */}
-                <div className="payment__type" style={{ marginBottom: '1rem' ,width:"70%" }}>
-=======
               <div className="row gutter-20 " style={{ display: "flex", justifyContent: "space-around  " }}>
                 {/* Cash on Delivery Option */}
                 <div className="payment__type" style={{ marginBottom: '1rem', width: "70%" }}>
->>>>>>> 445ae1557bb2023f09f58878cadc3940f8c231f1
                   <input
                     type="radio"
                     id="Cash on Delivery"
@@ -998,11 +992,7 @@ const Checkout = () => {
                 </div>
 
                 {/* Online Payment Option */}
-<<<<<<< HEAD
-                <div className="payment__type" style={{ marginBottom: '1rem' , width:"70%"}}>
-=======
                 <div className="payment__type" style={{ marginBottom: '1rem', width: "70%" }}>
->>>>>>> 445ae1557bb2023f09f58878cadc3940f8c231f1
                   <input
                     type="radio"
                     id="Online"
