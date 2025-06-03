@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
+import { Link } from "react-router-dom";
 
 
 
@@ -116,7 +117,7 @@ const ProductDetails = () => {
                 <div className="breadcrumb__content">
                   <nav className="breadcrumb">
                     <span property="itemListElement" typeof="ListItem">
-                      <a href="index-2.html">Home</a>
+                      <a href="/">Home</a>
                     </span>
                     <span className="breadcrumb-separator">
                       <i className="flaticon-right-arrow-angle" />
@@ -309,11 +310,11 @@ const ProductDetails = () => {
                   </h3>
                   <h4 className="price">$29.00</h4>
                   <div className="product__code">
-                    <a href="store-details.html">
+                    <Link to="/shopProductList">  
                       <span>
                         <b>Furry pet shop </b>
                       </span>
-                    </a>
+                    </Link>
                   </div>
                   {/* <p>Cat Food nullam malesuada aenean congue semper donec velit ultrice search hendrerit enim, conubia sociis adipiscing sed tempor curae elit nibh rutrum ipsum. Consectetur sollicitudin.</p> */}
                   <br />

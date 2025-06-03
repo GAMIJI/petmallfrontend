@@ -76,6 +76,10 @@ const Checkout = () => {
   const [isEditingAddress, setIsEditingAddress] = useState(false); // Edit mode flag
   const [editingAddressId, setEditingAddressId] = useState(null); // ID of address being edited
 
+  const [couponCode, setCouponCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
   const [formData, setFormData] = useState({
     paymentMode: '', // 'Cash on Delivery' or 'Online'
     onlinePaymentMethod: '', // 'UPI', 'Credit/Debit Card', 'Net Banking', 'Wallet', 'EMI'
@@ -94,6 +98,8 @@ const Checkout = () => {
     const val = type === "radio" ? e.target.id : value;
     setFormData({ ...formData, [name]: val });
   };
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -375,9 +381,239 @@ const Checkout = () => {
     }
   };
 
+  const applyCoupon = () => {
+    // In a real app, you would validate the coupon with your backend
+    const validCoupons = {
+      'WELCOME10': 0.1,  // 10% discount
+      'SAVE20': 0.2,     // 20% discount
+      'FESTIVE15': 0.15, // 15% discount
+      'NEWUSER': 0.1     // 10% discount
+    };
+
+    if (couponCode && validCoupons[couponCode.toUpperCase()]) {
+      const discountRate = validCoupons[couponCode.toUpperCase()];
+      const newDiscount = subtotal * discountRate;
+      setDiscount(newDiscount);
+      setAppliedCoupon(couponCode.toUpperCase());
+      setTotal(subtotal - newDiscount);
+      AlertMsg(`Coupon applied successfully! You saved ₹${newDiscount.toFixed(2)}`, "success", "Coupon Applied");
+    } else {
+      AlertMsg("Invalid coupon code", "error", "Coupon Error");
+    }
+  };
+
+  const renderOfferSection = () => (
+    <div style={{
+      margin: '20px 0',
+      padding: '15px',
+      backgroundColor: '#f8f9fa',
+      borderRadius: '8px',
+      border: '1px solid #e0e0e0'
+    }}>
+      <h5 style={{
+        marginBottom: '15px',
+        fontSize: '16px',
+        fontWeight: '600',
+        color: '#333',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '5px' }}>
+          <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#4a6bff" strokeWidth="2" />
+          <path d="M12 8V12L15 15" stroke="#4a6bff" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        Available Offers
+      </h5>
+
+      {/* Auto-applied offers */}
+      <div style={{ marginBottom: '15px' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '12px',
+          backgroundColor: '#e8f4ff',
+          borderRadius: '6px',
+          marginBottom: '10px'
+        }}>
+          <div style={{
+            width: '24px',
+            height: '24px',
+            backgroundColor: '#4a6bff',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: '10px',
+            flexShrink: 0
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#333'
+            }}>
+              <span style={{ color: '#4a6bff' }}>10% OFF</span> on orders above ₹1000
+            </p>
+            <p style={{
+              margin: '4px 0 0',
+              fontSize: '12px',
+              color: '#666'
+            }}>
+              Code: <span style={{ fontWeight: '500' }}>WELCOME10</span> • Applied
+            </p>
+          </div>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '12px',
+          backgroundColor: '#e8f4ff',
+          borderRadius: '6px'
+        }}>
+          <div style={{
+            width: '24px',
+            height: '24px',
+            backgroundColor: '#4a6bff',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: '10px',
+            flexShrink: 0
+          }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              fontWeight: '500',
+              color: '#333'
+            }}>
+              <span style={{ color: '#4a6bff' }}>Free Shipping</span> on all orders
+            </p>
+            <p style={{
+              margin: '4px 0 0',
+              fontSize: '12px',
+              color: '#666'
+            }}>
+              Applied automatically
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Apply coupon section */}
+      <div style={{
+        display: 'flex',
+        gap: '10px',
+        marginTop: '15px'
+      }}>
+        <div style={{
+          flex: 1,
+          position: 'relative'
+        }}>
+          <input
+            type="text"
+            placeholder="Enter coupon code"
+            style={{
+              width: '100%',
+              padding: '12px 15px',
+              borderRadius: '6px',
+              border: '1px solid #ddd',
+              fontSize: '14px',
+              paddingRight: '90px'
+            }}
+          />
+          <button
+            style={{
+              position: 'absolute',
+              right: '5px',
+              top: '10px',
+              padding: '6px 12px',
+              backgroundColor: '#f0f0f0',
+              border: 'none',
+              borderRadius: '4px',
+              color: '#4a6bff',
+              fontWeight: '500',
+              fontSize: '13px',
+              cursor: 'pointer'
+            }}
+          >
+            APPLY
+          </button>
+        </div>
+        <button
+          style={{
+            padding: '12px 15px',
+            backgroundColor: '#fff',
+            border: '1px solid #4a6bff',
+            borderRadius: '6px',
+            color: '#4a6bff',
+            fontWeight: '500',
+            fontSize: '14px',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          View All Offers
+        </button>
+      </div>
+
+      {/* Recently used coupons */}
+      <div style={{ marginTop: '15px' }}>
+        <p style={{
+          fontSize: '13px',
+          color: '#666',
+          marginBottom: '8px'
+        }}>
+          Recently used:
+        </p>
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          paddingBottom: '5px'
+        }}>
+          {['SAVE20', 'FESTIVE15', 'NEWUSER'].map((code, index) => (
+            <div
+              key={index}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#fff',
+                border: '1px solid #ddd',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: '500',
+                color: '#4a6bff',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+              onClick={() => {
+                // Handle coupon code application
+                console.log(`Applying coupon: ${code}`);
+              }}
+            >
+              {code}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   // Price Summary Componentv
   const PriceSummary = () => (
-    <div className="col-md-4">
+    <div className="col-md-4 mb-5">
       <div className="order-summary p-4" style={{ border: "1px solid #ddd", borderRadius: "8px", backgroundColor: "#f9f9f9" }}>
         <h5 className="mb-3">Order Summary</h5>
 
@@ -403,11 +639,10 @@ const Checkout = () => {
                           height: '100%'
                         }}
                       />
-
                     </div>
                     <div className="col-5 ps-2">
                       <h6 className="mb-1 fw-medium text-truncate" style={{ fontSize: '0.85rem' }}>
-                        {item.productName}
+                        {item.product.productName}
                       </h6>
                       <p className="mb-0 text-muted" style={{ fontSize: '0.8rem' }}>
                         ₹ {item.product.price.toFixed(2)}
@@ -428,17 +663,26 @@ const Checkout = () => {
               ))}
             </div>
 
+            {/* Add the offer section here */}
+            {renderOfferSection()}
+
             <div className="order-summary-row d-flex justify-content-between mb-2">
               <span>Subtotal</span>
               <strong>₹ {subtotal.toFixed(2)}</strong>
             </div>
+            {discount > 0 && (
+              <div className="order-summary-row d-flex justify-content-between mb-2 text-success">
+                <span>Discount ({appliedCoupon})</span>
+                <strong>- ₹ {discount.toFixed(2)}</strong>
+              </div>
+            )}
             <div className="order-summary-row d-flex justify-content-between mb-2">
               <span>Shipping</span>
               <strong>₹ 0.00</strong>
             </div>
             <div className="order-summary-row d-flex justify-content-between total pt-2 mt-2 border-top">
               <span>Total</span>
-              <strong>₹ {subtotal.toFixed(2)}</strong>
+              <strong>₹ {total.toFixed(2)}</strong>
             </div>
           </>
         )}
@@ -457,7 +701,7 @@ const Checkout = () => {
             {!showAddressForm && (
               <div className="sub__registration-detials mt-3">
                 <div className="row gutter-20">
-                  <h5 className="sub__title sub__title2">Saved Addresses</h5>
+                  <h5 className="sub__title sub__title2 mb-5">Saved Addresses</h5>
                   {savedAddresses.length > 0 ? (
                     savedAddresses.map((address, index) => (
                       <div key={index} className="col-md-6 mb-3">
@@ -731,9 +975,9 @@ const Checkout = () => {
             <h4 className="title">Payment Method</h4>
 
             <div className="sub__registration-detials mt-3">
-              <div className="row gutter-20">
+              <div className="row gutter-20 " style={{ display: "flex", justifyContent: "space-around  " }}>
                 {/* Cash on Delivery Option */}
-                <div className="payment__type" style={{ marginBottom: '1rem' }}>
+                <div className="payment__type" style={{ marginBottom: '1rem', width: "70%" }}>
                   <input
                     type="radio"
                     id="Cash on Delivery"
@@ -748,7 +992,7 @@ const Checkout = () => {
                 </div>
 
                 {/* Online Payment Option */}
-                <div className="payment__type" style={{ marginBottom: '1rem' }}>
+                <div className="payment__type" style={{ marginBottom: '1rem', width: "70%" }}>
                   <input
                     type="radio"
                     id="Online"
@@ -1235,8 +1479,8 @@ const Checkout = () => {
             <h4 className="title">Review Your Order</h4>
 
             {/* Shipping Address Review */}
-            <div className="sub__registration-detials mt-3">
-              <h5 className="sub__title sub__title2">Shipping To</h5>
+            <div className="sub__registration-detials mt-4">
+              <h5 className="sub__title sub__title2 mb-4">Shipping To</h5>
               <div className="border rounded p-3">
                 <p>{selectedAddress ? selectedAddress.name : formData.name}</p>
                 <p>{selectedAddress ? selectedAddress.street : formData.street}</p>
@@ -1249,8 +1493,8 @@ const Checkout = () => {
             </div>
 
             {/* Payment Method Review */}
-            <div className="sub__registration-detials mt-3">
-              <h5 className="sub__title sub__title2">Payment Method</h5>
+            <div className="sub__registration-detials mt-3 ">
+              <h5 className="sub__title sub__title2 mb-3">Payment Method</h5>
               <div className="border rounded p-3">
                 <p>{formData.paymentMode}</p>
               </div>

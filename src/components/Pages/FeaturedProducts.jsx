@@ -9,7 +9,7 @@ const FeaturedProducts = () => {
   return (
     <div>
       {/* product-area */}
-      <section className="product__area">
+     <section className="product__area pt-100 pb-100">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-md-7">
@@ -25,8 +25,8 @@ const FeaturedProducts = () => {
               </div>
             </div>
             <div className="col-md-5">
-              <div className="view-all-btn">
-                <Link to="/productList">
+              <div className="view-all-btn text-md-end">
+                <Link to="/productList" className="btn btn-link">
                   See All <i className="flaticon-right-arrow-angle" />
                 </Link>
               </div>
@@ -45,7 +45,7 @@ const FeaturedProducts = () => {
                   aria-labelledby="all-tab"
                   tabIndex={0}
                 >
-                  <div className="product-active">
+                  <div className="product-active position-relative">
                     <Swiper
                       modules={[Navigation]}
                       navigation={{
@@ -55,19 +55,20 @@ const FeaturedProducts = () => {
                       spaceBetween={30}
                       slidesPerView={4}
                       loop={true}
-                      className="product-active"
+                      className="product-active swiper-container"
                     >
                       {/* Sample Slides - repeat with your product data */}
                       <SwiperSlide>
-                        <div className="product__item">
-                          <div className="product__thumb">
+                        <div className="product__item transition-3">
+                          <div className="product__thumb position-relative">
                             <Link to="/productDetails">
                               <img
                                 src="assets/img/products/products_img01.jpg"
                                 alt="img"
+                                className="img-fluid"
                               />
                             </Link>
-                            <div className="product__action">
+                            <div className="product__action d-flex">
                               <Link to="/productDetails">
                                 <i className="flaticon-love" />
                               </Link>
@@ -82,17 +83,17 @@ const FeaturedProducts = () => {
                               <span>New</span>
                             </div>
                             <div className="product__add-cart">
-                              <Link to="/productDetails" className="btn">
+                              <Link to="/productDetails" className="btn btn-sm">
                                 <i className="flaticon-shopping-bag" /> Add To
                                 Cart
                               </Link>
                             </div>
                           </div>
                           <div
-                            className="product__content"
+                            className="product__content pt-15"
                             style={{ padding: 10 }}
                           >
-                            <div className="product__reviews">
+                            <div className="product__reviews d-flex align-items-center">
                               <div className="rating">
                                 <i className="fas fa-star" />
                                 <i className="fas fa-star" />
@@ -116,15 +117,16 @@ const FeaturedProducts = () => {
                       </SwiperSlide>
 
                       <SwiperSlide>
-                        <div className="product__item">
-                          <div className="product__thumb">
+                        <div className="product__item transition-3">
+                          <div className="product__thumb position-relative">
                             <Link to="/productDetails">
                               <img
                                 src="assets/img/products/products_img01.jpg"
                                 alt="img"
+                                className="img-fluid"
                               />
                             </Link>
-                            <div className="product__action">
+                            <div className="product__action d-flex">
                               <Link to="/productDetails">
                                 <i className="flaticon-love" />
                               </Link>
@@ -139,17 +141,17 @@ const FeaturedProducts = () => {
                               <span>New</span>
                             </div>
                             <div className="product__add-cart">
-                              <Link to="/productDetails" className="btn">
+                              <Link to="/productDetails" className="btn btn-sm">
                                 <i className="flaticon-shopping-bag" /> Add To
                                 Cart
                               </Link>
                             </div>
                           </div>
                           <div
-                            className="product__content"
+                            className="product__content pt-15"
                             style={{ padding: 10 }}
                           >
-                            <div className="product__reviews">
+                            <div className="product__reviews d-flex align-items-center">
                               <div className="rating">
                                 <i className="fas fa-star" />
                                 <i className="fas fa-star" />
@@ -175,11 +177,13 @@ const FeaturedProducts = () => {
                       {/* Add more <SwiperSlide> items here */}
                     </Swiper>
                   </div>
-                  <div className="product__nav-wrap">
-                    <button className="product-button-prev">
+
+                  
+                  <div className="product__nav-wrap d-flex justify-content-center mt-30">
+                    <button className="product-button-prev me-2">
                       <i className="flaticon-left-chevron" />
                     </button>
-                    <button className="product-button-next">
+                    <button className="product-button-next ms-2">
                       <i className="flaticon-right-arrow-angle" />
                     </button>
                   </div>
