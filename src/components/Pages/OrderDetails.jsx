@@ -1,27 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useLocation} from 'react-router-dom';
-import { 
-  FaBox, FaMapMarkerAlt, FaCalendarAlt, FaCreditCard, 
-  FaShoppingBag, FaStore, FaUser, FaCheckCircle, 
-  FaTimesCircle, FaPhone, FaEnvelope, FaWallet,
-  FaShippingFast, FaCheck, FaChevronRight
+import { useLocation } from 'react-router-dom';
+import {
+    FaBox, FaMapMarkerAlt, FaCalendarAlt, FaCreditCard,
+    FaShoppingBag, FaStore, FaUser, FaCheckCircle,
+    FaTimesCircle, FaPhone, FaEnvelope, FaWallet,
+    FaShippingFast, FaCheck, FaChevronRight, FaInfoCircle,
+    FaShare, FaRupeeSign, FaTag, FaTruck, FaHome
 } from 'react-icons/fa';
-import { FiPackage, FiTruck } from 'react-icons/fi';
-import { motion } from 'framer-motion';
-import { BsBoxSeam, BsCreditCard } from 'react-icons/bs';
 
 const OrderDetails = () => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [activeStatus, setActiveStatus] = useState('confirmed');
     const location = useLocation();
-   const { orderId } = location.state || {};
+    const { orderId } = location.state || {};
     const API_URL = import.meta.env.VITE_API_URLS;
 
-
-    console.log(orderId, "orderId from OrderDetails");
-    
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
@@ -31,6 +27,7 @@ const OrderDetails = () => {
                     params: { orderId }
                 });
                 setOrder(res.data.order);
+                updateActiveStatus(res.data.order.status);
             } catch (err) {
                 console.error(err);
                 setError("Failed to fetch order details. Please try again.");
@@ -41,532 +38,523 @@ const OrderDetails = () => {
         fetchOrderDetails();
     }, [orderId, API_URL]);
 
+    const updateActiveStatus = (status) => {
+        const statusMap = {
+            'pending': 'confirmed',
+            'confirmed': 'confirmed',
+            'shipped': 'shipped',
+            'out_for_delivery': 'out_for_delivery',
+            'delivered': 'delivered',
+            'cancelled': 'cancelled'
+        };
+        setActiveStatus(statusMap[status] || 'confirmed');
+    };
+
+    const getStatusPercentage = () => {
+        switch (activeStatus) {
+            case 'confirmed': return 25;
+            case 'shipped': return 50;
+            case 'out_for_delivery': return 75;
+            case 'delivered': return 100;
+            default: return 0;
+        }
+    };
+
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-            <motion.div
-                animate={{ 
-                    rotateY: 360,
-                    scale: [1, 1.2, 1]
-                }}
-                transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                }}
-                className="spinner-grow text-primary"
-                style={{ width: '4rem', height: '4rem' }}
-            />
+            <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+            </div>
         </div>
     );
 
     if (error) return (
-        <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="alert alert-danger mx-auto mt-5 shadow-lg"
-            style={{ maxWidth: '600px' }}
-        >
+        <div className="alert alert-danger mx-auto mt-5" style={{ maxWidth: '600px' }}>
             {error}
-        </motion.div>
+        </div>
     );
 
     if (!order) return (
-        <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="alert alert-warning mx-auto mt-5 shadow-lg"
-            style={{ maxWidth: '600px' }}
-        >
+        <div className="alert alert-warning mx-auto mt-5" style={{ maxWidth: '600px' }}>
             No order found with ID: {orderId}
-        </motion.div>
+        </div>
     );
 
     const { address, paymentMode, status, createdAt, products = [], user, store } = order;
     const totalAmount = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discountAmount = products.reduce((sum, item) => sum + ((item.price * 0.2) * item.quantity), 0);
 
-    const statusConfig = {
-        'Placed': { color: 'bg-blue-500', icon: <BsBoxSeam className="me-2" /> },
-        'Shipped': { color: 'bg-purple-500', icon: <FiTruck className="me-2" /> },
-        'Delivered': { color: 'bg-green-500', icon: <FaCheck className="me-2" /> },
-        'Cancelled': { color: 'bg-red-500', icon: <FaTimesCircle className="me-2" /> },
-        'Processing': { color: 'bg-yellow-500', icon: <FiPackage className="me-2" /> }
+    const formatDate = (dateString) => {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-IN', options);
     };
 
-    const paymentIcons = {
-        'Cash on Delivery': <FaWallet className="me-2" />,
-        'Credit Card': <BsCreditCard className="me-2" />,
-        'UPI': <FaCreditCard className="me-2" />
-    };
-
-    const statusSteps = [
-        { id: 1, name: 'Order Placed', icon: <FaCalendarAlt />, status: 'complete' },
-        { id: 2, name: 'Processing', icon: <FiPackage />, status: status === 'Placed' ? 'pending' : ['Processing', 'Shipped', 'Delivered'].includes(status) ? 'complete' : 'pending' },
-        { id: 3, name: 'Shipped', icon: <FiTruck />, status: ['Shipped', 'Delivered'].includes(status) ? 'complete' : 'pending' },
-        { id: 4, name: 'Delivered', icon: <FaBox />, status: status === 'Delivered' ? 'complete' : 'pending' }
-    ];
+    const deliveryDate = new Date(createdAt);
+    deliveryDate.setDate(deliveryDate.getDate() + 3);
 
     return (
-        <div className="container py-5">
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="row"
-            >
-                <div className="col-lg-10 mx-auto">
-                    {/* Order Header */}
-                    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-                        <motion.div whileHover={{ scale: 1.02 }}>
-                            <h1 className="display-6 fw-bold text-gradient">
-                                <FaShoppingBag className="me-3" />
-                                Order #{order.orderId}
-                            </h1>
-                            <p className="text-muted">
-                                <FaCalendarAlt className="me-2" />
-                                {new Date(createdAt).toLocaleString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
-                            </p>
-                        </motion.div>
-                        
-                        <motion.span 
-                            whileHover={{ scale: 1.05 }}
-                            className={`badge rounded-pill p-3 fs-6 mt-3 mt-md-0 ${statusConfig[status]?.color || 'bg-secondary'} text-white shadow-sm`}
-                        >
-                            {statusConfig[status]?.icon}
-                            {status}
-                        </motion.span>
-                    </div>
+        <div className="container py-4">
+            <nav aria-label="breadcrumb" className="mb-4">
+                <ol className="breadcrumb">
+                    <li ><a href="/" className="text-decoration-none">Home/</a></li>
+                    <li ><a href="/account" className="text-decoration-none">My Account/</a></li>
+                    <li ><a href="/orders" className="text-decoration-none">My Orders/</a></li>
+                    <li className="breadcrumb-item active" aria-current="page">/Order #{order.orderId}</li>
+                </ol>
+            </nav>
 
-                    {/* Order Summary Card */}
-                    <motion.div 
-                        whileHover={{ y: -5 }}
-                        className="card border-0 shadow-lg mb-4 overflow-hidden"
-                    >
-                        <div className="card-header bg-primary bg-gradient text-white py-3">
-                            <h5 className="mb-0 d-flex align-items-center">
-                                <FaShoppingBag className="me-3 fs-4" />
-                                Order Summary
-                            </h5>
-                        </div>
-                        <div className="card-body p-0">
-                            <div className="table-responsive">
-                                <table className="table table-hover mb-0">
-                                    <thead className="table-light">
-                                        <tr>
-                                            <th className="ps-4">Product</th>
-                                            <th>Price</th>
-                                            <th>Qty</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {products.map((item, idx) => (
-                                            <motion.tr 
-                                                key={idx}
-                                                whileHover={{ 
-                                                    backgroundColor: 'rgba(248,249,250,0.8)',
-                                                    scale: 1.005
-                                                }}
-                                                transition={{ duration: 0.2 }}
-                                            >
-                                                <td className="ps-4">
-                                                    <div className="d-flex align-items-center">
-                                                        {item.images?.[0] && (
-                                                            <motion.img
-                                                                whileHover={{ scale: 1.1 }}
-                                                                src={`${API_URL}${item.images[0]}`}
-                                                                alt={item.name}
-                                                                width="80"
-                                                                className="rounded-3 me-3 shadow-sm"
-                                                                style={{ objectFit: 'cover' }}
-                                                            />
-                                                        )}
-                                                        <div>
-                                                            <h6 className="mb-1 fw-bold">{item.name}</h6>
-                                                            <small className="text-muted">{item.brand || 'Generic Brand'}</small>
-                                                            {item.size && <div className="mt-1"><span className="badge bg-light text-dark">Size: {item.size}</span></div>}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="align-middle">₹{item.price.toFixed(2)}</td>
-                                                <td className="align-middle">{item.quantity}</td>
-                                                <td className="align-middle fw-bold">₹{(item.price * item.quantity).toFixed(2)}</td>
-                                            </motion.tr>
-                                        ))}
-                                    </tbody>
-                                    <tfoot className="table-light">
-                                        <tr>
-                                            <td colSpan="3" className="text-end fw-bold ps-4">Subtotal:</td>
-                                            <td className="fw-bold">₹{totalAmount.toFixed(2)}</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="3" className="text-end fw-bold ps-4">Shipping:</td>
-                                            <td className="fw-bold">₹0.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td colSpan="3" className="text-end fw-bold ps-4">Total:</td>
-                                            <td className="fw-bold text-primary">₹{totalAmount.toFixed(2)}</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-                        </div>
-                    </motion.div>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 className="mb-1">Order #{order.orderId}</h2>
+                    <p className="text-muted mb-0">
+                        <FaCalendarAlt className="me-1" />
+                        Placed on {formatDate(createdAt)}
+                    </p>
+                </div>
+                <button className="btn btn-outline-primary btn-sm">
+                    <FaShare className="me-1" /> Share Order
+                </button>
+            </div>
 
-                    {/* Order Timeline */}
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="card border-0 shadow-lg mb-4"
-                    >
-                        <div className="card-header bg-white py-3">
-                            <h5 className="mb-0 d-flex align-items-center">
-                                <FaShippingFast className="me-3 fs-4 text-primary" />
-                                Order Status
-                            </h5>
-                        </div>
-                        <div className="card-body">
-                            <div className="stepper-wrapper">
-                                {statusSteps.map((step, index) => (
-                                    <motion.div 
-                                        key={step.id}
-                                        whileHover={{ scale: 1.05 }}
-                                        className={`stepper-item ${step.status === 'complete' ? 'completed' : ''} ${step.status === 'pending' && statusSteps[index-1]?.status === 'complete' ? 'active' : ''}`}
-                                    >
-                                        <div className="step-counter">
-                                            {step.status === 'complete' ? (
-                                                <span className="bg-success text-white rounded-circle d-flex align-items-center justify-content-center">
-                                                    {step.icon}
-                                                </span>
-                                            ) : step.status === 'active' ? (
-                                                <span className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
-                                                    {step.icon}
-                                                </span>
-                                            ) : (
-                                                <span className="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center">
-                                                    {step.icon}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="step-name">{step.name}</div>
-                                        {index < statusSteps.length - 1 && (
-                                            <div className="step-connector">
-                                                <div className={`connector-line ${statusSteps[index+1].status === 'complete' ? 'completed' : ''}`}></div>
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Two Column Section */}
-                    <div className="row">
-                        {/* Left Column */}
-                        <div className="col-md-6 mb-4">
-                            {/* Payment Info */}
-                            <motion.div 
-                                whileHover={{ y: -3 }}
-                                className="card border-0 shadow-sm h-100"
-                            >
-                                <div className="card-header bg-white">
-                                    <h5 className="mb-0 d-flex align-items-center">
-                                        <FaCreditCard className="me-3 fs-4 text-primary" />
-                                        Payment Information
-                                    </h5>
-                                </div>
-                                <div className="card-body">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <div className="icon-circle bg-light-primary text-primary me-3">
-                                            {paymentIcons[paymentMode] || <FaWallet />}
-                                        </div>
-                                        <div>
-                                            <h6 className="mb-0">Payment Method</h6>
-                                            <p className="text-muted mb-0">{paymentMode}</p>
-                                        </div>
-                                    </div>
-                                    <div className="d-flex align-items-center">
-                                        <div className="icon-circle bg-light-success text-success me-3">
-                                            <FaCheck />
-                                        </div>
-                                        <div>
-                                            <h6 className="mb-0">Payment Status</h6>
-                                            <p className="text-muted mb-0">
-                                                {paymentMode === 'Cash on Delivery' ? 'Pending' : 'Completed'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-
-                        {/* Right Column */}
-                        <div className="col-md-6 mb-4">
-                            {/* Delivery Address */}
-                            <motion.div 
-                                whileHover={{ y: -3 }}
-                                className="card border-0 shadow-sm h-100"
-                            >
-                                <div className="card-header bg-white">
-                                    <h5 className="mb-0 d-flex align-items-center">
-                                        <FaMapMarkerAlt className="me-3 fs-4 text-danger" />
-                                        Delivery Address
-                                    </h5>
-                                </div>
-                                <div className="card-body">
-                                    <address className="mb-0">
-                                        <div className="d-flex align-items-start mb-2">
-                                            <FaUser className="me-3 mt-1 text-muted" />
-                                            <div>
-                                                <strong>{address?.name || user?.name}</strong><br />
-                                                {address?.street}, {address?.landmark}<br />
-                                                {address?.city}, {address?.state}<br />
-                                                {address?.country} - {address?.postalCode}
-                                            </div>
-                                        </div>
-                                        <div className="d-flex align-items-center mb-2">
-                                            <FaPhone className="me-3 text-muted" />
-                                            <span>{address?.phone || user?.phone}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center">
-                                            <FaEnvelope className="me-3 text-muted" />
-                                            <span>{address?.email || user?.email || 'N/A'}</span>
-                                        </div>
-                                    </address>
-                                </div>
-                            </motion.div>
-                        </div>
-                    </div>
-
-                    {/* Seller Information */}
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="card border-0 shadow-lg mb-4"
-                    >
-                        <div className="card-header bg-white py-3">
-                            <h5 className="mb-0 d-flex align-items-center">
-                                <FaStore className="me-3 fs-4 text-warning" />
-                                Seller Information
-                            </h5>
-                        </div>
+            <div className="row">
+                {/* Left Column - Order Items with Vertical Progress Bar */}
+                <div className="col-lg-8 mb-4">
+                    <div className="card border-0 shadow-sm mb-4">
                         <div className="card-body">
                             <div className="row">
-                                <div className="col-md-8">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <div className="icon-circle bg-light-warning text-warning me-3">
-                                            <FaStore />
+                                {/* Vertical Progress Bar */}
+                                <div className="col-md-2 d-none d-md-block">
+                                    <div className="vertical-progress-container">
+                                        <div
+                                            className="vertical-progress-bar"
+                                            style={{ height: `${getStatusPercentage()}%` }}
+                                        ></div>
+                                        <div className="vertical-progress-steps">
+                                            <div className={`vertical-progress-step ${activeStatus === 'confirmed' ? 'active' : ''} ${activeStatus !== 'confirmed' ? 'completed' : ''}`}>
+                                                <div className="step-icon">
+                                                    <FaCheckCircle />
+                                                </div>
+                                                <div className="step-label">Confirmed</div>
+                                            </div>
+                                            <div className={`vertical-progress-step ${activeStatus === 'shipped' ? 'active' : ''} ${['out_for_delivery', 'delivered'].includes(activeStatus) ? 'completed' : ''}`}>
+                                                <div className="step-icon">
+                                                    <FaShippingFast />
+                                                </div>
+                                                <div className="step-label">Shipped</div>
+                                            </div>
+                                            <div className={`vertical-progress-step ${activeStatus === 'out_for_delivery' ? 'active' : ''} ${activeStatus === 'delivered' ? 'completed' : ''}`}>
+                                                <div className="step-icon">
+                                                    <FaTruck />
+                                                </div>
+                                                <div className="step-label">On the way</div>
+                                            </div>
+                                            <div className={`vertical-progress-step ${activeStatus === 'delivered' ? 'active' : ''}`}>
+                                                <div className="step-icon">
+                                                    <FaHome />
+                                                </div>
+                                                <div className="step-label">Delivered</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h5 className="mb-0">{store?.storeName}</h5>
-                                            <small className="text-muted">Store ID: {store?._id}</small>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="ms-5 ps-3">
-                                        <div className="d-flex align-items-center mb-2">
-                                            <FaUser className="me-3 text-muted" />
-                                            <span><strong>Owner:</strong> {store?.storeOwner}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center mb-2">
-                                            <FaPhone className="me-3 text-muted" />
-                                            <span><strong>Contact:</strong> {store?.contactNumber}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center mb-2">
-                                            <FaEnvelope className="me-3 text-muted" />
-                                            <span><strong>Email:</strong> {store?.storeEmail}</span>
-                                        </div>
-                                        <div className="d-flex align-items-center">
-                                            <FaMapMarkerAlt className="me-3 text-muted" />
-                                            <span><strong>Address:</strong> {store?.storeAddress}</span>
-                                        </div>
-                                        
-                                         <span className={`position-absolute top-0 end-0 badge ${store?.isVerified ? 'bg-success' : 'bg-secondary'} rounded-pill p-2 mt-3 me-3`}>
-                                                {store?.isVerified ? 'Verified' : 'Unverified'}
-                                                {store?.isVerified ? (
-                                                    <FaCheckCircle className="ms-1" />
-                                                ) : (
-                                                    <FaTimesCircle className="ms-1" />
-                                                )}
-                                            </span>
                                     </div>
                                 </div>
-                                <div className="col-md-4 text-center">
-                                    <motion.div 
-                                        whileHover={{ scale: 1.05 }}
-                                        className="mt-3 mt-md-0"
-                                    >
-                                        {/* <div className="position-relative">
-                                            {store?.storeImages?.[0] && (
-                                                <img 
-                                                    src={`${API_URL}${store.storeImages[0]}`}
-                                                    alt="Store"
-                                                    className="img-fluid rounded-3 shadow-sm"
-                                                    style={{ maxHeight: '150px', objectFit: 'cover' }}
-                                                />
-                                            )}
-                                            <span className={`position-absolute top-0 end-0 badge ${store?.isVerified ? 'bg-success' : 'bg-secondary'} rounded-pill p-2`}>
-                                                {store?.isVerified ? 'Verified' : 'Unverified'}
-                                                {store?.isVerified ? (
-                                                    <FaCheckCircle className="ms-1" />
-                                                ) : (
-                                                    <FaTimesCircle className="ms-1" />
-                                                )}
-                                            </span>
-                                        </div> */}
-                                        <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            className="btn btn-outline-primary mt-3"
-                                        >
-                                            View Store <FaChevronRight className="ms-1" />
-                                        </motion.button>
-                                    </motion.div>
+
+                                {/* Order Items */}
+                                <div className="col-md-10">
+                                    <h5 className="card-title mb-4">Order Summary</h5>
+                                    {products.map((product, index) => (
+                                        <div key={index} className="mb-4 pb-4 border-bottom">
+                                            <div className="row">
+                                                <div className="col-3 col-md-2">
+                                                    <img
+                                                        src={`${API_URL}${product?.images[0]}`}
+                                                        alt={product?.name}
+                                                        className="img-fluid rounded"
+                                                        style={{ maxHeight: '100px' }}
+                                                    />
+                                                </div>
+                                                <div className="col-9 col-md-6">
+                                                    <h6 className="mb-1">{product?.name}</h6>
+                                                    <p className="text-muted mb-1">Color: {product?.color || 'Not specified'}</p>
+                                                    <p className="mb-2">
+                                                        <FaStore className="me-1 text-warning" />
+                                                        Seller: {store?.storeName}
+                                                    </p>
+                                                    <p className="text-success mb-0">
+                                                        <FaCheckCircle className="me-1" />
+                                                        {product.verified ? 'Verified at delivery' : 'Will be verified at delivery'}
+                                                    </p>
+                                                </div>
+                                                <div className="col-12 col-md-4 mt-3 mt-md-0 text-md-end">
+                                                    <div className="d-flex flex-column">
+                                                        <h5 className="text-danger mb-1">
+                                                            <FaRupeeSign /> {(product.price * product.quantity).toLocaleString('en-IN')}
+                                                        </h5>
+                                                        {product.price > product.originalPrice && (
+                                                            <small className="text-muted text-decoration-line-through">
+                                                                <FaRupeeSign /> {(product.originalPrice * product.quantity).toLocaleString('en-IN')}
+                                                            </small>
+                                                        )}
+                                                        <small className="text-success">
+                                                            {product.discount > 0 ? `${product.discount}% off` : 'No discount'}
+                                                        </small>
+                                                        <small className="text-muted">Qty: {product.quantity}</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Delivery Information */}
+                                    <div className="alert alert-light d-flex align-items-center mt-4">
+                                        <FaInfoCircle className="me-2 text-primary" size={20} />
+                                        <div>
+                                            <strong>Delivery update:</strong> Your order is {activeStatus.replace('_', ' ')}.
+                                            {activeStatus === 'delivered' ? ' It was delivered successfully.' : ' Expected delivery by ' + formatDate(deliveryDate)}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
+
+                    {/* Shipping Details */}
+                    <div className="card border-0 shadow-sm">
+                        <div className="card-body">
+                            <h5 className="card-title mb-4">Shipping & Billing Details</h5>
+                            <div className="row">
+                                <div className="col-md-6 mb-4 mb-md-0">
+                                    <h6 className="d-flex align-items-center mb-3">
+                                        <FaMapMarkerAlt className="me-2 text-primary" />
+                                        Shipping Address
+                                    </h6>
+                                    <address className="mb-0">
+                                        <p className="mb-1"><strong>{address?.name || user?.name}</strong></p>
+                                        <p className="mb-1">{address?.street}, {address?.landmark}</p>
+                                        <p className="mb-1">{address?.city}, {address?.state} - {address?.postalCode}</p>
+                                        <p className="mb-0">
+                                            <FaPhone className="me-1" />
+                                            {address?.phone || user?.phone}
+                                        </p>
+                                    </address>
+                                </div>
+                                <div className="col-md-6">
+                                    <h6 className="d-flex align-items-center mb-3">
+                                        <FaCreditCard className="me-2 text-primary" />
+                                        Payment Information
+                                    </h6>
+                                    <div>
+                                        <p className="mb-1"><strong>Payment Method:</strong> {paymentMode}</p>
+                                        <p className="mb-1"><strong>Payment Status:</strong> Paid</p>
+                                        <p className="mb-1"><strong>Transaction ID:</strong> TXN{orderId.slice(0, 8).toUpperCase()}</p>
+                                        <p className="mb-0"><strong>Paid Amount:</strong> <FaRupeeSign /> {totalAmount.toLocaleString('en-IN')}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </motion.div>
+
+                {/* Right Column - Order Summary */}
+                <div className="col-lg-4">
+                    <div className="card border-0 shadow-sm sticky-top" style={{ top: '20px' }}>
+                        <div className="card-body">
+                            <h5 className="card-title mb-4">Order Total</h5>
+
+                            <div className="mb-3">
+                                <div className="d-flex justify-content-between mb-2">
+                                    <span>Subtotal ({products.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                                    <span><FaRupeeSign /> {totalAmount.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-2">
+                                    <span>Discount</span>
+                                    <span className="text-success">- <FaRupeeSign /> {discountAmount.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-2">
+                                    <span>Delivery Fee</span>
+                                    <span className="text-success">Free</span>
+                                </div>
+                                <div className="d-flex justify-content-between mb-2">
+                                    <span>Taxes</span>
+                                    <span><FaRupeeSign /> {(totalAmount * 0.18).toLocaleString('en-IN')}</span>
+                                </div>
+                                <hr />
+                                <div className="d-flex justify-content-between fw-bold fs-5">
+                                    <span>Total</span>
+                                    <span><FaRupeeSign /> {(totalAmount - discountAmount + (totalAmount * 0.18)).toLocaleString('en-IN')}</span>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div className="mb-4">
+                                <h6 className="d-flex align-items-center mb-3">
+                                    <FaTag className="me-2 text-warning" />
+                                    Applied Offers
+                                </h6>
+                                <div className="alert alert-success py-2 mb-2">
+                                    <div className="d-flex justify-content-between">
+                                        <small>10% off on first order</small>
+                                        <small className="text-success">- <FaRupeeSign /> {discountAmount.toLocaleString('en-IN')}</small>
+                                    </div>
+                                </div>
+                                <div className="alert alert-success py-2">
+                                    <div className="d-flex justify-content-between">
+                                        <small>Free delivery</small>
+                                        <small className="text-success">Applied</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div className="d-grid gap-2">
+                                <button className="btn btn-primary">
+                                    Track Package
+                                </button>
+                                <button className="btn btn-outline-secondary">
+                                    Download Invoice
+                                </button>
+                                {activeStatus === 'delivered' && (
+                                    <button className="btn btn-success">
+                                        Rate & Review Products
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Progress Bar (Horizontal) */}
+            <div className="d-block d-md-none mb-4">
+                <div className="card border-0 shadow-sm">
+                    <div className="card-body">
+                        <h5 className="card-title mb-3">Order Status</h5>
+                        <div className="progress-container">
+                            <div className="progress-bar" style={{ width: `${getStatusPercentage()}%` }}></div>
+                            <div className="progress-steps">
+                                <div className={`progress-step ${activeStatus === 'confirmed' ? 'active' : ''} ${activeStatus !== 'confirmed' ? 'completed' : ''}`}>
+                                    <div className="step-icon">
+                                        <FaCheckCircle />
+                                    </div>
+                                    <div className="step-label">Confirmed</div>
+                                </div>
+                                <div className={`progress-step ${activeStatus === 'shipped' ? 'active' : ''} ${['out_for_delivery', 'delivered'].includes(activeStatus) ? 'completed' : ''}`}>
+                                    <div className="step-icon">
+                                        <FaShippingFast />
+                                    </div>
+                                    <div className="step-label">Shipped</div>
+                                </div>
+                                <div className={`progress-step ${activeStatus === 'out_for_delivery' ? 'active' : ''} ${activeStatus === 'delivered' ? 'completed' : ''}`}>
+                                    <div className="step-icon">
+                                        <FaTruck />
+                                    </div>
+                                    <div className="step-label">On the way</div>
+                                </div>
+                                <div className={`progress-step ${activeStatus === 'delivered' ? 'active' : ''}`}>
+                                    <div className="step-icon">
+                                        <FaHome />
+                                    </div>
+                                    <div className="step-label">Delivered</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <style jsx>{`
-                .text-gradient {
-                    background: linear-gradient(45deg, #4e54c8, #8f94fb);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
+                .breadcrumb {
+                    background-color: transparent;
+                    padding: 0.75rem 1rem;
+                    border-radius: 0.5rem;
+                    background-color: #f8f9fa;
                 }
                 
-                .icon-circle {
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 1.25rem;
-                }
-                
-                .bg-light-primary {
-                    background-color: rgba(13,110,253,0.1);
-                }
-                
-                .bg-light-success {
-                    background-color: rgba(25,135,84,0.1);
-                }
-                
-                .bg-light-warning {
-                    background-color: rgba(255,193,7,0.1);
-                }
-                
-                .stepper-wrapper {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 20px;
-                }
-                
-                .stepper-item {
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    flex: 1;
-                }
-                
-                .stepper-item.completed .step-counter {
-                    background-color: #198754;
-                    color: white;
-                }
-                
-                .stepper-item.active .step-counter {
-                    background-color: #0d6efd;
-                    color: white;
-                }
-                
-                .step-counter {
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 50%;
-                    background-color: #e9ecef;
+                .breadcrumb-item a {
                     color: #6c757d;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 10px;
-                    font-size: 1.25rem;
-                    z-index: 2;
+                    transition: color 0.2s;
                 }
                 
-                .step-name {
-                    font-size: 0.875rem;
-                    font-weight: 500;
-                    color: #6c757d;
-                    text-align: center;
-                }
-                
-                .stepper-item.completed .step-name {
-                    color: #198754;
-                    font-weight: 600;
-                }
-                
-                .stepper-item.active .step-name {
+                .breadcrumb-item a:hover {
                     color: #0d6efd;
-                    font-weight: 600;
+                    text-decoration: none;
                 }
                 
-                .step-connector {
+              /* Vertical Progress Bar Styles */
+/* Vertical Progress Bar Styles */
+.vertical-progress-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+}
+
+.vertical-progress-bar {
+    position: absolute;
+    left: 20px; /* Half of step-icon width (40px/2) */
+    top: 0;
+    width: 4px;
+    background-color: #0d6efd;
+    transition: height 0.5s ease;
+    z-index: 1;
+}
+
+.vertical-progress-steps {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.vertical-progress-step {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+    gap: 8px;
+}
+
+.vertical-progress-step:last-child {
+    margin-bottom: 0;
+}
+
+.vertical-progress-step .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+    border: 3px solid #e9ecef;
+    font-size: 1rem;
+    position: relative;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.vertical-progress-step.completed .step-icon {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+}
+
+.vertical-progress-step.active .step-icon {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.vertical-progress-step .step-content {
+    margin-left: 1rem; /* Space between icon and text */
+}
+
+.vertical-progress-step .step-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #212529;
+}
+
+.vertical-progress-step .step-date {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+                
+                /* Horizontal Progress Bar (for mobile) */
+                .progress-container {
+                    position: relative;
+                    width: 100%;
+                    margin: 1rem 0;
+                }
+                
+                .progress-bar {
                     position: absolute;
-                    top: 25px;
-                    left: calc(50% + 25px);
-                    right: calc(-50% + 25px);
-                    height: 2px;
-                    background-color: #e9ecef;
+                    top: 20px;
+                    left: 0;
+                    height: 4px;
+                    background-color: #0d6efd;
+                    transition: width 0.5s ease;
                     z-index: 1;
                 }
                 
-                .connector-line {
-                    height: 100%;
+                .progress-steps {
+                    display: flex;
+                    justify-content: space-between;
+                    position: relative;
+                    z-index: 2;
+                }
+                
+                .progress-step {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: start;
+                    flex: 1;
+                    position: relative;
+                }
+                
+                .progress-step .step-icon {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 0.5rem;
                     background-color: #e9ecef;
-                    transition: width 0.3s ease;
+                    color: #6c757d;
+                    border: 3px solid #e9ecef;
+                    font-size: 1rem;
                 }
                 
-                .connector-line.completed {
+                .progress-step.completed .step-icon {
                     background-color: #198754;
+                    border-color: #198754;
+                    color: white;
                 }
                 
-                @media (max-width: 768px) {
-                    .stepper-wrapper {
-                        flex-direction: column;
-                        align-items: flex-start;
-                    }
-                    
-                    .stepper-item {
-                        flex-direction: row;
-                        margin-bottom: 20px;
-                        width: 100%;
-                    }
-                    
-                    .step-counter {
-                        margin-right: 15px;
-                        margin-bottom: 0;
-                    }
-                    
-                    .step-name {
-                        text-align: left;
-                        margin-top: 5px;
-                    }
-                    
-                    .step-connector {
-                        display: none;
-                    }
+                .progress-step.active .step-icon {
+                    background-color: #0d6efd;
+                    border-color: #0d6efd;
+                    color: white;
+                    animation: pulse 1.5s infinite;
+                }
+                
+                .progress-step .step-label {
+                    font-weight: 500;
+                    font-size: 0.75rem;
+                    text-align: center;
+                }
+                
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                    100% { transform: scale(1); }
+                }
+                
+                .card {
+                    border-radius: 0.75rem;
+                    overflow: hidden;
+                }
+                
+                .card-title {
+                    font-weight: 600;
+                    color: #2c3e50;
                 }
             `}</style>
         </div>
