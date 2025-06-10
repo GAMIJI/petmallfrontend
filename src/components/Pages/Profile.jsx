@@ -153,17 +153,16 @@ const Profile = () => {
           <div className="row">
             {/* // Sidebar Section */}
             <div className="col-xl-3 col-lg-4 col-sm-5 pr-0">
-              <aside className="blog-sidebar account__sidebar">
-                <div
-                  className="acc__profile mb-4"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                  }}
-                >
-                  {/* Profile Image */}
+              <aside className="account__sidebar">
+                {/* Profile Section */}
+                <div className="acc__profile mb-4" style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  paddingBottom: "20px",
+                  borderBottom: "1px solid #eee"
+                }}>
                   <img
                     src="https://us.123rf.com/450wm/virtosmedia/virtosmedia2301/virtosmedia230116752/197246325-programmer-programmer-developer-vector-illustration-in-flat-style.jpg"
                     className="rounded-circle mb-3"
@@ -175,60 +174,173 @@ const Profile = () => {
                       border: "2px solid #ddd",
                     }}
                   />
-
-                  {/* Text Section */}
                   <p className="text-muted m-0">Hello,</p>
-                  <p className="acc__profile_name fw-bold fs-5">{userName}</p>
+                  <p className="fw-bold fs-5" style={{ margin: "5px 0 0 0" }}>{userName}</p>
                 </div>
-               <div >
+
+                {/* Menu Sections */}
+                <div className="sidebar-menu" style={{marginLeft: '20px'}}>
+                  <div className="menu-section">
+                    <h5 className="menu-title" style={{
+                      
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      margin: "15px 0 10px 0",
+                      textTransform: "uppercase"
+                    }}>MY ORDERS</h5>
+                    <Link
+                      className="menu-item"
+                      style={{
+                        display: "block",
+                        padding: "8px 0",
+                        
+                        textDecoration: "none"
+                      }}
+                      onClick={() => setActiveTab("myOrders")}
+                    >
+                      My Orders
+                    </Link>
+                  </div>
+
+                  <div className="menu-section">
+                    <h5 className="menu-title" style={{
                  
-                      <Link onClick={() => setActiveTab("myOrders")}>
-                        MY ORDERS
-                      </Link>
-                
-               </div>
-              
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      margin: "15px 0 10px 0",
+                      textTransform: "uppercase"
+                    }}>ACCOUNT SETTINGS</h5>
+                    <ul className="menu-list" style={{ listStyle: "none", padding: 0 }}>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{  textDecoration: "none" }}
+                          onClick={() => setActiveTab("profile")}
+                        >
+                          Profile Information
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{textDecoration: "none" }}
+                          onClick={() => setActiveTab("manageAddresses")}
+                        >
+                          Manage Addresses
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{ textDecoration: "none" }}
+                          onClick={() => setActiveTab("panCard")}
+                        >
+                          PAN Card Information
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
 
-                <h5 className="sub-title">ACCOUNT SETTINGS</h5>
-                <div className="sidebar-cat-list">
-                  <ul className="list-wrap">
-                    <li>
-                      <Link onClick={() => setActiveTab("profile")}>
-                        Profile Information
-                      </Link>
-                    </li>
-                    {/* <li>
-                      <Link onClick={() => setActiveTab("myOrders")}>
-                        My Orders
-                      </Link>
-                    </li> */}
-                    <li>
-                      <Link onClick={() => setActiveTab("appointments")}>
-                        My Appointments
-                      </Link>
-                    </li>
-                    <li>
-                      <Link onClick={() => setActiveTab("favourites")}>
-                        My Favourites
-                      </Link>
-                    </li>
-                    <li>
-                      <Link onClick={() => setActiveTab("notifications")}>
-                        All Notifications
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+                  <div className="menu-section">
+                    <h5 className="menu-title" style={{
+                      
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      margin: "15px 0 10px 0",
+                      textTransform: "uppercase"
+                    }}>PAYMENTS</h5>
+                    <ul className="menu-list" style={{ listStyle: "none", padding: 0 }}>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{textDecoration: "none" }}
+                          onClick={() => setActiveTab("giftCards")}
+                        >
+                          Gift Cards
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{textDecoration: "none" }}
+                          onClick={() => setActiveTab("savedUPI")}
+                        >
+                          Saved UPI
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{ textDecoration: "none" }}
+                          onClick={() => setActiveTab("savedCards")}
+                        >
+                          Saved Cards
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
 
-                <div className="mt-4">
-                  <button className="btn btn-danger" onClick={handleLogout}>
-                    Logout
-                  </button>
+                  <div className="menu-section">
+                    <h5 className="menu-title" style={{
+                   
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      margin: "15px 0 10px 0",
+                      textTransform: "uppercase"
+                    }}>MY STUFF</h5>
+                    <ul className="menu-list" style={{ listStyle: "none", padding: 0 }}>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{textDecoration: "none" }}
+                          onClick={() => setActiveTab("myCoupons")}
+                        >
+                          My Coupons
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{ textDecoration: "none" }}
+                          onClick={() => setActiveTab("myReviews")}
+                        >
+                          My Reviews & Ratings
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{ textDecoration: "none" }}
+                          onClick={() => setActiveTab("allNotifications")}
+                        >
+                          All Notifications
+                        </Link>
+                      </li>
+                      <li className="menu-item" style={{ padding: "8px 0" }}>
+                        <Link
+                          style={{ textDecoration: "none" }}
+                          onClick={() => setActiveTab("myWishlist")}
+                        >
+                          My Wishlist
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="logout-section" style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #eee" }}>
+                    <button
+                      className="logout-btn"
+                      onClick={handleLogout}
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        background: "none",
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                       
+                        cursor: "pointer",
+                        fontWeight: "500"
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
                 </div>
               </aside>
             </div>
 
-              {/* // Main Content Section */}
+            {/* // Main Content Section */}
             <div className="col-xl-9 col-lg-8 col-sm-7 pl-0">
               {activeTab === "profile" && (
                 <form className="registration__form checkout__form account__sidebar">

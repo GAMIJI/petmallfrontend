@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Spinner, Toast, Button, Badge } from "react-bootstrap";
-import { FaTrash, FaHeart, FaShoppingCart, FaRupeeSign, FaChevronRight } from "react-icons/fa";
+import { Spinner, Toast, Button, Badge, Card, Row, Col } from "react-bootstrap";
+import { FaHeart, FaShoppingCart, FaRupeeSign, FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ const Wishlist = () => {
     const [error, setError] = useState("");
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
-    const [removingId, setRemovingId] = useState(null);
+    const [processingId, setProcessingId] = useState(null);
     const API_URL = import.meta.env.VITE_API_URLS;
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
@@ -37,39 +37,29 @@ const Wishlist = () => {
         fetchWishlist();
     }, []);
 
-    const handleRemoveFromWishlist = async (productId) => {
-        setRemovingId(productId);
+    const handleCartAndRemove = async (productId) => {
+        setProcessingId(productId);
         try {
-            await axios.delete(`${API_URL}api/user/removeProductFromWishlist`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                data: { productId },
-            });
-
-            setTimeout(() => {
-                setWishlist(prev => prev.filter(item => item._id !== productId));
-                showSuccessToast("Item removed from wishlist");
-                setRemovingId(null);
-            }, 300);
-        } catch (err) {
-            console.error("Error removing from wishlist:", err);
-            showErrorToast("Failed to remove item");
-            setRemovingId(null);
-        }
-    };
-
-    const handleAddToCart = async (productId) => {
-        try {
-            // Replace with your actual add to cart API call
-            await axios.post(`${API_URL}api/user/addToCart`,
+            // First add to cart
+            await axios.post(
+                `${API_URL}api/user/addToCart`,
                 { productId, quantity: 1 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            showSuccessToast("Item added to cart");
+
+            // Then remove from wishlist
+            await axios.delete(`${API_URL}api/user/removeProductFromWishlist`, {
+                headers: { Authorization: `Bearer ${token}` },
+                data: { productId },
+            });
+
+            setWishlist(prev => prev.filter(item => item._id !== productId));
+            showSuccessToast("Item moved to cart");
         } catch (err) {
-            console.error("Error adding to cart:", err);
-            showErrorToast("Failed to add to cart");
+            console.error("Error:", err);
+            showErrorToast(err.response?.data?.message || "Failed to process");
+        } finally {
+            setProcessingId(null);
         }
     };
 
@@ -124,12 +114,11 @@ const Wishlist = () => {
                     overflow: 'hidden',
                 }}
             >
-                <Toast.Header className=" text-white" style={{ backgroundColor: '#05576e' }}>
+                <Toast.Header className="text-white" style={{ backgroundColor: '#05576e' }}>
                     <strong className="me-auto">Notification</strong>
                 </Toast.Header>
                 <Toast.Body className="text-dark">{toastMessage}</Toast.Body>
             </Toast>
-
 
             {/* Header */}
             <motion.div
@@ -142,7 +131,6 @@ const Wishlist = () => {
                     <FaHeart className="text-danger me-2" />
                     My Wishlist <Badge bg="secondary" pill>{wishlist.length}</Badge>
                 </h2>
-
             </motion.div>
 
             {wishlist.length === 0 ? (
@@ -159,137 +147,91 @@ const Wishlist = () => {
                     </Link>
                 </motion.div>
             ) : (
-                <div className="list-group">
+                <Row xs={1} md={2} lg={3} xl={5} className="g-3">
                     <AnimatePresence>
                         {wishlist.map((item) => (
-                            <motion.div
-                                key={item._id}
-                                layout
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{
-                                    opacity: 1,
-                                    x: 0,
-                                    transition: { duration: 0.3 }
-                                }}
-                                exit={{
-                                    opacity: 0,
-                                    x: 20,
-                                    transition: { duration: 0.3 }
-                                }}
-                                transition={{ duration: 0.3 }}
-                                className={`list-group-item list-group-item-action ${removingId === item._id ? "removing-item" : ""}`}
-                                onClick={() => navigate(`/product/${item._id}`)}
-                                style={{ cursor: "pointer" }}
-                            >
-                                <div className="d-flex align-items-center m-2">
-                                    <div className="position-relative me-3" style={{ width: "80px", height: "80px" }}>
-                                        <img
-                                            src={`${API_URL}${item.productImages[0]}`}
-                                            alt={item.productName}
-                                            className="img-fluid rounded"
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "cover",
-                                                transition: "transform 0.3s ease"
-                                            }}
-                                        />
-                                        {true && (
-                                            <Badge
-                                                bg="danger"
-                                                className="position-absolute top-0 start-0 translate-middle-y"
-                                            >
-
-                                                40% OFF
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <div className="flex-grow-1">
-                                        <h5 className="mb-1">{item.productName}</h5>
-                                        <div className="d-flex align-items-center">
-                                            <h5 className="mb-0 text-dark me-2">
-                                                <FaRupeeSign size={14} className="align-text-top" />
-                                                {item.price.toLocaleString()}
-                                            </h5>
-                                            {true && (
-                                                <del className="small text-muted">
-                                                    <FaRupeeSign size={10} className="align-text-top" />
-                                                    {/* {item.originalPrice.toLocaleString()} */}
-                                                    1000
-                                                </del>
-                                            )}
+                            <Col key={item._id} className="d-flex">
+                                <motion.div
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ duration: 0.2 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    className="w-100" 
+                                >
+                                    <Card className="h-100 d-flex flex-column" style={{
+                                        borderRadius: "8px", // Rounded corners for entire card
+                                        overflow: "hidden", // Ensures child elements respect the border radius
+                                        boxShadow: "0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)" // Replaces shadow-sm with custom shadow
+                                    }}>
+                                        <div
+                                            onClick={() => navigate(`/product/${item._id}`)}
+                                            style={{ cursor: "pointer" }}
+                                            className="flex-grow-1"
+                                        >
+                                            <Card.Img
+                                                variant="top"
+                                                src={`${API_URL}${item.productImages[0]}`}
+                                                style={{
+                                                    height: "200px",
+                                                    objectFit: "cover",
+                                                    width: "100%",
+                                                    borderTopLeftRadius: "8px",
+                                                    borderTopRightRadius: "8px"
+                                                }}
+                                            />
+                                            <Card.Body>
+                                                <Card.Title className="text-truncate">{item.productName}</Card.Title>
+                                                <div className="d-flex align-items-center">
+                                                    <FaRupeeSign size={14} />
+                                                    <span className="h5 mb-0 ms-1">
+                                                        {item.price.toLocaleString()}
+                                                    </span>
+                                                    {true && (
+                                                        <del className="small text-muted ms-2">
+                                                            <FaRupeeSign size={10} />
+                                                            1000
+                                                        </del>
+                                                    )}
+                                                </div>
+                                            </Card.Body>
                                         </div>
-                                    </div>
-                                    <div className="d-flex align-items-center ms-3">
-                                        <a
-                                            className="me-3"
-                                            style={{
-                                                background: 'none',
-                                                border: 'none',
-                                                color: '#05576e',
-                                                fontSize: '16px',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s ease',
-                                                padding: '10px',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                textDecoration: 'none',
-                                            }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleAddToCart(item._id);
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.transform = 'scale(1.2)';
-                                                e.currentTarget.style.color = '#05576e';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.transform = 'scale(1)';
-                                                e.currentTarget.style.color = '#05576e';
-                                            }}
-                                        >
-                                            <FaShoppingCart />
-                                        </a>
-
-
-
-                                        <a
-                                            variant="outline-danger"
-                                            size="sm"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleRemoveFromWishlist(item._id);
-                                            }}
-                                            style={{
-                                                background: 'none',
-                                                border: 'none',
-                                                color: '#dc3545',
-                                                fontSize: '16px',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s ease',
-                                                padding: '5px'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.transform = 'scale(1.2)';
-                                                e.currentTarget.style.color = '#05576e';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.transform = 'scale(1)';
-                                                e.currentTarget.style.color = '#dc3545';
-                                            }}
-                                        >
-                                            <FaTrash />
-                                        </a>
-
-
-                                        <FaChevronRight className="ms-3 text-muted" />
-                                    </div>
-                                </div>
-                            </motion.div>
+                                        <Card.Footer className="bg-white p-0 w-100" style={{
+                                            borderBottomLeftRadius: "8px",
+                                            borderBottomRightRadius: "8px"
+                                        }}>
+                                            <Button
+                                                variant="primary"
+                                                className="w-100 d-flex justify-content-center align-items-center"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleCartAndRemove(item._id);
+                                                }}
+                                                disabled={processingId === item._id}
+                                                style={{
+                                                    padding: "0.75rem",
+                                                    borderRadius: "0 0 8px 8px", // Rounded bottom corners
+                                                    border: "none",
+                                                    gap: "0.5rem"
+                                                }}
+                                            >
+                                                {processingId === item._id ? (
+                                                    <span>Processing...</span>
+                                                ) : (
+                                                    <>
+                                                        <FaShoppingCart />
+                                                        <span>Move to Cart</span>
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </Card.Footer>
+                                    </Card>
+                                </motion.div>
+                            </Col>
                         ))}
                     </AnimatePresence>
-                </div>
+                </Row>
             )}
         </div>
     );

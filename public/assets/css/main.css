@@ -6988,7 +6988,7 @@ textarea {
   margin-bottom: 25px;
   position: relative;
   border: 1px solid #eae6e6;
-  border-radius: 20px;
+  border-radius: 15px;
 }
 
 .product__item:hover .product__thumb::before {

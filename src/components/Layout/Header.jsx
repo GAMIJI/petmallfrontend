@@ -1,12 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
+
+
+ const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    const queryParams = new URLSearchParams();
+
+    if (searchTerm.trim()) queryParams.append("search", searchTerm.trim());
+    if (selectedCategory && selectedCategory !== "All") {
+      queryParams.append("category", selectedCategory);
+    }
+
+    navigate(`/productList?${queryParams.toString()}`);
+  };
+
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -142,7 +161,9 @@ const Header = () => {
                       </div>
                     </div>
                     <div className="col-xl-5 col-lg-5">
-                      <div className="tgmenu__search">
+
+
+                      {/* <div className="tgmenu__search">
                         <form action="#" className="tgmenu__search-form">
                           <input type="text" placeholder="Search Here . . ." />
                           <div className="select-grp">
@@ -167,7 +188,49 @@ const Header = () => {
                             <i className="flaticon-loupe" />
                           </button>
                         </form>
-                      </div>
+                      </div> */}
+
+                       <div className="tgmenu__search">
+      <form onSubmit={handleSearch} className="tgmenu__search-form">
+        <input
+          type="text"
+          placeholder="Search Here . . ."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <div className="select-grp">
+          <select
+            className="form-select"
+            id="course-cat"
+            aria-label="Default select example"
+            style={{ width: 130 }}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            defaultValue=""
+          >
+            <option value="" disabled>
+              All Categories
+            </option>
+            <option value="Dogs">Dogs</option>
+            <option value="Cats">Cats</option>
+            <option value="Rabbit">Rabbit</option>
+            <option value="Birds">Birds</option>
+            <option value="Fish">Fish</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <button style={{ margin: "4px" }} type="submit">
+          <i className="flaticon-loupe" />
+        </button>
+      </form>
+    </div>
+
+
+
+
+
+
+
+
                     </div>
                     <div className="col-xl-4 col-lg-4 p-3">
                       <div className="tgmenu__action tgmenu__action-three d-none d-lg-block " style={{ fontSize: "14px", width: "90%" }}>
@@ -527,22 +590,7 @@ const Header = () => {
                           </li>
                         </ul>
                       </li>
-                      {/* <li class="menu-item-has-children"><a href="#">Pages</a>
-              <ul class="sub-menu">
-                <li><a href="animal.html">All Pets</a></li>
-                <li><a href="animal-details.html">Pet Details</a></li>
-                <li><a href="gallery.html">Gallery</a></li>
-                <li><a href="faq.html">Faq Page</a></li>
-                <li><a href="pricing.html">Pricing Page</a></li>
-                <li><a href="reservation.html">Reservation Page</a></li>
-                <li><a href="team.html">Our Team</a></li>
-                <li><a href="team-details.html">Team Details</a></li>
-                <li><a href="blog.html">Our Blog</a></li>
-                <li><a href="blog-details.html">Blog Details</a></li>
-                <li><a href="error.html">404 Error Page</a></li>
-              </ul>
-            </li> */}
-                      {/* <li><a href="contact.html">contacts</a></li> */}
+    
                     </ul>
                   </div>
                   <div className="tgmenu__action d-none d-md-block">
