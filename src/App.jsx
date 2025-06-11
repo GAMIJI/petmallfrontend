@@ -34,6 +34,7 @@ import Store from "./components/VendorProfile/Store";
 import OrderList from "./components/Pages/OrderList";
 import OrderDetails from "./components/Pages/OrderDetails";
 import WishList from "./components/Pages/WishList"
+import Test from "./components/Pages/test";
 
 
 const AppLayout = () => {
@@ -80,7 +81,11 @@ const AppLayout = () => {
         <Route path="/neworders" element={<NewOrders />} />
         <Route path="/myProducts" element={<MyProducts />} />
         <Route path="/addproduct" element={<AddProduct />} />
+        
         <Route path="/mystore" element={<Store />} />
+        <Route path="/test" element={<Test />} />
+        
+
       </Routes>
 
     {!isAuthRoute && <Footer />}

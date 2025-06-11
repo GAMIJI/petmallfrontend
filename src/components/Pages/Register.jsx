@@ -1,61 +1,70 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import { MdOutlineDone } from "react-icons/md";
-import { LiaStopwatchSolid } from "react-icons/lia";
-import { RiArrowRightLine } from "react-icons/ri";
-import { WiTime4 } from "react-icons/wi";
-import { FaRegStar, FaBoxOpen, FaUser, FaBuilding, FaMapMarkerAlt, FaProcedures } from "react-icons/fa";
-import { FaQuestionCircle } from 'react-icons/fa';
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import './apps.css'
 import './add.css'
 import './responsive.css'
 // import './furniture.css'
-import { FiHome } from "react-icons/fi";
-import { LuSofa } from "react-icons/lu";
-import { LuHammer } from "react-icons/lu";
-import { PiStudentBold } from "react-icons/pi";
-import { TbCategoryFilled } from "react-icons/tb";
-import { GrCompliance } from "react-icons/gr";
-import { TbIcons } from "react-icons/tb";
-import { IoMdPersonAdd } from "react-icons/io";
-import { BiSolidContact } from "react-icons/bi";
-import { FaRegAddressBook } from "react-icons/fa";
-import { MdSwitchAccount } from "react-icons/md";
-import { HiAcademicCap, HiMiniIdentification } from "react-icons/hi2";
-import { HiMiniClipboardDocumentList } from "react-icons/hi2";
-import { FaBusinessTime } from "react-icons/fa6";
-import { MdSubscriptions } from "react-icons/md";
-import { MdPayments } from "react-icons/md";
-import { RiSecurePaymentFill } from "react-icons/ri";
+
 import { LuMessageCircleMore } from "react-icons/lu";
 import { FaUserMd } from "react-icons/fa";
-import { FaStore } from "react-icons/fa";
-import { FaClinicMedical } from "react-icons/fa";
+
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import AddIcon from '@mui/icons-material/Add';
-import Stepper from '@mui/joy/Stepper';
-import Step, { stepClasses } from '@mui/joy/Step';
-import StepIndicator, { stepIndicatorClasses } from '@mui/joy/StepIndicator';
-import Typography from '@mui/joy/Typography';
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import Box from '@mui/material/Box'; // or '@mui/joy/Box' if using Joy UI
-import List from '@mui/material/List'; // or '@mui/joy/List'
-import ListItem from '@mui/material/ListItem'
+
 
 
 const Register = () => {
   const [activeTab, setActiveTab] = useState("customer");
   const apiUrl = import.meta.env.VITE_API_URL;
   const api = import.meta.env.VITE_API_URL;
-
+  const [step, setStep] = useState(1);
+  const [roles, setRoles] = useState({
+    doctor: "no",
+    vendor: "no",
+    venory: "no"
+  });
   const navigate = useNavigate();
-  const [hide, setHide] = useState("show");
-  const [hidepersonal, setHidePersonal] = useState("Hide");
+
+
+
+  const categories = ["Pet Food", "Toys", "Grooming", "Accessories", "Health", "Apparel"];
+  const [selected, setSelected] = useState([]);
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const toggleDropdown = () => setOpen(prev => !prev);
+
+  const handleSelect = (value) => {
+    if (selected.includes(value)) {
+      setSelected(selected.filter(item => item !== value));
+    } else {
+      setSelected([...selected, value]);
+    }
+  };
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
+
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
+
+
   const [status, setStatus] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [openIndex, setOpenIndex] = useState(null);
@@ -86,7 +95,7 @@ const Register = () => {
   const [docAvailableDays, setDocAvailableDays] = useState([]);
   const [docTimings, setDocTimings] = useState({ start: "09:00", end: "18:00" });
   const [docServices, setDocServices] = useState([]);
-  const [docOTP, setDocOTP] = useState("");
+
 
   // State variables for customer registration
   const [profilePreview, setProfilePreview] = useState(null);
@@ -102,6 +111,7 @@ const Register = () => {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [locationError, setLocationError] = useState('');
+
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -397,105 +407,144 @@ const Register = () => {
     }
   };
 
+  const [hidepersonal, setHidePersonal] = useState("Hide");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  const [error, setError] = useState(false);
+  const handleRoleChange = (role) => {
+    setError(false); // Reset error when user interacts
+    if (selectedRoles.includes(role)) {
+      // Remove role if already selected
+      setSelectedRoles(selectedRoles.filter(r => r !== role));
+    } else {
+      // Add role if not selected
+      setSelectedRoles([...selectedRoles, role]);
+    }
+  };
+
+  // Validate before proceeding
+  const handleNextStep = () => {
+    if (selectedRoles.length === 0) {
+      setError(true); // Show error if nothing selected
+      return;
+    }
+    setHidePersonal("DoctorProfessionalDetails"); // Proceed if valid
+  };
+
+
+
+
+  const handleRoleSelect = (role, value) => {
+    setRoles((prev) => ({ ...prev, [role]: value }));
+  };
 
 
   return (
     <div >
 
 
-       <div style={{ width: "100%"}}>
-      <nav className="navbar navbar-expand-lg bg-body-tertiary shadow-sm p-0" style={{ width: "100%", height: "auto" }}>
-        <div className="container-fluid d-flex justify-content-between align-items-center px-4 p-0">
+      <div style={{ width: "100%" }}>
+        <nav
+          className="navbar navbar-expand-lg bg-body-tertiary shadow-sm p-0"
+          style={{
+            width: "100%",
+            height: "auto",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 1,
+            backgroundColor: "#fff",
+          }}
+        >
 
-          {/* Logo */}
-          <div className="d-flex align-items-center m-2">
-            <img
-              src="assets/img/logo/logo.png"
-              style={{ height: "60px", width: "auto" }}
-              alt="Logo"
-            />
-          </div>
+          <div className="container-fluid d-flex justify-content-between align-items-center px-4 p-0 ">
 
-          {/* Toggle Button */}
-          <button
-            className="navbar-toggler ms-3 d-lg-none"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon" />
-          </button>
+            {/* Logo */}
+            <div className="d-flex align-items-center m-2">
+              <img
+                src="assets/img/logo/logo.png"
+                style={{ height: "60px", width: "auto" }}
+                alt="Logo"
+              />
+            </div>
 
-          {/* Navbar Content */}
-          <div className="collapse navbar-collapse mx-5" id="navbarSupportedContent">
-            <ul className="navbar-nav gap-2 me-auto">
-              <li className="nav-item">
-                <a className="nav-link active fw-bolder nav-hover-blue" href="#">Sell Online</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link active fw-bolder nav-hover-blue" href="#">How it Works</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link active fw-bolder nav-hover-blue" href="#">Pricing & Commission</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link active fw-bolder nav-hover-blue" href="#">Shipping & Returns</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link active fw-bolder nav-hover-blue" href="#">Grow Business</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link active fw-bolder nav-hover-blue" href="#">Don't have GST?</a>
-              </li>
-            </ul>
-
-            {/* Mobile Buttons */}
-            <div className="d-lg-none d-flex flex-column gap-2 mt-3">
-               <button
-              className="btn btn-outline bg-white text-black border-primary"
-              style={{ border: "solid 1px", height: "40px", width: "60%" }}
+            {/* Toggle Button */}
+            <button
+              className="navbar-toggler ms-3 d-lg-none"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
             >
-              Login
+              <span className="navbar-toggler-icon" />
             </button>
+
+            {/* Navbar Content */}
+            <div className="collapse navbar-collapse mx-5" id="navbarSupportedContent">
+              <ul className="navbar-nav gap-2 me-auto">
+                <li className="nav-item">
+                  <a className="nav-link active fw-bolder nav-hover-blue" href="#">Sell Online</a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link active fw-bolder nav-hover-blue" href="#">How it Works</a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link active fw-bolder nav-hover-blue" href="#">Pricing & Commission</a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link active fw-bolder nav-hover-blue" href="#">Shipping & Returns</a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link active fw-bolder nav-hover-blue" href="#">Grow Business</a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link active fw-bolder nav-hover-blue" href="#">Don't have GST?</a>
+                </li>
+              </ul>
+
+              {/* Mobile Buttons */}
+              <div className="d-lg-none d-flex flex-column gap-2 mt-3">
                 <button
-              className="btn btn-primary text-white"
-              style={{ border: "solid 1px", height: "40px", width: "60%" }}
-            >
-              Start Selling
-            </button>
+                  className="btn btn-outline bg-white text-black border-primary"
+                  style={{ border: "solid 1px", height: "40px", width: "60%" }}
+                >
+                  Login
+                </button>
+                <button
+                  className="btn btn-primary text-white"
+                  style={{ border: "solid 1px", height: "40px", width: "60%" }}
+                >
+                  Start Selling
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop Buttons */}
+            <div className="d-none d-lg-flex gap-2 ms-3 align-items-center">
+              <button
+                className="btn btn-outline bg-white text-black border-primary"
+                style={{ border: "solid 1px", height: "40px", width: "60%" }}
+              >
+                Login
+              </button>
+              <button
+                className="btn btn-primary text-white"
+                style={{ height: "40px", width: "100%" }}
+              >
+                Start Selling
+              </button>
             </div>
           </div>
-
-          {/* Desktop Buttons */}
-          <div className="d-none d-lg-flex gap-2 ms-3 align-items-center">
-            <button
-              className="btn btn-outline bg-white text-black border-primary"
-              style={{ border: "solid 1px", height: "40px", width: "60%" }}
-            >
-              Login
-            </button>
-            <button
-              className="btn btn-primary text-white"
-              style={{ height: "40px", width: "100%" }}
-            >
-              Start Selling
-            </button>
-          </div>
-        </div>
-      </nav>
-    </div>
-
-
-
-
+        </nav>
+      </div>
 
 
 
       <main className="fix" >
-        <section className="registration__area-two " style={{ padding: "10px" }}>
+
+        <section className="registration__area-two " style={{ padding: "10px",marginTop:"80px" }}>
           <div>
             <div className="registration__inner-wrap-two" >
               <div className="row justify-content-center" >
@@ -521,259 +570,253 @@ const Register = () => {
                     </div>
                   </section>
 
-                  <section
-                    className="flat-contact-page checks  w-100 w-md-75 w-lg-60 w-xl-50 mx-auto section1"
-                  >
 
+
+                  <section className="flat-contact-page checks w-100 w-md-75 w-lg-60 w-xl-50 mx-auto section1">
                     <div className="container">
                       <div className="row">
                         <div className="col-lg-12 mb-4">
-                          <div id="comments" className="comments cfd"  >
-                            {hidepersonal === "Hide" ? (
+                          <div id="comments" className="comments cfd">
+                            {step === 1 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
                                   <h3 className="mb-2" style={{ color: "#05576e" }}>MyPetMall Services</h3>
                                 </div>
 
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FiHome className="setod" />
-                                      </div>
-                                      <div className="fs-22" style={{ color: "#05576e" }}>
-                                        Services <br />
-                                        <font className="text-secondary fw-5 fs-15">
-                                          Please select the service
-                                        </font>
-                                        <hr />
-                                        <div className="mt-3">
-                                          <h3 className="mb-2 fw-7">
-                                            <button
-                                              onClick={() => setHidePersonal("DoctorListings")}
-                                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit', color: 'inherit', color: "#05576e" }}
-                                            >
-                                              Doctor Listings
-                                            </button>
-                                          </h3>
-                                          <hr />
-
-                                          <h3 className="mb-2 fw-7">
-                                            <button
-                                              onClick={() => setHidePersonal("VendorListings")}
-                                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit', color: 'inherit', color: "#05576e" }}
-                                            >
-                                              Vendor Listings
-                                            </button>
-                                          </h3>
-                                          <hr />
-
-                                          <h3 className="mb-2 fw-7">
-                                            <button
-                                              onClick={() => setHidePersonal("Veterinary")}
-                                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit', color: 'inherit', color: "#05576e" }}
-                                            >
-                                              Veterinary
-                                            </button>
-                                          </h3>
+                                <div className="respond-comment">
+                                  <div className="jsy">
+                                    <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
+                                    <h3 className="fw-8 prgs">0%</h3>
+                                  </div>
+                                  <div className="w3-border mb-1 bgh">
+                                    <div className="w3-grey ert"></div>
+                                  </div>
+                                  <p className="fs-18 mb-3" >Step 1 of 4</p>
+                                  <form
+                                    method="post"
+                                    id="contactform"
+                                    className="ghrt comment-form form-submit p-3 bg-white"
+                                    action="./contact/contact-process.php"
+                                    acceptCharset="utf-8"
+                                    noValidate="novalidate"
+                                  >
+                                    <h3 className="mb-0">
+                                      <div className="flex mb-3">
+                                        <div className="fgr">
+                                          <FaUserMd className="setod" />
+                                        </div>
+                                        <div className="fs-20">
+                                          Personal & Account Information <br />
+                                          <font className="text-secondary fw-5">
+                                            Please provide your basic details
+                                          </font>
+                                          {/* <hr /> */}
                                         </div>
                                       </div>
-                                      <hr />
-                                    </div>
-                                  </h3>
+                                    </h3>
 
-                                  <hr />
-                                  <div className="center">
-                                    <h4 className="fw-6">
-                                      Click{" "}
-                                      <span className="prgs fs-18 fw-6" >
-                                        "Start Your Journey"
-                                      </span>{" "}
-                                      button
-                                    </h4>
-                                    <h4 className="fw-6">
-                                      Select{" "}
-                                      <span className="prgs fs-18 fw-6">
-                                        "Pet Services"
-                                      </span>{" "}
-                                      from main categories
-                                    </h4>
-                                  </div>
-                                  <hr />
-                                  <div style={{ justifyItems: "end" }}>
-                                    <div className="lh-16">
-                                      <button
-                                        className="sc-button btn-icon" style={{ backgroundColor: "#05576e" }}
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Start Your Journey</span>
-                                      </button>
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Full Name<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="text"
+                                          className="tb-my-input"
+                                          name="name"
+                                          placeholder="Full Name"
+                                          required
+                                          value={docName}
+                                          onChange={(e) => setDocName(e.target.value)}
+                                        />
+                                      </fieldset>
                                     </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
 
-                            {/* Doctor Listings Flow */}
-                            {hidepersonal === "DoctorListings" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">0%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 0 of 4</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaUserMd className="setod" />
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Email<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="email"
+                                          className="tb-my-input"
+                                          name="email"
+                                          placeholder="Email Address"
+                                          required
+                                          value={docEmail}
+                                          onChange={(e) => setDocEmail(e.target.value)}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Phone Number<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input style={{ width: "100%" }}
+                                          type="tel"
+                                          className="tb-my-input"
+                                          name="phone"
+                                          placeholder="Phone Number"
+                                          required
+                                          value={docPhone}
+                                          onChange={(e) => setDocPhone(e.target.value)}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Password<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="password"
+                                          className="tb-my-input"
+                                          name="password"
+                                          placeholder="Create a password (8+ characters)"
+                                          required
+                                          value={docPassword}
+                                          onChange={(e) => setDocPassword(e.target.value)}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      License Number<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="text"
+                                          className="tb-my-input"
+                                          name="licenseNumber"
+                                          placeholder="Medical license number"
+                                          required
+                                          value={docLicenseNumber}
+                                          onChange={(e) => setDocLicenseNumber(e.target.value)}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Education/Degrees<span className="text-danger">*</span>
+                                    </label>
+
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="text"
+                                          className="tb-my-input"
+                                          name="education"
+                                          placeholder="e.g. MBBS, MD, BAMS"
+                                          required
+                                          value={docEducation}
+                                          onChange={(e) => setDocEducation(e.target.value)}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      College/University<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="text"
+                                          className="tb-my-input"
+                                          name="college"
+                                          placeholder="College or university attended"
+                                          required
+                                          value={docCollege}
+                                          onChange={(e) => setDocCollege(e.target.value)}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Website (optional)
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input style={{ width: "100%" }}
+                                          type="url"
+                                          className="tb-my-input"
+                                          name="website"
+                                          placeholder="Business website URL"
+                                        />
+                                      </fieldset>
+                                    </div>
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      ID Proof (Passport/Driving License)<span className="text-danger">*</span>
+                                      <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="file"
+                                          className="tb-my-input"
+                                          name="idProof"
+                                          accept=".pdf,.jpg,.jpeg,.png"
+                                          required
+                                        />
+                                      </fieldset>
+                                    </div>
+
+
+
+                                    <label className="text-color-2 fw-6 mb-0">
+                                      Profile Picture<span className="text-danger">*</span>
+                                    </label>
+                                    <div className="text-wrap flex form-wg">
+                                      <fieldset style={{ width: "100%" }}>
+                                        <input
+                                          type="file"
+                                          className="tb-my-input"
+                                          name="profilePicture"
+                                          accept="image/*"
+                                          required
+                                          onChange={handleDocProfileChange}
+                                        />
+                                      </fieldset>
+                                    </div>
+
+                                    <hr />
+                                    <div className="jsy">
+                                      <div>
+                                        {/* <button
+                                          style={{ backgroundColor: "rgb(229 228 228)" }}
+                                          onClick={() => {
+                                            setHidePersonal("Hide");
+                                          }}
+                                          className="sc-button btn-icon"
+                                          name="submit"
+                                          type="button"
+                                        >
+                                          <span className="text-color-1" style={{ color: "black" }}>Back</span>
+                                        </button> */}
                                       </div>
-                                      <div className="fs-20">
-                                        Personal & Account Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Please provide your basic details
-                                        </font>
-                                        <hr />
+                                      <div className="lh-16">
+                                        <button
+                                          onClick={() => {
+                                            setStep(2); // Next step
+                                          }}
+                                          className="sc-button btn-icon"
+                                          name="submit"
+                                          type="button"
+                                        >
+                                          <span>Next</span>
+                                        </button>
                                       </div>
                                     </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Full Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="name"
-                                        placeholder="Full Name"
-                                        required
-                                        value={docName}
-                                        onChange={(e) => setDocName(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Email<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="email"
-                                        className="tb-my-input"
-                                        name="email"
-                                        placeholder="Email Address"
-                                        required
-                                        value={docEmail}
-                                        onChange={(e) => setDocEmail(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Phone Number<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input style={{ width: "100%" }}
-                                        type="tel"
-                                        className="tb-my-input"
-                                        name="phone"
-                                        placeholder="Phone Number"
-                                        required
-                                        value={docPhone}
-                                        onChange={(e) => setDocPhone(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Password<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="password"
-                                        className="tb-my-input"
-                                        name="password"
-                                        placeholder="Create a password (8+ characters)"
-                                        required
-                                        value={docPassword}
-                                        onChange={(e) => setDocPassword(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Profile Picture<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="profilePicture"
-                                        accept="image/*"
-                                        required
-                                        onChange={handleDocProfileChange}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("Hide");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-1" style={{ color: "black" }}>Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("DoctorProfessionalDetails");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
+                                  </form>
+                                </div>
                               </div>
                             ) : null}
 
                             {/* Doctor Professional Details */}
-                            {hidepersonal === "DoctorProfessionalDetails" ? (
+                            {step === 2 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
                                   <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
@@ -782,139 +825,365 @@ const Register = () => {
                                 <div className="w3-border mb-1 bgh">
                                   <div className="w3-grey ert prgs1"></div>
                                 </div>
-                                <p className="fs-18 mb-3">Step 1 of 4</p>
-                                <form
-                                  method="post"
+                                <p className="fs-18 mb-3">Step 2 of 4</p>
+                                <form method="post"
                                   id="contactform"
                                   className="ghrt comment-form form-submit p-3 bg-white"
                                   action="./contact/contact-process.php"
                                   acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <HiAcademicCap className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Professional & License Details <br />
-                                        <font className="text-secondary fw-5">
-                                          Please provide your professional information
-                                        </font>
-                                      </div>
+                                  noValidate="novalidate">
+                                  <div className="mb-4">
+                                    <label  className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Doctor?</label>
+                                    <div className="d-flex gap-3">
+                                      <label>
+                                        <input
+                                          type="radio"
+
+                                          name="doctor"
+                                          value="yes"
+                                          checked={roles.doctor === "yes"}
+                                          onChange={() => handleRoleSelect("doctor", "yes")}
+                                        />{" "}
+                                        Yes
+                                      </label>
+                                      <label>
+                                        <input
+                                          type="radio"
+                                          name="doctor"
+                                          value="no"
+                                          checked={roles.doctor === "no"}
+                                          onChange={() => handleRoleSelect("doctor", "no")}
+                                        />{" "}
+                                        No
+                                      </label>
                                     </div>
-                                  </h3>
 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Education/Degrees<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="education"
-                                        placeholder="e.g. MBBS, MD, BAMS"
-                                        required
-                                        value={docEducation}
-                                        onChange={(e) => setDocEducation(e.target.value)}
-                                      />
-                                    </fieldset>
+                                    {roles.doctor === "yes" && (
+                                      <div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Clinic/Hospital Name<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="clinicName"
+                                                placeholder="Clinic or hospital name"
+                                                required
+                                                value={docClinicName}
+                                                onChange={(e) => setDocClinicName(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Clinic Address<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="clinicAddress"
+                                                placeholder="Full clinic address"
+                                                required
+                                                value={docClinicAddress}
+                                                onChange={(e) => setDocClinicAddress(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Specialization<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="specialization"
+                                                placeholder="e.g. Cardiologist, Dermatologist"
+                                                required
+                                                value={docSpecialization}
+                                                onChange={(e) => setDocSpecialization(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Years of Experience<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className="tb-my-input"
+                                                name="experience"
+                                                placeholder="Years of experience"
+                                                required
+                                                value={docExperience}
+                                                onChange={(e) => setDocExperience(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Consultation Fee<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className="tb-my-input"
+                                                name="consultationFee"
+                                                placeholder="Consultation fee in local currency"
+                                                required
+                                                value={docConsultationFee}
+                                                onChange={(e) => setDocConsultationFee(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Available Days<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="form-group wdth">
+                                            <div className="d-flex flex-wrap gap-2" >
+                                              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                                                <label key={day} className="d-flex align-items-center" style={{color :"#05576e"}}>
+                                                  <input
+                                                    className="chkhgh"
+                                                    name="availableDays"
+                                                    type="checkbox"
+                                                    value={day}
+                                                    checked={docAvailableDays.includes(day)}
+                                                    onChange={(e) => {
+                                                      if (e.target.checked) {
+                                                        setDocAvailableDays([...docAvailableDays, day]);
+                                                      } else {
+                                                        setDocAvailableDays(docAvailableDays.filter(d => d !== day));
+                                                      }
+                                                    }}
+                                                  />
+                                                  <span className="btn-checkbox ms-2" />
+                                                  <span className="mt-1 fs-13 fw-6 ms-2">{day}</span>
+                                                </label>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Operating Hours<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="row mt-3">
+                                            <div className="col-md-6">
+                                              <label className="text-color-2 fw-6 mb-0">
+                                                Start Time<span className="text-danger">*</span>
+                                              </label>
+                                              <div className="text-wrap flex form-wg">
+                                                <fieldset style={{ width: "100%" }}>
+                                                  <input
+                                                    type="time"
+                                                    className="tb-my-input"
+                                                    name="startTime"
+                                                    required
+                                                    value={docTimings.start}
+                                                    onChange={(e) => setDocTimings({ ...docTimings, start: e.target.value })}
+                                                  />
+                                                </fieldset>
+                                              </div>
+                                            </div>
+                                            <div className="col-md-6">
+                                              <label className="text-color-2 fw-6 mb-0">
+                                                End Time<span className="text-danger">*</span>
+                                              </label>
+                                              <div className="text-wrap flex form-wg">
+                                                <fieldset style={{ width: "100%" }}>
+                                                  <input
+                                                    type="time"
+                                                    className="tb-my-input"
+                                                    name="endTime"
+                                                    required
+                                                    value={docTimings.end}
+                                                    onChange={(e) => setDocTimings({ ...docTimings, end: e.target.value })}
+                                                  />
+                                                </fieldset>
+                                              </div>
+                                            </div>
+                                          </div>
+
+
+                                        </div>
+
+                                        <div className="row mt-3 mb-3">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Professional Documents<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className="tb-my-input"
+                                                name="documents"
+                                                multiple
+                                                accept=".pdf,.jpg,.png"
+                                                required
+                                                onChange={handleDocDocumentsChange}
+                                              />
+                                              <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Clinic Location (Coordinates)<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="mb-3">
+                                            <button
+                                              type="button"
+                                              className="sc-button btn-icon"
+                                              onClick={() => {
+                                                navigator.geolocation.getCurrentPosition(
+                                                  (position) => {
+                                                    setLatitude(position.coords.latitude);
+                                                    setLongitude(position.coords.longitude);
+                                                  },
+                                                  (error) => {
+                                                    console.error("Error getting location:", error);
+                                                  }
+                                                );
+                                              }}
+                                            >
+                                              <span>Detect My Location</span>
+                                            </button>
+                                          </div>
+                                          <div className="mr-2">
+                                            {latitude && longitude && (
+                                              <iframe
+                                                title="Google Map"
+                                                width="650"
+                                                height="450"
+                                                style={{ border: 1 }}
+                                                loading="lazy"
+                                                allowFullScreen
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                                src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
+                                              ></iframe>
+                                            )}
+                                          </div>
+
+                                        </div>
+
+
+                                        <div className="form-group wdth">
+                                          <div className="d-flex flex-column gap-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Please select the services you provide<span className="text-danger">*</span>
+                                            </label>
+                                            <label className="d-flex align-items-center">
+
+                                              <input
+                                                className="chkhgh"
+                                                name="services"
+                                                type="checkbox"
+                                                value="General Checkups"
+                                                checked={docServices.includes("General Checkups")}
+                                                onChange={(e) => {
+                                                  if (e.target.checked) {
+                                                    setDocServices([...docServices, "General Checkups"]);
+                                                  } else {
+                                                    setDocServices(docServices.filter(s => s !== "General Checkups"));
+                                                  }
+                                                }}
+                                              />
+                                              <span className="btn-checkbox ms-2" />
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>General Checkups</span>
+                                            </label>
+
+                                            <label className="d-flex align-items-center">
+                                              <input
+                                                className="chkhgh"
+                                                name="services"
+                                                type="checkbox"
+                                                value="Vaccinations"
+                                                checked={docServices.includes("Vaccinations")}
+                                                onChange={(e) => {
+                                                  if (e.target.checked) {
+                                                    setDocServices([...docServices, "Vaccinations"]);
+                                                  } else {
+                                                    setDocServices(docServices.filter(s => s !== "Vaccinations"));
+                                                  }
+                                                }}
+                                              />
+                                              <span className="btn-checkbox ms-2" />
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Vaccinations</span>
+                                            </label>
+
+                                            <label className="d-flex align-items-center">
+                                              <input
+                                                className="chkhgh"
+                                                name="services"
+                                                type="checkbox"
+                                                value="Surgery"
+                                                checked={docServices.includes("Surgery")}
+                                                onChange={(e) => {
+                                                  if (e.target.checked) {
+                                                    setDocServices([...docServices, "Surgery"]);
+                                                  } else {
+                                                    setDocServices(docServices.filter(s => s !== "Surgery"));
+                                                  }
+                                                }}
+                                              />
+                                              <span className="btn-checkbox ms-2" />
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Surgery</span>
+                                            </label>
+
+                                            <label className="d-flex align-items-center">
+                                              <input
+                                                className="chkhgh"
+                                                name="services"
+                                                type="checkbox"
+                                                value="Dental Care"
+                                                checked={docServices.includes("Dental Care")}
+                                                onChange={(e) => {
+                                                  if (e.target.checked) {
+                                                    setDocServices([...docServices, "Dental Care"]);
+                                                  } else {
+                                                    setDocServices(docServices.filter(s => s !== "Dental Care"));
+                                                  }
+                                                }}
+                                              />
+                                              <span className="btn-checkbox ms-2" />
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Dental Care</span>
+                                            </label>
+                                          </div>
+                                        </div>
+
+                                      </div>
+                                    )}
                                   </div>
 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    College/University<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="college"
-                                        placeholder="College or university attended"
-                                        required
-                                        value={docCollege}
-                                        onChange={(e) => setDocCollege(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Specialization<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="specialization"
-                                        placeholder="e.g. Cardiologist, Dermatologist"
-                                        required
-                                        value={docSpecialization}
-                                        onChange={(e) => setDocSpecialization(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Years of Experience<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="experience"
-                                        placeholder="Years of experience"
-                                        required
-                                        value={docExperience}
-                                        onChange={(e) => setDocExperience(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    License Number<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="licenseNumber"
-                                        placeholder="Medical license number"
-                                        required
-                                        value={docLicenseNumber}
-                                        onChange={(e) => setDocLicenseNumber(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Professional Documents<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="documents"
-                                        multiple
-                                        accept=".pdf,.jpg,.png"
-                                        required
-                                        onChange={handleDocDocumentsChange}
-                                      />
-                                      <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
                                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                                     <div className="lh-16">
                                       <button
                                         style={{ backgroundColor: "rgb(229 228 228)" }}
                                         onClick={() => {
-                                          setHidePersonal("DoctorListings");
+                                          setStep(1); // Previous step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -926,7 +1195,7 @@ const Register = () => {
                                     <div className="lh-16">
                                       <button
                                         onClick={() => {
-                                          setHidePersonal("DoctorClinicInfo");
+                                          setStep(3); // Next step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -937,11 +1206,12 @@ const Register = () => {
                                     </div>
                                   </div>
                                 </form>
+
                               </div>
                             ) : null}
 
                             {/* Doctor Clinic Information */}
-                            {hidepersonal === "DoctorClinicInfo" ? (
+                            {step === 3 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
                                   <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
@@ -950,7 +1220,7 @@ const Register = () => {
                                 <div className="w3-border mb-1 bgh">
                                   <div className="w3-grey ert prgs2"></div>
                                 </div>
-                                <p className="fs-18 mb-3">Step 2 of 4</p>
+                                <p className="fs-18 mb-3">Step 3 of 4</p>
                                 <form
                                   method="post"
                                   id="contactform"
@@ -959,251 +1229,232 @@ const Register = () => {
                                   acceptCharset="utf-8"
                                   noValidate="novalidate"
                                 >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaClinicMedical className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Clinic/Practice Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Please provide your clinic details
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Clinic/Hospital Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="clinicName"
-                                        placeholder="Clinic or hospital name"
-                                        required
-                                        value={docClinicName}
-                                        onChange={(e) => setDocClinicName(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Clinic Address<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="clinicAddress"
-                                        placeholder="Full clinic address"
-                                        required
-                                        value={docClinicAddress}
-                                        onChange={(e) => setDocClinicAddress(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Consultation Fee<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="consultationFee"
-                                        placeholder="Consultation fee in local currency"
-                                        required
-                                        value={docConsultationFee}
-                                        onChange={(e) => setDocConsultationFee(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Available Days<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="form-group wdth">
-                                    <div className="d-flex flex-wrap gap-2">
-                                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                                        <label key={day} className="d-flex align-items-center">
-                                          <input
-                                            className="chkhgh"
-                                            name="availableDays"
-                                            type="checkbox"
-                                            value={day}
-                                            checked={docAvailableDays.includes(day)}
-                                            onChange={(e) => {
-                                              if (e.target.checked) {
-                                                setDocAvailableDays([...docAvailableDays, day]);
-                                              } else {
-                                                setDocAvailableDays(docAvailableDays.filter(d => d !== day));
-                                              }
-                                            }}
-                                          />
-                                          <span className="btn-checkbox ms-2" />
-                                          <span className="mt-1 fs-13 fw-6 ms-2">{day}</span>
-                                        </label>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  <div className="row">
-                                    <div className="col-md-6">
-                                      <label className="text-color-2 fw-6 mb-0">
-                                        Start Time<span className="text-danger">*</span>
+                                  <div className="mb-4">
+                                    <label className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Vendor?</label>
+                                    <div className="d-flex gap-3">
+                                      <label>
+                                        <input
+                                          type="radio"
+                                          name="vendor"
+                                          value="yes"
+                                          checked={roles.vendor === "yes"}
+                                          onChange={() => handleRoleSelect("vendor", "yes")}
+                                        />{" "}
+                                        Yes
                                       </label>
-                                      <div className="text-wrap flex form-wg">
-                                        <fieldset style={{ width: "100%" }}>
-                                          <input
-                                            type="time"
-                                            className="tb-my-input"
-                                            name="startTime"
-                                            required
-                                            value={docTimings.start}
-                                            onChange={(e) => setDocTimings({ ...docTimings, start: e.target.value })}
-                                          />
-                                        </fieldset>
-                                      </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                      <label className="text-color-2 fw-6 mb-0">
-                                        End Time<span className="text-danger">*</span>
+                                      <label>
+                                        <input
+                                          type="radio"
+                                          name="vendor"
+                                          value="no"
+                                          checked={roles.vendor === "no"}
+                                          onChange={() => handleRoleSelect("vendor", "no")}
+                                        />{" "}
+                                        No
                                       </label>
-                                      <div className="text-wrap flex form-wg">
-                                        <fieldset style={{ width: "100%" }}>
-                                          <input
-                                            type="time"
-                                            className="tb-my-input"
-                                            name="endTime"
-                                            required
-                                            value={docTimings.end}
-                                            onChange={(e) => setDocTimings({ ...docTimings, end: e.target.value })}
-                                          />
-                                        </fieldset>
-                                      </div>
                                     </div>
-                                  </div>
 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Clinic Location (Coordinates)<span className="text-danger">*</span>
-                                  </label>
-                                  {/* <div className="row">
-                                    <div className="col-md-6">
-                                      <div className="text-wrap flex form-wg">
-                                        <fieldset style={{ width: "100%" }}>
-                                          <input
-                                            type="number"
-                                            step="any"
-                                            className="tb-my-input"
-                                            name="latitude"
-                                            placeholder="Latitude"
-                                            required
-                                            value={latitude}
-                                            onChange={(e) => setLatitude(e.target.value)}
-                                          />
-                                        </fieldset>
-                                      </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                      <div className="text-wrap flex form-wg">
-                                        <fieldset style={{ width: "100%" }}>
-                                          <input
-                                            type="number"
-                                            step="any"
-                                            className="tb-my-input"
-                                            name="longitude"
-                                            placeholder="Longitude"
-                                            required
-                                            value={longitude}
-                                            onChange={(e) => setLongitude(e.target.value)}
-                                          />
-                                        </fieldset>
-                                      </div>
-                                    </div>
-                                  </div> */}
-                                  <div className="mb-3">
-                                    <button
-                                      type="button"
-                                      className="sc-button btn-icon"
-                                      onClick={() => {
-                                        // Add geolocation capture logic here
-                                        navigator.geolocation.getCurrentPosition(
-                                          (position) => {
-                                            setLatitude(position.coords.latitude);
-                                            setLongitude(position.coords.longitude);
-                                          },
-                                          (error) => {
-                                            console.error("Error getting location:", error);
-                                          }
-                                        );
-                                      }}
-                                    >
-                                      <span>Detect My Location</span>
-                                    </button>
-                                  </div>
-                                  {/* 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Latitude
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="latitude"
-                                        placeholder="Latitude coordinates"
-                                        step="any"
-                                        value={latitude}
-                                        onChange={(e) => setLatitude(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
+                                    {roles.vendor === "yes" && (
+                                      <>
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Name<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="businessName"
+                                                placeholder="Registered business name"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Address<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="storeAddress"
+                                                placeholder="Full physical location"
+                                                required
+                                                rows="3"
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Longitude
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="longitude"
-                                        placeholder="Longitude coordinates"
-                                        step="any"
-                                        value={longitude}
-                                        onChange={(e) => setLongitude(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div> */}
-                                  <div className="mr-2">
-                                    {latitude && longitude && (
-                                      <iframe
-                                        title="Google Map"
-                                        width="650"
-                                        height="450"
-                                        style={{ border: 1 }}
-                                        loading="lazy"
-                                        allowFullScreen
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
-                                      ></iframe>
+
+                                        <div className="mt-2">
+
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Website (optional)
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input style={{ width: "100%" }}
+                                                type="url"
+                                                className="tb-my-input"
+                                                name="website"
+                                                placeholder="Business website URL"
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Product Categories<span className="text-danger">*</span>
+                                          </label>
+
+                                          <div className="relative" style={{ width: "100%" }} ref={dropdownRef}>
+                                            <div
+                                              className={`nice-select current list style ${open ? "open" : ""}`}
+                                              style={{
+                                                width: "100%",
+                                                cursor: "pointer",
+                                                padding: "10px 15px",
+                                                border: "1px solid #ced4da",
+                                                borderRadius: "4px",
+                                                position: "relative",
+                                                background: "#fff",
+                                              }}
+                                              onClick={toggleDropdown}
+                                            >
+                                              <span className="current">
+                                                {selected.length > 0 ? selected.join(", ") : "Choose product categories"}
+                                              </span>
+                                              <div
+                                                className="arrow"
+                                                style={{
+                                                  position: "absolute",
+                                                  right: "15px",
+                                                  top: "50%",
+                                                  transform: "translateY(-50%)",
+                                                }}
+                                              >
+                                                {open ? <FiChevronUp /> : <FiChevronDown />}
+
+                                              </div>
+                                            </div>
+
+                                            {open && (
+                                              <ul
+                                                className="list bg-white"
+                                                style={{
+                                                  position: "absolute",
+                                                  width: "100%",
+                                                  border: "1px solid #ced4da",
+                                                  borderRadius: "4px",
+                                                  marginTop: "-13 px",
+                                                  zIndex: 10,
+                                                  maxHeight: "200px",
+                                                  overflowY: "auto",
+                                                  padding: "10px",
+                                                }}
+                                              >
+                                                {categories.map((category) => (
+                                                  <li key={category} className="option" onClick={(e) => e.stopPropagation()}>
+                                                    <label className="d-flex align-items-center mb-1">
+                                                      <input
+                                                        type="checkbox"
+                                                        value={category}
+                                                        checked={selected.includes(category)}
+                                                        onChange={() => handleSelect(category)}
+                                                        className="me-2"
+                                                      />
+                                                      {category}
+                                                    </label>
+                                                  </li>
+                                                ))}
+                                              </ul>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-4">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Registration Number<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="registrationNumber"
+                                                placeholder="Business registration number"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Type<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="relative" style={{ width: "100%" }}>
+                                            <select className="nice-select current list style" style={{ width: "100%" }} name="businessType" required>
+                                              <option value="" disabled selected>Choose business type</option>
+                                              <option value="retailer">Retailer</option>
+                                              <option value="wholesaler">Wholesaler</option>
+                                              <option value="manufacturer">Manufacturer</option>
+                                              <option value="dropshipper">Dropshipper</option>
+                                              <option value="distributor">Distributor</option>
+                                            </select>
+                                          </div>
+                                        </div>
+
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Years in Business<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className="tb-my-input"
+                                                name="yearsInBusiness"
+                                                placeholder="Number of years in business"
+                                                min="0"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            GST Number (optional)
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="gstNumber"
+                                                placeholder="GST or tax identification number"
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+
+
+                                      </>
+
+
                                     )}
-
                                   </div>
-                                  {/* <div className="text-center">
-                                    <button
-                                      type="button"
-                                      className="sc-button bghkk mt-2"
-                                      // onClick={handleGetLocation}
-                                    >
-                                      <span style={{ color: "black" }}>Get My Current Location</span>
-                                    </button>
-                                  </div> */}
 
                                   <hr />
                                   <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1211,7 +1462,7 @@ const Register = () => {
                                       <button
                                         style={{ backgroundColor: "rgb(229 228 228)" }}
                                         onClick={() => {
-                                          setHidePersonal("DoctorProfessionalDetails");
+                                          setStep(2); // Next step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -1223,7 +1474,7 @@ const Register = () => {
                                     <div className="lh-16">
                                       <button
                                         onClick={() => {
-                                          setHidePersonal("DoctorServices");
+                                          setStep(4); // Next step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -1237,8 +1488,8 @@ const Register = () => {
                               </div>
                             ) : null}
 
-                            {/* Doctor Services */}
-                            {hidepersonal === "DoctorServices" ? (
+                            {/* Veterinary Services */}
+                            {step === 4 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
                                   <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
@@ -1256,133 +1507,197 @@ const Register = () => {
                                   acceptCharset="utf-8"
                                   noValidate="novalidate"
                                 >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaProcedures className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Services Offered <br />
-                                        <font className="text-secondary fw-5">
-                                          Please select the services you provide
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
 
-                                  <div className="form-group wdth">
-                                    <div className="d-flex flex-column gap-2">
-                                      <label className="d-flex align-items-center">
+                                  <div className="mb-4">
+                                    <label className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Veterinary?</label>
+                                    <div className="d-flex gap-3">
+                                      <label>
                                         <input
-                                          className="chkhgh"
-                                          name="services"
-                                          type="checkbox"
-                                          value="General Checkups"
-                                          checked={docServices.includes("General Checkups")}
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setDocServices([...docServices, "General Checkups"]);
-                                            } else {
-                                              setDocServices(docServices.filter(s => s !== "General Checkups"));
-                                            }
-                                          }}
-                                        />
-                                        <span className="btn-checkbox ms-2" />
-                                        <span className="mt-1 fs-13 fw-6 ms-2">General Checkups</span>
+                                          type="radio"
+                                          name="venory"
+                                          value="yes"
+                                          checked={roles.venory === "yes"}
+                                          onChange={() => handleRoleSelect("venory", "yes")}
+                                        />{" "}
+                                        Yes
                                       </label>
-
-                                      <label className="d-flex align-items-center">
+                                      <label>
                                         <input
-                                          className="chkhgh"
-                                          name="services"
-                                          type="checkbox"
-                                          value="Vaccinations"
-                                          checked={docServices.includes("Vaccinations")}
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setDocServices([...docServices, "Vaccinations"]);
-                                            } else {
-                                              setDocServices(docServices.filter(s => s !== "Vaccinations"));
-                                            }
-                                          }}
-                                        />
-                                        <span className="btn-checkbox ms-2" />
-                                        <span className="mt-1 fs-13 fw-6 ms-2">Vaccinations</span>
-                                      </label>
-
-                                      <label className="d-flex align-items-center">
-                                        <input
-                                          className="chkhgh"
-                                          name="services"
-                                          type="checkbox"
-                                          value="Surgery"
-                                          checked={docServices.includes("Surgery")}
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setDocServices([...docServices, "Surgery"]);
-                                            } else {
-                                              setDocServices(docServices.filter(s => s !== "Surgery"));
-                                            }
-                                          }}
-                                        />
-                                        <span className="btn-checkbox ms-2" />
-                                        <span className="mt-1 fs-13 fw-6 ms-2">Surgery</span>
-                                      </label>
-
-                                      <label className="d-flex align-items-center">
-                                        <input
-                                          className="chkhgh"
-                                          name="services"
-                                          type="checkbox"
-                                          value="Dental Care"
-                                          checked={docServices.includes("Dental Care")}
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setDocServices([...docServices, "Dental Care"]);
-                                            } else {
-                                              setDocServices(docServices.filter(s => s !== "Dental Care"));
-                                            }
-                                          }}
-                                        />
-                                        <span className="btn-checkbox ms-2" />
-                                        <span className="mt-1 fs-13 fw-6 ms-2">Dental Care</span>
+                                          type="radio"
+                                          name="venory"
+                                          value="no"
+                                          checked={roles.venory === "no"}
+                                          onChange={() => handleRoleSelect("venory", "no")}
+                                        />{" "}
+                                        No
                                       </label>
                                     </div>
-                                  </div>
 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    OTP Verification<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="otp"
-                                        placeholder="Enter OTP sent to your phone/email"
-                                        required
-                                        value={docOTP}
-                                        onChange={(e) => setDocOTP(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-                                  <div className="text-center mt-2">
-                                    <button
-                                      type="button"
-                                      className="sc-button bghkk"
-                                    // onClick={handleResendOTP}
-                                    >
-                                      <span style={{ color: "black" }}>Resend OTP</span>
-                                    </button>
-                                  </div>
+                                    {roles.venory === "yes" && (
+                                      <>
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Registration Number<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="registrationNumber"
+                                                placeholder="Veterinary council registration number"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
 
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            License Document<span className="text-danger">*</span>
+                                            <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className="tb-my-input"
+                                                name="licenseFile"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Years of Experience<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className="tb-my-input"
+                                                name="experience"
+                                                placeholder="Number of years in practice"
+                                                min="0"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Clinic Name<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="clinicName"
+                                                placeholder="Name of your veterinary clinic"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Clinic Address<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input style={{ width: "100%" }}
+                                                className="tb-my-input"
+                                                name="clinicAddress"
+                                                placeholder="Full address of your clinic"
+                                                required
+                                                rows="3"
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Operating Hours<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="row mt-3">
+                                            <div className="col-md-6">
+                                              <label className="text-color-2 fw-6 mb-0">
+                                                Start Time<span className="text-danger">*</span>
+                                              </label>
+                                              <div className="text-wrap flex form-wg">
+                                                <fieldset style={{ width: "100%" }}>
+                                                  <input
+                                                    type="time"
+                                                    className="tb-my-input"
+                                                    name="startTime"
+                                                    required
+                                                    value={docTimings.start}
+                                                    onChange={(e) => setDocTimings({ ...docTimings, start: e.target.value })}
+                                                  />
+                                                </fieldset>
+                                              </div>
+                                            </div>
+                                            <div className="col-md-6">
+                                              <label className="text-color-2 fw-6 mb-0">
+                                                End Time<span className="text-danger">*</span>
+                                              </label>
+                                              <div className="text-wrap flex form-wg">
+                                                <fieldset style={{ width: "100%" }}>
+                                                  <input
+                                                    type="time"
+                                                    className="tb-my-input"
+                                                    name="endTime"
+                                                    required
+                                                    value={docTimings.end}
+                                                    onChange={(e) => setDocTimings({ ...docTimings, end: e.target.value })}
+                                                  />
+                                                </fieldset>
+                                              </div>
+                                            </div>
+                                          </div>
+
+
+                                        </div>
+
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Consultation Fee (₹)<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className="tb-my-input"
+                                                name="consultationFee"
+                                                placeholder="Base consultation fee in INR"
+                                                min="0"
+                                                required
+                                              />
+                                            </fieldset>
+                                          </div>
+
+                                        </div>
+                                      </>
+
+                                    )}
+                                  </div>
                                   <hr />
                                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                                     <div className="lh-16">
                                       <button
                                         style={{ backgroundColor: "rgb(229 228 228)" }}
                                         onClick={() => {
-                                          setHidePersonal("DoctorClinicInfo");
+                                          setStep(3); // Next step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -1394,7 +1709,7 @@ const Register = () => {
                                     <div className="lh-16">
                                       <button
                                         onClick={() => {
-                                          setHidePersonal("DoctorComplete");
+                                          setStep(5); // Next step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -1408,8 +1723,9 @@ const Register = () => {
                               </div>
                             ) : null}
 
+
                             {/* Doctor Complete */}
-                            {hidepersonal === "DoctorComplete" ? (
+                            {step === 5 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
                                   <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Complete</h3>
@@ -1436,11 +1752,15 @@ const Register = () => {
                                             </div>
 
                                             <p
-                                              className="texts text-color-2 p-3 fs-20 lh-20"
+                                              className="texts text-color-2 p-3 fs-20 lh-20 "
                                               style={{
                                                 borderRadius: "10px",
                                                 backgroundColor: "rgb(228 249 239 / 51%)",
                                                 border: "2px solid rgb(130 223 182 / 51%)",
+                                                fontFamily: 'sans-serif',
+                                                gap:'px'
+          
+                                                
                                               }}
                                             >
                                               Thank you for registering as a veterinary professional on MyPetMall.
@@ -1469,1481 +1789,15 @@ const Register = () => {
                               </div>
                             ) : null}
 
-
-
-
-                            {/* Vendor Listings Flow */}
-                            {hidepersonal === "VendorListings" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">0%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 0 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaUser className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Personal Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Basic identity and account credentials
-                                        </font>
-                                        <hr />
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Full Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="name"
-                                        placeholder="Your full legal name"
-                                        required
-                                        value={userName}
-                                        onChange={(e) => setUserName(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Email<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="email"
-                                        className="tb-my-input"
-                                        name="email"
-                                        placeholder="Your email address"
-                                        required
-                                        value={userEmail}
-                                        onChange={(e) => setUserEmail(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Phone Number<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input style={{ width: "100%" }}
-                                        type="tel"
-                                        className="tb-my-input"
-                                        name="phone"
-                                        placeholder="Mobile number"
-                                        required
-                                        value={userPhone}
-                                        onChange={(e) => setUserPhone(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Password<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="password"
-                                        className="tb-my-input"
-                                        name="password"
-                                        placeholder="Create a strong password"
-                                        required
-                                        value={userPassword}
-                                        onChange={(e) => setUserPassword(e.target.value)}
-                                      />
-                                      <small className="text-muted">Minimum 8 characters with a symbol and number</small>
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("Hide");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VendorBusiness");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Vendor Business Information */}
-                            {hidepersonal === "VendorBusiness" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">25%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs1"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 1 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaBuilding className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Business Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Official business details for legal compliance
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Business Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="businessName"
-                                        placeholder="Registered business name"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Business Type<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="relative" style={{ width: "100%" }}>
-                                    <select className="nice-select current list style" style={{ width: "100%" }} name="businessType" required>
-                                      <option value="" disabled selected>Choose business type</option>
-                                      <option value="retailer">Retailer</option>
-                                      <option value="wholesaler">Wholesaler</option>
-                                      <option value="manufacturer">Manufacturer</option>
-                                      <option value="dropshipper">Dropshipper</option>
-                                      <option value="distributor">Distributor</option>
-                                    </select>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Registration Number<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="registrationNumber"
-                                        placeholder="Business registration number"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Years in Business<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="yearsInBusiness"
-                                        placeholder="Number of years in business"
-                                        min="0"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    GST Number (optional)
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="gstNumber"
-                                        placeholder="GST or tax identification number"
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("VendorListings");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VendorStore");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Vendor Store Details */}
-                            {hidepersonal === "VendorStore" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">50%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs2"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 2 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaStore className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Store Details <br />
-                                        <font className="text-secondary fw-5">
-                                          Information shown to customers
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Store Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="storeName"
-                                        placeholder="Public-facing store name"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Store Address<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="storeAddress"
-                                        placeholder="Full physical location"
-                                        required
-                                        rows="3"
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Store Email<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="email"
-                                        className="tb-my-input"
-                                        name="storeEmail"
-                                        placeholder="Email for store communications"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-                                  {/* 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Contact Person<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }} >
-                                      <input style={{ width: "100%" }}
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="contactPerson"
-                                        placeholder="Name of representative"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div> */}
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Contact Phone<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input style={{ width: "100%" }}
-                                        type="tel"
-                                        className="tb-my-input"
-                                        name="contactPhone"
-                                        placeholder="Phone for store inquiries"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Website (optional)
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input style={{ width: "100%" }}
-                                        type="url"
-                                        className="tb-my-input"
-                                        name="website"
-                                        placeholder="Business website URL"
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Product Categories<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="form-group wdth">
-                                    <div>
-                                      {["Pet Food", "Toys", "Grooming", "Accessories", "Health", "Apparel"].map(category => (
-                                        <label className="flex" key={category}>
-                                          <input
-                                            className="chkhgh"
-                                            name="categories"
-                                            type="checkbox"
-                                            value={category}
-                                          />
-                                          <span className="btn-checkbox" />
-                                          <span className="mt-1 fs-13 fw-6" style={{ marginLeft: "5px" }}>
-                                            {category}
-                                          </span>
-                                        </label>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("VendorBusiness");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VendorVerification");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Vendor Verification */}
-                            {hidepersonal === "VendorVerification" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">75%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs3"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 3 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <HiMiniIdentification className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Verification <br />
-                                        <font className="text-secondary fw-5">
-                                          Upload required documents
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Profile Picture/Logo<span className="text-danger">*</span>
-                                    <small className="text-muted"> (JPG/PNG, max 5MB)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="profilePicture"
-                                        accept=".jpg,.jpeg,.png"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Business License<span className="text-danger">*</span>
-                                    <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="businessLicense"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    ID Proof (Passport/Driving License)<span className="text-danger">*</span>
-                                    <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="idProof"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Additional Documents (if any)
-                                    <small className="text-muted"> (PDF/JPG/PNG, max 5MB each)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="additionalDocuments"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        multiple
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Store Images (3-5 photos)<span className="text-danger">*</span>
-                                    <small className="text-muted"> (JPG/PNG, max 5MB each)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="storeImages"
-                                        accept=".jpg,.jpeg,.png"
-                                        multiple
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("VendorStore");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VendorLocation");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Vendor Location */}
-                            {hidepersonal === "VendorLocation" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">90%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs4"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 4 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaMapMarkerAlt className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Location Details <br />
-                                        <font className="text-secondary fw-5">
-                                          For logistics and mapping
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <div className="mb-3">
-                                    <button
-                                      type="button"
-                                      className="sc-button btn-icon"
-                                      onClick={() => {
-                                        // Add geolocation capture logic here
-                                        navigator.geolocation.getCurrentPosition(
-                                          (position) => {
-                                            setLatitude(position.coords.latitude);
-                                            setLongitude(position.coords.longitude);
-                                          },
-                                          (error) => {
-                                            console.error("Error getting location:", error);
-                                          }
-                                        );
-                                      }}
-                                    >
-                                      <span>Detect My Location</span>
-                                    </button>
-                                  </div>
-                                  {/* 
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Latitude
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="latitude"
-                                        placeholder="Latitude coordinates"
-                                        step="any"
-                                        value={latitude}
-                                        onChange={(e) => setLatitude(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Longitude
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="longitude"
-                                        placeholder="Longitude coordinates"
-                                        step="any"
-                                        value={longitude}
-                                        onChange={(e) => setLongitude(e.target.value)}
-                                      />
-                                    </fieldset>
-                                  </div> */}
-                                  <div className="mr-2">
-                                    {latitude && longitude && (
-                                      <iframe
-                                        title="Google Map"
-                                        width="650"
-                                        height="450"
-                                        style={{ border: 1 }}
-                                        loading="lazy"
-                                        allowFullScreen
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
-                                      ></iframe>
-                                    )}
-
-                                  </div>
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("VendorVerification");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VendorComplete");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Complete Registration</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Vendor Complete */}
-                            {hidepersonal === "VendorComplete" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Complete</h3>
-                                  <h3 className="fw-8 prgs">100%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs5"></div>
-                                </div>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <section className="pt-0 flat-pricing page">
-                                    <div className="container">
-                                      <div className="row">
-                                        <div className="col-lg-12 col-md-12">
-                                          <div className="box">
-                                            <div className="sub-title fs-30 lh-45 fw-7">
-                                              {/* <img
-                                                height={60}
-                                                width={60}
-                                                src="assets/checkmark.png"
-                                                alt="Checkmark"
-                                              />{" "} */}
-                                              Registration Complete!
-                                            </div>
-
-                                            <p
-                                              className="texts text-color-2 p-3 fs-20 lh-20"
-                                              style={{
-                                                borderRadius: "10px",
-                                                backgroundColor: "rgb(228 249 239 / 51%)",
-                                                border: "2px solid rgb(130 223 182 / 51%)",
-                                              }}
-                                            >
-                                              Thank you for registering as a vendor on MyPetMall.
-                                              Your account is under review and you'll receive a confirmation email shortly.
-                                            </p>
-
-                                            <div className="button-pricing mb-3">
-                                              <a className="sc-button" href="#">
-                                                <span>Go to Dashboard</span>
-                                              </a>
-                                            </div>
-
-                                            <div className="button-pricing">
-                                              <a className="sc-button bghkk " href="#">
-                                                <span className="text-color-2 " style={{ color: "black" }}>
-                                                  Add Your Products
-                                                </span>
-                                              </a>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </section>
-                                </form>
-                              </div>
-                            ) : null}
-
-
-
-
-
-
-                            {/* Veterinary Services Flow */}
-                            {hidepersonal === "Veterinary" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">20%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs1"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 1 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaUser className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Personal & Account Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Your basic details for account creation
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Full Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="name"
-                                        placeholder="Your full name"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Email Address<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="email"
-                                        className="tb-my-input"
-                                        name="email"
-                                        placeholder="Email for login and communication"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Phone Number<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input style={{ width: "100%" }}
-                                        type="tel"
-                                        className="tb-my-input"
-                                        name="phone"
-                                        placeholder="Active mobile number for OTP"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Password<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="password"
-                                        className="tb-my-input"
-                                        name="password"
-                                        placeholder="Min 8 chars with 1 number & special char"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Profile Picture<span className="text-danger">*</span>
-                                    <small className="text-muted"> (JPG/PNG, max 5MB)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="profilePicture"
-                                        accept=".jpg,.jpeg,.png"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("Hide");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VeterinaryProfessional");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Veterinary Professional Information */}
-                            {hidepersonal === "VeterinaryProfessional" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">40%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs2"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 2 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaUserMd className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Professional Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Your veterinary qualifications and credentials
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Registration Number<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="registrationNumber"
-                                        placeholder="Veterinary council registration number"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    License Document<span className="text-danger">*</span>
-                                    <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="file"
-                                        className="tb-my-input"
-                                        name="licenseFile"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Education/Degree<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="education"
-                                        placeholder="e.g. B.V.Sc, M.V.Sc"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    College/Institution<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="college"
-                                        placeholder="Where you studied"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Years of Experience<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="experience"
-                                        placeholder="Number of years in practice"
-                                        min="0"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Specialization<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="specialization"
-                                        placeholder="e.g. small animals, surgery, etc."
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("Veterinary");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VeterinaryClinic");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Veterinary Clinic Information */}
-                            {hidepersonal === "VeterinaryClinic" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">60%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs3"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 3 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaClinicMedical className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Clinic Information <br />
-                                        <font className="text-secondary fw-5">
-                                          Details about your veterinary practice
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Clinic Name<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="clinicName"
-                                        placeholder="Name of your veterinary clinic"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Clinic Address<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input style={{ width: "100%" }}
-                                        className="tb-my-input"
-                                        name="clinicAddress"
-                                        placeholder="Full address of your clinic"
-                                        required
-                                        rows="3"
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Services Offered<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="form-group wdth">
-                                    <div>
-                                      {["General Checkups", "Vaccinations", "Surgery", "Emergency Care", "Dental Care", "Grooming", "Diagnostics"].map(service => (
-                                        <label className="flex" key={service}>
-                                          <input
-                                            className="chkhgh"
-                                            name="services"
-                                            type="checkbox"
-                                            value={service}
-                                          />
-                                          <span className="btn-checkbox" />
-                                          <span className="mt-1 fs-13 fw-6" style={{ marginLeft: "5px" }}>
-                                            {service}
-                                          </span>
-                                        </label>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Operating Hours<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="text"
-                                        className="tb-my-input"
-                                        name="operatingHours"
-                                        placeholder="e.g. 9:00 AM - 6:00 PM"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Available Days<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="form-group wdth">
-                                    <div>
-                                      {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => (
-                                        <label className="flex" key={day}>
-                                          <input
-                                            className="chkhgh"
-                                            name="availableDays"
-                                            type="checkbox"
-                                            value={day}
-                                          />
-                                          <span className="btn-checkbox" />
-                                          <span className="mt-1 fs-13 fw-6" style={{ marginLeft: "5px" }}>
-                                            {day}
-                                          </span>
-                                        </label>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Consultation Fee (₹)<span className="text-danger">*</span>
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="consultationFee"
-                                        placeholder="Base consultation fee in INR"
-                                        min="0"
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("VeterinaryProfessional");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VeterinaryLocation");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Next</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Veterinary Location */}
-                            {hidepersonal === "VeterinaryLocation" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Progress</h3>
-                                  <h3 className="fw-8 prgs">80%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs4"></div>
-                                </div>
-                                <p className="fs-18 mb-3">Step 4 of 5</p>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <h3 className="mb-0">
-                                    <div className="flex mb-3">
-                                      <div className="fgr">
-                                        <FaMapMarkerAlt className="setod" />
-                                      </div>
-                                      <div className="fs-20">
-                                        Location Details <br />
-                                        <font className="text-secondary fw-5">
-                                          For maps and local search
-                                        </font>
-                                      </div>
-                                    </div>
-                                  </h3>
-
-                                  <div className="mb-3">
-                                    <button
-                                      type="button"
-                                      className="sc-button btn-icon"
-                                      onClick={() => {
-                                        navigator.geolocation.getCurrentPosition(
-                                          (position) => {
-                                            setLatitude(position.coords.latitude);
-                                            setLongitude(position.coords.longitude);
-                                          },
-                                          (error) => {
-                                            console.error("Error getting location:", error);
-                                          }
-                                        );
-                                      }}
-                                    >
-                                      <span>Detect My Location</span>
-                                    </button>
-                                  </div>
-
-                                  {/* <label className="text-color-2 fw-6 mb-0">
-                                    Latitude
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="latitude"
-                                        placeholder="Latitude coordinates"
-                                        step="any"
-                                        value={latitude}
-                                        onChange={(e) => setLatitude(e.target.value)}
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div>
-
-                                  <label className="text-color-2 fw-6 mb-0">
-                                    Longitude
-                                  </label>
-                                  <div className="text-wrap flex form-wg">
-                                    <fieldset style={{ width: "100%" }}>
-                                      <input
-                                        type="number"
-                                        className="tb-my-input"
-                                        name="longitude"
-                                        placeholder="Longitude coordinates"
-                                        step="any"
-                                        value={longitude}
-                                        onChange={(e) => setLongitude(e.target.value)}
-                                        required
-                                      />
-                                    </fieldset>
-                                  </div> */}
-
-                                  <div className="mr-2 mt-3">
-                                    {latitude && longitude && (
-                                      <iframe
-                                        title="Google Map"
-                                        width="100%"
-                                        height="300"
-                                        style={{ border: 1 }}
-                                        loading="lazy"
-                                        allowFullScreen
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
-                                      ></iframe>
-                                    )}
-                                  </div>
-
-                                  <hr />
-                                  <div className="jsy">
-                                    <div>
-                                      <button
-                                        style={{ backgroundColor: "rgb(229 228 228)" }}
-                                        onClick={() => {
-                                          setHidePersonal("VeterinaryClinic");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span className="text-color-2">Back</span>
-                                      </button>
-                                    </div>
-                                    <div className="lh-16">
-                                      <button
-                                        onClick={() => {
-                                          setHidePersonal("VeterinaryComplete");
-                                        }}
-                                        className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
-                                      >
-                                        <span>Complete Registration</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                            ) : null}
-
-                            {/* Veterinary Complete */}
-                            {hidepersonal === "VeterinaryComplete" ? (
-                              <div className="respond-comment">
-                                <div className="jsy">
-                                  <h3 className="mb-2" style={{ color: "#05576e" }}>Registration Complete</h3>
-                                  <h3 className="fw-8 prgs">100%</h3>
-                                </div>
-                                <div className="w3-border mb-1 bgh">
-                                  <div className="w3-grey ert prgs5"></div>
-                                </div>
-                                <form
-                                  method="post"
-                                  id="contactform"
-                                  className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
-                                  acceptCharset="utf-8"
-                                  noValidate="novalidate"
-                                >
-                                  <section className="pt-0 flat-pricing page">
-                                    <div className="container">
-                                      <div className="row">
-                                        <div className="col-lg-12 col-md-12">
-                                          <div className="box">
-                                            <div className="sub-title fs-30 lh-45 fw-7">
-                                              Registration Complete!
-                                            </div>
-
-                                            <p
-                                              className="texts text-color-2 p-3 fs-20 lh-20"
-                                              style={{
-                                                borderRadius: "10px",
-                                                backgroundColor: "rgb(228 249 239 / 51%)",
-                                                border: "2px solid rgb(130 223 182 / 51%)",
-                                              }}
-                                            >
-                                              Thank you for registering as a veterinary professional on MyPetMall.
-                                              Your account is under review and you'll receive a confirmation email shortly.
-                                            </p>
-
-                                            <div className="button-pricing mb-3">
-                                              <a className="sc-button" href="#">
-                                                <span>Go to Dashboard</span>
-                                              </a>
-                                            </div>
-
-                                            <div className="button-pricing">
-                                              <a className="sc-button bghkk " href="#">
-                                                <span className="text-color-2" style={{ color: "black" }}>
-                                                  Add Your Services
-                                                </span>
-                                              </a>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </section>
-                                </form>
-                              </div>
-                            ) : null}
                           </div>
                         </div>
                       </div>
                     </div>
                   </section>
+
+
+
+
 
 
                   <section className="flat-icon bg-1 pt-4 pb-4">
@@ -3166,6 +2020,7 @@ const Register = () => {
             </div>
           </div>
         </section>
+
       </main>
       {/* Modal Popup Bid */}
       {status === true ? (
