@@ -34,17 +34,17 @@ import Store from "./components/VendorProfile/Store";
 import OrderList from "./components/Pages/OrderList";
 import OrderDetails from "./components/Pages/OrderDetails";
 import WishList from "./components/Pages/WishList"
+import Test from "./components/Pages/test";
 
 
 const AppLayout = () => {
   const location = useLocation();
-  const isRegisterRoute = location.pathname === "/register";
+  const isAuthRoute = location.pathname === "/register" || location.pathname === "/login";
 
   return (
     <>
       <Preloader />
-      {!isRegisterRoute && <Header />}
-
+       {!isAuthRoute && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetails />} />
@@ -60,14 +60,14 @@ const AppLayout = () => {
         <Route path="/animalList" element={<AnimalList />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/verifyOtp" element={<VerifyOtp />} />
         <Route path="/docProfile" element={<DocProfile />} />
         <Route path="/orderList" element={<OrderList />} />
         <Route path="/order" element={<OrderDetails />} />
         <Route path="/wishlist" element={<WishList />} />
         <Route path="/productDetails" element={<ProductDetails />} />
-
+          
+         <Route path="/login" element={<Login />} />
        
 
         {/* Vendor Routes */}
@@ -81,10 +81,14 @@ const AppLayout = () => {
         <Route path="/neworders" element={<NewOrders />} />
         <Route path="/myProducts" element={<MyProducts />} />
         <Route path="/addproduct" element={<AddProduct />} />
+        
         <Route path="/mystore" element={<Store />} />
+        <Route path="/test" element={<Test />} />
+        
+
       </Routes>
 
-      {!isRegisterRoute && <Footer />}
+    {!isAuthRoute && <Footer />}
     </>
   );
 };

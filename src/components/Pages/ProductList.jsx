@@ -4,6 +4,10 @@ import ReactSlider from 'react-slider';
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import Preloader from "../Preloader";
+import { useLocation } from "react-router-dom";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+
+
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -18,8 +22,83 @@ const ProductList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [priceRange, setPriceRange] = useState([0, 2000]);
   const [debouncedPriceRange, setDebouncedPriceRange] = useState(priceRange);
-
   const API_URL = import.meta.env.VITE_API_URLS;
+  const [cartItems, setCartItems] = useState([]);
+  const token = localStorage.getItem("token");
+  const location = useLocation();
+  const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(true);
+
+
+
+  // Fetch cart items for show in the button
+
+  const fetchCartItems = async () => {
+    try {
+      // setLoading(true);
+      if (!token) {
+        alert("Please login to view your cart");
+        return;
+      }
+
+      const response = await axios.get(`${API_URL}api/user/getUserCart`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const items = response.data.items || [];
+      setCartItems(items);
+    } catch (err) {
+      console.error("Failed to fetch cart items", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCartItems();
+    fetchWishlist();
+  }, []);
+
+  const isInCart = (productId) => {
+    return cartItems.some(item => item.productId._id === productId);
+  };
+
+  // fetch wishlist product 
+  const fetchWishlist = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}api/user/getWishlist`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setWishlist(data.products || []);
+    } catch (err) {
+      console.error("Failed to load wishlist.", err);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+
+  const isInWishlist = (productId) => wishlist.some(item => item._id === productId);
+
+
+  // search from header logic
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const search = params.get("search") || "";
+    const category = params.get("category");
+
+    setSearchTerm(search);
+    setCurrentPage(1);
+
+    if (category) {
+      setSelectedCategories([category]);
+    } else {
+      setSelectedCategories([]);
+    }
+  }, [location.search]);
+
 
   // Function to handle adding product to wishlist
   const handleAddToWishlist = async (product) => {
@@ -38,6 +117,7 @@ const ProductList = () => {
         },
       });
       AlertMsg("Product added to Wishlist!", "success", "Wishlist");
+      fetchWishlist();
     } catch (err) {
       AlertMsg("Could not add to Wishlist", "error", "Error");
     }
@@ -69,6 +149,7 @@ const ProductList = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       AlertMsg("Product Added to Cart successfully!", "success", "Product Added");
+      fetchCartItems();
     } catch (error) {
       console.error("Add to cart failed:", error);
       AlertMsg("Failed to Add Product", "error", "Product Added");
@@ -116,6 +197,7 @@ const ProductList = () => {
       if (searchTerm) {
         queryParams.append("search", searchTerm);
       }
+      console.log("Query string sent to API:", queryParams.toString());
 
       const res = await axios.get(
         `${API_URL}api/user/getAllProducts?${queryParams.toString()}`,
@@ -187,7 +269,7 @@ const ProductList = () => {
     );
   }
 
-  if (loading) {
+  if (loading || wishlistLoading || categoriesLoading) {
     return (
       <div className="text-center py-5">
         <div className="spinner-border text-primary" role="status">
@@ -236,8 +318,6 @@ const ProductList = () => {
                         </div>
                       ) : (
                         products.map((product) => (
-
-
                           <div className="col mb-4" key={product._id}>
                             <div className="card h-100 product-card product__item">
                               <div className="product__thumb">
@@ -250,14 +330,17 @@ const ProductList = () => {
                                     }
                                     className="object-fit-cover"
                                     alt={product.productName}
-                                    style={{ height: "200px", width: "100%", objectFit: "cover" }}
+                                    style={{ height: "200px", width: "100%", objectFit: "cover", borderRadius: '15px 15px 0px 0px' }}
                                   />
                                 </Link>
                                 <div className="product__action">
-                                  <a href="#" onClick={(e) => { e.preventDefault(); handleAddToWishlist(product); }}>
-                                    <i className="flaticon-love" />
+                                  <a href="#" onClick={() => handleAddToWishlist(product)}>
+                                    {isInWishlist(product._id) ? (
+                                      <FaHeart style={{ color: "red", fontSize: "20px" }} />
+                                    ) : (
+                                      <FaRegHeart style={{ color: "#303030", fontSize: "20px" }} />
+                                    )}
                                   </a>
-
                                   <a href="#">
                                     <i className="flaticon-loupe" />
                                   </a>
@@ -271,9 +354,13 @@ const ProductList = () => {
                                   </div>
                                 )}
                                 <div className="product__add-cart">
-                                  <button onClick={() => handleAddToCart(product)} className="btn">
+                                  <button
+                                    onClick={() => handleAddToCart(product)}
+                                    className="btn"
+                                  // disabled={isInCart(product._id)} 
+                                  >
                                     <i className="flaticon-shopping-bag" />
-                                    Add To Cart
+                                    {isInCart(product._id) ? "Added" : "Add To Cart"}
                                   </button>
                                 </div>
                               </div>
@@ -302,9 +389,6 @@ const ProductList = () => {
                               </div>
                             </div>
                           </div>
-
-
-
                         ))
                       )}
                     </div>

@@ -118,20 +118,28 @@ const UserOrderHeader = () => {
 
 
     return (
-        <div className="container py-4" style={{ borderRadius: '25px', backgroundColor: '#f4f7f9', minHeight: '100vh' }}>
-            <h2 className="mb-4" style={{ color: '#2c3e50', fontWeight: '600' }}>My Orders</h2>
+        <div className="container py-4" style={{ borderRadius: '15px', backgroundColor: '#f4f7f9', minHeight: '100vh' }}>
+            <h2 className="mb-4" style={{ color: '#05576e', fontWeight: '600' }}>My Orders</h2>
 
-            <div className="d-flex justify-content-center flex-wrap gap-3 mb-4">
+            <div className="d-flex flex-wrap gap-2 mb-4">
                 {TABS.map(tab => {
                     const isActive = activeTab === tab;
                     return (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`btn ${isActive ? 'btn-primary' : 'btn-outline-secondary'}`}
-                            style={{ borderRadius: '50px', backgroundColor: 'white', color: 'black', border: '1px #05576e solid' }}
+                            style={{
+                                padding: '0.375rem 1rem',
+                                fontSize: '0.875rem',
+                                fontWeight: '500',
+                                color: isActive ? 'white' : '#05576e',
+                                backgroundColor: isActive ? '#05576e' : 'transparent',
+                                border: '1px solid #05576e',
+                                borderRadius: '50px',
+                                transition: 'all 0.2s ease'
+                            }}
                         >
-                            <i className={`bi ${ICONS[tab]} me-1`}></i> {tab}
+                            {tab}
                         </button>
                     );
                 })}
@@ -146,13 +154,33 @@ const UserOrderHeader = () => {
                 <div className="order-list">
                     {orders[activeTab].map(order => (
                         <div key={order.id} className="card mb-4 shadow-sm">
-                            <div className="card-header d-flex justify-content-between">
-                                <div>
-                                    <strong>Payment:</strong> {order.paymentMode} <br />
-                                    <strong>Date:</strong> {order.date}
+
+                            <div className="card-header d-flex justify-content-between align-items-center" style={{
+                                backgroundColor: '#f8f9fa',
+                                borderBottom: '1px solid #e0e0e0',
+                                padding: '12px 16px'
+                            }}>
+                                <div className="d-flex align-items-center gap-3">
+                                    <div className="d-flex align-items-center gap-2">
+                                        <i className="bi bi-credit-card-fill text-primary" style={{ fontSize: '1.1rem' }}></i>
+                                        <span style={{ fontSize: '0.9rem', color: '#05576e' }}>
+                                            <strong style={{ color: 'black' }}>Payment:</strong> {order.paymentMode}
+                                        </span>
+                                    </div>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <i className="bi bi-calendar-check text-primary" style={{ fontSize: '1.1rem' }}></i>
+                                        <span style={{ fontSize: '0.9rem', color: '#05576e' }}>
+                                            <strong style={{ color: 'black' }}>Date:</strong> {order.date}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="fw-bold text-success">{order.total}</div>
+                                <div className="d-flex align-items-center gap-2">
+                                    <i className="bi bi-currency-rupee text-success" style={{ fontSize: '1.1rem' }}></i>
+                                    <span className="fw-bold" style={{ color: '#198754', fontSize: '1.1rem' }}>{order.total}</span>
+                                </div>
                             </div>
+
+
                             <div className="card-body">
                                 {order.items.map(item => (
 
@@ -177,11 +205,11 @@ const UserOrderHeader = () => {
                                         <div className="d-flex gap-2">
 
                                             {activeTab === 'Completed' && (
-                                                <> 
-                                                <Link to='/checkout'>
-                                                    <button className="btn1 btn-light btn-sm" title="Buy Again">
-                                                        <FaCartPlus />
-                                                    </button>
+                                                <>
+                                                    <Link to='/checkout'>
+                                                        <button className="btn1 btn-light btn-sm" title="Buy Again">
+                                                            <FaCartPlus />
+                                                        </button>
                                                     </Link>
                                                     <button
                                                         className="btn1 btn-light btn-sm"
@@ -193,7 +221,7 @@ const UserOrderHeader = () => {
                                                     </button>
                                                 </>
                                             )}
-                                            {activeTab === 'Placed' && item.status === 'Payment pending' && (
+                                            {/* {activeTab === 'Placed' && item.status === 'Payment pending' && (
                                                 <button className="btn1 btn-warning btn-sm" title="Complete Payment">
                                                     <MdPayment />
                                                 </button>
@@ -202,7 +230,7 @@ const UserOrderHeader = () => {
                                                 <button className="btn1 btn-outline-danger btn-sm" title="Cancel Order">
                                                     <MdCancel />
                                                 </button>
-                                            )}
+                                            )} */}
                                         </div>
                                     </div>
 
@@ -213,67 +241,7 @@ const UserOrderHeader = () => {
                 </div>
             ))}
 
-            {/* Review Modal */}
-            {/* <div className="modal fade" id="reviewModal" tabIndex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content border-0">
-            <div className="modal-header border-0 pb-0">
-              <h5 className="modal-title fw-bold" id="reviewModalLabel">Rate this product</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div className="modal-body pt-0">
-              <div className="text-center mb-4">
-                <div className="star-rating mb-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      className="btn btn-link p-0 border-0 bg-transparent"
-                      onClick={() => setReviewData({...reviewData, rating: star})}
-                    >
-                      {star <= reviewData.rating ? (
-                        <FaStar className="text-warning" style={{ fontSize: '2rem' }} />
-                      ) : (
-                        <FaRegStar className="text-secondary" style={{ fontSize: '2rem' }} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <small className="text-muted">
-                  {reviewData.rating} Star{reviewData.rating !== 1 ? 's' : ''}
-                </small>
-              </div>
 
-              <div className="form-floating mb-3">
-                <textarea
-                  className="form-control"
-                  id="reviewText"
-                  placeholder="Share your experience"
-                  style={{ height: '100px' }}
-                  value={reviewData.comment}
-                  onChange={(e) => setReviewData({...reviewData, comment: e.target.value})}
-                ></textarea>
-                <label htmlFor="reviewText">Your review (optional)</label>
-              </div>
-            </div>
-            <div className="modal-footer border-0 pt-0">
-              <button 
-                type="button" 
-                className="btn btn-outline-secondary" 
-                data-bs-dismiss="modal"
-              >
-                Cancel
-              </button>
-              <button 
-                className="btn btn-primary" 
-                onClick={handleReviewSubmit}
-              >
-                Submit Review
-              </button>
-            </div>
-          </div>
-        </div>
-      </div> */}
             {showReviewModal && (
                 <div
                     style={{

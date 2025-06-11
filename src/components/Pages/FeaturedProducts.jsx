@@ -26,7 +26,7 @@ const FeaturedProducts = () => {
             </div>
             <div className="col-md-5">
               <div className="view-all-btn text-md-end">
-                <Link to="/productList" className="btn btn-link">
+                <Link to="/productList" >
                   See All <i className="flaticon-right-arrow-angle" />
                 </Link>
               </div>
