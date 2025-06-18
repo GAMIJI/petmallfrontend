@@ -175,9 +175,12 @@ const Register = () => {
   const [docMedicalRegistration, setDocMedicalRegistration] = useState("");
   const [docMedicalCouncil, setDocMedicalCouncil] = useState("");
   const [docRegistrationYear, setDocRegistrationYear] = useState("");
+<<<<<<< HEAD
   const [docDegreeProof, setDocDegreeProof] = useState(null);
   const [docRegistrationProof, setDocRegistrationProof] = useState(null);
   const [docExperienceProof, setDocExperienceProof] = useState(null);
+=======
+>>>>>>> db7433da53bc835bc52960ae9695a80cc4d9590b
   const [docEducation, setDocEducation] = useState("");
   const [docExperience, setDocExperience] = useState("");
   const [docConsultationFee, setDocConsultationFee] = useState("");
@@ -187,6 +190,10 @@ const Register = () => {
     start: "",
     end: ""
   });
+<<<<<<< HEAD
+=======
+  const [docDocuments, setDocDocuments] = useState([]);
+>>>>>>> db7433da53bc835bc52960ae9695a80cc4d9590b
   const [docServices, setDocServices] = useState([]);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
@@ -222,23 +229,35 @@ const Register = () => {
 
   // Veterinary registration states
   const [vetRegistrationNumber, setVetRegistrationNumber] = useState("");
-  const [vetLicenseFile, setVetLicenseFile] = useState(null);
+
   const [vetExperience, setVetExperience] = useState("");
   const [vetClinicName, setVetClinicName] = useState("");
   const [vetClinicAddress, setVetClinicAddress] = useState("");
   const [vetConsultationFee, setVetConsultationFee] = useState("");
-  const [vetTimings, setVetTimings] = useState({
-    start: "",
-    end: ""
-  });
+  const [vetVideoConsultationFee, setVetVideoConsultationFee] = useState("");
   // Veterinary specific states
   const [vetEducation, setVetEducation] = useState("");
   const [vetCollege, setVetCollege] = useState("");
+  const [vetMedicalCouncil, setVetMedicalCouncil] = useState("");
+  const [vetRegistrationYear, setVetRegistrationYear] = useState("");
   const [vetSpecialization, setVetSpecialization] = useState("");
-  const [vetAvailableDays, setVetAvailableDays] = useState([]);
+  const [vetGstNumber, setVetGstNumber] = useState("");
+
+
   const [vetServices, setVetServices] = useState([]);
   const [vetLatitude, setVetLatitude] = useState(null);
   const [vetLongitude, setVetLongitude] = useState(null);
+  const [vetMedDocuments, setVetMedDocuments] = useState([]);         // ✅ not null
+  const [vetDegreeDocuments, setVetDegreeDocuments] = useState([]);   // ✅ not null
+  const [vetAdditionalDocuments, setVetAdditionalDocuments] = useState([]); // ✅ missing from your code
+  // Defaults
+  const [vetTimings, setVetTimings] = useState({ start: "", end: "" });
+  const [vetAvailableDays, setVetAvailableDays] = useState([]);
+
+
+
+
+
 
   const [validationAttempted, setValidationAttempted] = useState({
     1: false,
@@ -369,10 +388,13 @@ const handleDocLocationDetection = () => {
   };
 
 
+<<<<<<< HEAD
   // Handler for license file upload
   const handleLicenseFileChange = (e) => {
     setVetLicenseFile(e.target.files[0]);
   };
+=======
+>>>>>>> db7433da53bc835bc52960ae9695a80cc4d9590b
 
 
   const handleVetDaySelection = (day) => {
@@ -513,10 +535,7 @@ const handleDocLocationDetection = () => {
         alert("Please enter your registration number");
         return false;
       }
-      if (!vetLicenseFile) {
-        alert("Please upload your license document");
-        return false;
-      }
+
       if (isNaN(vetExperience) || vetExperience < 0) {
         alert("Please enter valid years of experience");
         return false;
@@ -672,7 +691,10 @@ const handleDocLocationDetection = () => {
       formData.append("isVendor", false);
     }
 
+    if (roles.vet === "yes") {
+      formData.append("roles", JSON.stringify(["VETERINARY"]));
 
+<<<<<<< HEAD
 
     if (roles.venory === "yes") {
       formData.append("isVeterinary", true);
@@ -685,16 +707,52 @@ const handleDocLocationDetection = () => {
       formData.append("vetEducation", vetEducation);
       formData.append("vetCollege", vetCollege);
       formData.append("vetSpecialization", vetSpecialization);
+=======
+      // === Professional Details ===
+      formData.append("registrationNumber", vetRegistrationNumber || "");
+      formData.append("registrationYear", vetRegistrationYear || "");
+      formData.append("university", vetCollege || "");
+      formData.append("experience", vetExperience || "");
+      formData.append("medicalCouncil", vetMedicalCouncil || "");
+      formData.append("specialization", vetSpecialization || "");
+      formData.append("vetGstNumber", vetGstNumber || "");
+      formData.append("vetAvailableDays", JSON.stringify(vetAvailableDays || []));
+      formData.append("operatingHours", JSON.stringify(vetTimings || { start: "", end: "" }));
+>>>>>>> db7433da53bc835bc52960ae9695a80cc4d9590b
 
-      formData.append("vetAvailableDays", JSON.stringify(vetAvailableDays));
-      formData.append("vetServices", JSON.stringify(vetServices));
 
-      formData.append("vetLatitude", vetLatitude);
-      formData.append("vetLongitude", vetLongitude);
 
-      if (vetLicenseFile) formData.append("vetLicenseFile", vetLicenseFile);
-    } else {
-      formData.append("isVeterinary", false);
+      // === Clinic Details ===
+      formData.append("vetClinicName", vetClinicName || "");
+      formData.append("vetClinicAddress", vetClinicAddress || "");
+      formData.append("consultationFee", vetConsultationFee || "");
+      formData.append("vetVideoConsultationFee", vetVideoConsultationFee || "");
+      formData.append("vetLatitude", vetLatitude || "");
+      formData.append("vetLongitude", vetLongitude || "");
+
+      // === File Uploads ===
+      if (vetDegreeDocuments && vetDegreeDocuments.length > 0) {
+        formData.append("vetDegree", vetDegreeDocuments[0]);
+      }
+
+      if (vetMedDocuments && vetMedDocuments.length > 0) {
+        vetMedDocuments.forEach(file => {
+          formData.append("vetRegistractionDocument", file);
+        });
+      }
+
+      if (vetAdditionalDocuments && vetAdditionalDocuments.length > 0) {
+        vetAdditionalDocuments.forEach(file => {
+          formData.append("vetAdditionalDocuments", file);
+        });
+      }
+    }
+
+
+    // After all formData.append(...) calls
+    console.log("=== FormData Preview ===");
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
     }
 
 
@@ -732,6 +790,8 @@ const handleDocLocationDetection = () => {
       setIsLoading(false);
     }
   };
+
+
 
   return (
     <div >
@@ -871,6 +931,7 @@ const handleDocLocationDetection = () => {
                       <div className="row">
                         <div className="col-lg-12 mb-4">
                           <div id="comments" className="comments cfd">
+
                             {/* // basic information */}
                             {step === 1 ? (
                               <div className="respond-comment">
@@ -1490,6 +1551,7 @@ const handleDocLocationDetection = () => {
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="file"
+<<<<<<< HEAD
                                                 className={"tb-my-input "}
                                                 name="experienceProof"
                                                 multiple
@@ -1498,6 +1560,16 @@ const handleDocLocationDetection = () => {
                                                 onChange={(e) => setDocExperienceProof(e.target.files[0])}
                                               />
                                               <small>Upload proof of Experience, license, certifications (PDF/Image)</small>
+=======
+                                                className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
+                                                name="documents"
+                                                multiple
+                                                accept=".pdf,.jpg,.png"
+                                                required
+                                                onChange={handleDocDocumentsChange}
+                                              />
+                                              <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
+>>>>>>> db7433da53bc835bc52960ae9695a80cc4d9590b
                                             </fieldset>
                                           </div>
                                         </div>
@@ -1757,7 +1829,6 @@ const handleDocLocationDetection = () => {
                                             </fieldset>
                                           </div>
                                         </div>
-
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
                                             Product Categories<span className="text-danger">*</span>
@@ -1790,7 +1861,6 @@ const handleDocLocationDetection = () => {
                                                 }}
                                               >
                                                 {open ? <FiChevronUp /> : <FiChevronDown />}
-
                                               </div>
                                             </div>
 
@@ -1802,9 +1872,9 @@ const handleDocLocationDetection = () => {
                                                   width: "100%",
                                                   border: "1px solid #ced4da",
                                                   borderRadius: "4px",
-                                                  marginTop: "-13 px",
+                                                  marginTop: "-13px",
                                                   zIndex: 10,
-                                                  maxHeight: "200px",
+                                                  maxHeight: "250px",
                                                   overflowY: "auto",
                                                   padding: "10px",
                                                 }}
@@ -2154,16 +2224,16 @@ const handleDocLocationDetection = () => {
                                               <fieldset style={{ width: "100%" }}>
                                                 <input
                                                   type="text"
-                                                  className={`tb-my-input ${!docMedicalCouncil.trim() && validationAttempted[2] ? 'is-invalid' : ''}`}
-                                                  name="medicalCouncil"
+                                                  className={`tb-my-input`}
+                                                  name="vetMedicalCouncil"
                                                   placeholder="Medical council name"
                                                   required
-                                                  value={docMedicalCouncil}
-                                                  onChange={(e) => setDocMedicalCouncil(e.target.value)}
+                                                  value={vetMedicalCouncil}
+                                                  onChange={(e) => setVetMedicalCouncil(e.target.value)}
                                                 />
-                                                {!docMedicalCouncil.trim() && validationAttempted[2] && (
-                                                  <div className="invalid-feedback">Please enter medical council</div>
-                                                )}
+
+                                                <div className="invalid-feedback">Please enter medical council</div>
+
                                               </fieldset>
                                             </div>
                                           </div>
@@ -2176,16 +2246,16 @@ const handleDocLocationDetection = () => {
                                               <fieldset style={{ width: "100%" }}>
                                                 <input
                                                   type="number"
-                                                  className={`tb-my-input ${!docRegistrationYear && validationAttempted[2] ? 'is-invalid' : ''}`}
-                                                  name="registrationYear"
+                                                  className={`tb-my-input`}
+                                                  name="vetRegistrationYear"
                                                   placeholder="Year of registration"
                                                   required
-                                                  value={docRegistrationYear}
-                                                  onChange={(e) => setDocRegistrationYear(e.target.value)}
+                                                  value={vetRegistrationYear}
+                                                  onChange={(e) => setVetRegistrationYear(e.target.value)}
                                                 />
-                                                {!docRegistrationYear && validationAttempted[2] && (
-                                                  <div className="invalid-feedback">Please enter registration year</div>
-                                                )}
+
+                                                <div className="invalid-feedback">Please enter registration year</div>
+
                                               </fieldset>
                                             </div>
                                           </div>
@@ -2200,10 +2270,11 @@ const handleDocLocationDetection = () => {
                                                 <input
                                                   type="file"
                                                   className="tb-my-input"
-                                                  name="licenseFile"
+                                                  name="vetMedDocuments"
                                                   accept=".pdf,.jpg,.jpeg,.png"
                                                   required
-                                                  onChange={handleLicenseFileChange}
+
+                                                  onChange={(e) => setVetMedDocuments(e.target.files[0])}
                                                 />
                                               </fieldset>
                                             </div>
@@ -2238,10 +2309,10 @@ const handleDocLocationDetection = () => {
                                                 <input
                                                   type="file"
                                                   className="tb-my-input"
-                                                  name="licenseFile"
+                                                  name="vetDegreeFile"
                                                   accept=".pdf,.jpg,.jpeg,.png"
                                                   required
-                                                  onChange={handleLicenseFileChange}
+                                                  onChange={(e) => setVetDegreeDocuments(e.target.files[0])}
                                                 />
                                               </fieldset>
                                             </div>
@@ -2256,10 +2327,10 @@ const handleDocLocationDetection = () => {
                                                 <input
                                                   type="text"
                                                   className="tb-my-input"
-                                                  name="gstNumber"
+                                                  name="vetG  stNumber"
                                                   placeholder="GST or tax identification number"
-                                                  value={vendorGstNumber}
-                                                  onChange={(e) => setVendorGstNumber(e.target.value)}
+                                                  value={vetGstNumber}
+                                                  onChange={(e) => setVetGstNumber(e.target.value)}
                                                 />
                                               </fieldset>
                                             </div>
@@ -2545,11 +2616,11 @@ const handleDocLocationDetection = () => {
                                                   placeholder="Base consultation fee in INR"
                                                   min="0"
                                                   required
-                                                  value={vetConsultationFee}
+                                                  value={vetVideoConsultationFee}
                                                   onChange={(e) => {
                                                     const value = e.target.value;
                                                     if (value === '' || !isNaN(value)) {
-                                                      setVetConsultationFee(value);
+                                                      setVetVideoConsultationFee(value);
                                                     }
                                                   }}
 
