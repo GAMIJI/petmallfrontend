@@ -1,0 +1,7 @@
+.tgmobile__menu {
+  display: none;
+  /* Other styles... */
+}
+.tgmobile__menu.show {
+  display: block;
+}

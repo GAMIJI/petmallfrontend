@@ -168,41 +168,46 @@ const Register = () => {
   const [profilePicture, setProfilePicture] = useState(null);
 
 
-// State for doctor professional details
-const [docClinicName, setDocClinicName] = useState("");
-const [docClinicAddress, setDocClinicAddress] = useState("");
-const [docSpecialization, setDocSpecialization] = useState("");
-const [docMedicalRegistration, setDocMedicalRegistration] = useState("");
-const [docMedicalCouncil, setDocMedicalCouncil] = useState("");
-const [docRegistrationYear, setDocRegistrationYear] = useState("");
-const [docEducation, setDocEducation] = useState("");
-const [docExperience, setDocExperience] = useState("");
-const [docConsultationFee, setDocConsultationFee] = useState("");
-const [docVideoConsultationFee, setDocVideoConsultationFee] = useState("");
-const [docAvailableDays, setDocAvailableDays] = useState([]);
-const [docTimings, setDocTimings] = useState({
-  start: "",
-  end: ""
-});
-const [docDocuments, setDocDocuments] = useState([]);
-const [docServices, setDocServices] = useState([]);
-const [latitude, setLatitude] = useState(null);
-const [longitude, setLongitude] = useState(null);
+  // State for doctor professional details
+  const [docClinicName, setDocClinicName] = useState("");
+  const [docClinicAddress, setDocClinicAddress] = useState("");
+  const [docSpecialization, setDocSpecialization] = useState("");
+  const [docMedicalRegistration, setDocMedicalRegistration] = useState("");
+  const [docMedicalCouncil, setDocMedicalCouncil] = useState("");
+  const [docRegistrationYear, setDocRegistrationYear] = useState("");
+  const [docDegreeProof, setDocDegreeProof] = useState(null);
+  const [docRegistrationProof, setDocRegistrationProof] = useState(null);
+  const [docExperienceProof, setDocExperienceProof] = useState(null);
+  const [docEducation, setDocEducation] = useState("");
+  const [docExperience, setDocExperience] = useState("");
+  const [docConsultationFee, setDocConsultationFee] = useState("");
+  const [docVideoConsultationFee, setDocVideoConsultationFee] = useState("");
+  const [docAvailableDays, setDocAvailableDays] = useState([]);
+  const [docTimings, setDocTimings] = useState({
+    start: "",
+    end: ""
+  });
+  const [docServices, setDocServices] = useState([]);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
 
 
   const [vendorBusinessName, setVendorBusinessName] = useState("");
   const [vendorStoreAddress, setVendorStoreAddress] = useState("");
   const [vendorWebsite, setVendorWebsite] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [vendorBusinessDescription, setVendorBusinessDescription] = useState("");
   const [vendorRegistrationNumber, setVendorRegistrationNumber] = useState("");
   const [vendorBusinessType, setVendorBusinessType] = useState("");
   const [vendorYearsInBusiness, setVendorYearsInBusiness] = useState("");
   const [vendorGstNumber, setVendorGstNumber] = useState("");
+  const [vendorLatitude, setVendorLatitude] = useState(null); // ✅ Use number/null
+  const [vendorLongitude, setVendorLongitude] = useState(null);
+
+  const [vendorRegistrationProof, setVendorRegistrationProof] = useState(null);
   const [vendorStoreLogo, setVendorStoreLogo] = useState(null);
   const [vendorStoreBanner, setVendorStoreBanner] = useState(null);
   const [vendorStoreImages, setVendorStoreImages] = useState([]);
-
-  // For category dropdown
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const categories = [
@@ -294,11 +299,6 @@ const [longitude, setLongitude] = useState(null);
     }
   };
 
-  // Handler for document uploads
-  const handleDocDocumentsChange = (e) => {
-    const files = Array.from(e.target.files);
-    setDocDocuments(files);
-  };
 
   // Handler for available days selection
   const handleDaySelection = (day) => {
@@ -326,8 +326,8 @@ const [longitude, setLongitude] = useState(null);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLatitude(position.coords.latitude);
-        setLongitude(position.coords.longitude);
+        setVendorLatitude(position.coords.latitude);
+        setVendorLongitude(position.coords.longitude);
       },
       (error) => {
         console.error("Error getting location:", error);
@@ -335,21 +335,24 @@ const [longitude, setLongitude] = useState(null);
       }
     );
   };
+const handleDocLocationDetection = () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser");
+    return;
+  }
 
-  // Handler for store logo upload
-  const handleStoreLogoChange = (e) => {
-    setVendorStoreLogo(e.target.files[0]);
-  };
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+    },
+    (error) => {
+      console.error("Error getting location:", error);
+      alert("Error getting your location. Please try again or enter manually.");
+    }
+  );
+};
 
-  // Handler for store banner upload
-  const handleStoreBannerChange = (e) => {
-    setVendorStoreBanner(e.target.files[0]);
-  };
-
-  // Handler for store images upload
-  const handleStoreImagesChange = (e) => {
-    setVendorStoreImages(Array.from(e.target.files));
-  };
 
   // Handler for category selection
   const handleSelect = (category) => {
@@ -366,7 +369,6 @@ const [longitude, setLongitude] = useState(null);
   };
 
 
-
   // Handler for license file upload
   const handleLicenseFileChange = (e) => {
     setVetLicenseFile(e.target.files[0]);
@@ -381,14 +383,6 @@ const [longitude, setLongitude] = useState(null);
     }
   };
 
-  const handleVetServiceSelection = (service) => {
-    if (vetServices.includes(service)) {
-      setVetServices(vetServices.filter(s => s !== service));
-    } else {
-      setVetServices([...vetServices, service]);
-    }
-  };
-
   const handleVetLocationDetection = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
@@ -397,8 +391,9 @@ const [longitude, setLongitude] = useState(null);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setVetLatitude(position.coords.latitude);
-        setVetLongitude(position.coords.longitude);
+        setVendorLatitude(position.coords.latitude); // already a number ✅
+        setVendorLongitude(position.coords.longitude);
+
       },
       (error) => {
         console.error("Error getting location:", error);
@@ -567,7 +562,7 @@ const [longitude, setLongitude] = useState(null);
     }
 
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
     const formData = new FormData();
 
@@ -601,21 +596,39 @@ const [longitude, setLongitude] = useState(null);
       formData.append("clinicName", docClinicName);
       formData.append("clinicAddress", docClinicAddress);
       formData.append("specialization", docSpecialization);
-      formData.append("licenseNumber", docLicenseNumber);
+      formData.append("medicalRegistration", docMedicalRegistration);
+      formData.append("medicalCouncil", docMedicalCouncil);
+      formData.append("registrationYear", docRegistrationYear);
       formData.append("education", docEducation);
       formData.append("experience", docExperience);
       formData.append("consultationFee", docConsultationFee);
+      formData.append("videoConsultationFee", docVideoConsultationFee);
       formData.append("availableDays", JSON.stringify(docAvailableDays));
       formData.append("timings", JSON.stringify(docTimings));
       formData.append("services", JSON.stringify(docServices));
-      formData.append("latitude", latitude);
-      formData.append("longitude", longitude);
 
+  if (typeof latitude === "number" && !isNaN(latitude)) {
+    formData.append("doctorClinicLatitude", latitude);
+  } else {
+    alert("Doctor location latitude is missing or invalid.");
+    return;
+  }
 
-      if (docDocuments && docDocuments.length > 0) {
-        docDocuments.forEach((file) => {
-          formData.append("documents", file);
-        });
+  if (typeof longitude === "number" && !isNaN(longitude)) {
+    formData.append("doctorClinicLongitude", longitude);
+  } else {
+    alert("Doctor location longitude is missing or invalid.");
+    return;
+  }
+      // Append each proof file separately
+      if (docRegistrationProof) {
+        formData.append("docMedicalRegistractionProof", docRegistrationProof);
+      }
+      if (docExperienceProof) {
+        formData.append("docExperienceCertificate", docExperienceProof);
+      }
+      if (docDegreeProof) {
+        formData.append("docDegree", docDegreeProof);
       }
     } else {
       formData.append("isDoctor", false);
@@ -624,24 +637,41 @@ const [longitude, setLongitude] = useState(null);
 
     if (roles.vendor === "yes") {
       formData.append("isVendor", true);
-      formData.append("businessName", vendorBusinessName);
+      formData.append("storeName", vendorBusinessName);
       formData.append("storeAddress", vendorStoreAddress);
       formData.append("website", vendorWebsite);
-      formData.append("categories", JSON.stringify(selectedCategories));
+      formData.append("storeDescription", vendorBusinessDescription);
       formData.append("registrationNumber", vendorRegistrationNumber);
-      formData.append("businessType", vendorBusinessType);
+      formData.append("storeType", vendorBusinessType);
       formData.append("yearsInBusiness", vendorYearsInBusiness);
       formData.append("gstNumber", vendorGstNumber);
+      formData.append("categories", JSON.stringify(selectedCategories));
 
-      if (vendorStoreLogo) formData.append("storeProfileImage", vendorStoreLogo);
-      if (vendorStoreBanner) formData.append("storeBanner", vendorStoreBanner);
+      if (vendorLatitude !== null && !isNaN(vendorLatitude)) {
+        formData.append("latitude", vendorLatitude);
+      }
+      if (vendorLongitude !== null && !isNaN(vendorLongitude)) {
+        formData.append("longitude", vendorLongitude);
+      }
 
-      vendorStoreImages.forEach((image, index) => {
+
+      if (vendorRegistrationProof) {
+        formData.append("registractionDocument", vendorRegistrationProof);
+      }
+      if (vendorStoreLogo) {
+        formData.append("storeLogo", vendorStoreLogo);
+      }
+      if (vendorStoreBanner) {
+        formData.append("storeBanner", vendorStoreBanner);
+      }
+
+      vendorStoreImages.forEach((image) => {
         formData.append("storeImages", image);
       });
     } else {
       formData.append("isVendor", false);
     }
+
 
 
     if (roles.venory === "yes") {
@@ -1440,39 +1470,39 @@ const [longitude, setLongitude] = useState(null);
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="file"
-                                                className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
-                                                name="documents"
+                                                className={"tb-my-input "}
+                                                name="registrationProof"
                                                 multiple
                                                 accept=".pdf,.jpg,.png"
                                                 required
-                                                onChange={handleDocRegistrationChange}
+                                                onChange={(e) => setDocRegistrationProof(e.target.files[0])}
                                               />
-                                              <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
+                                              <small>Upload proof of Medical Registration, license, certifications (PDF/Image)</small>
                                             </fieldset>
                                           </div>
                                         </div>
 
-                                          <div className="row mt-3 mb-3">
-                                            <label className="text-color-2 fw-6 mb-0">
-                                              Experience Proof<span className="text-danger">*</span>
-                                            </label>
-                                            <div className="text-wrap flex form-wg">
-                                              <fieldset style={{ width: "100%" }}>
-                                                <input
-                                                  type="file"
-                                                  className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
-                                                  name="documents"
-                                                  multiple
-                                                  accept=".pdf,.jpg,.png"
-                                                  required
-                                                  onChange={handleDocDocumentsChange}
-                                                />
-                                                <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
-                                              </fieldset>
-                                            </div>
+                                        <div className="row mt-3 mb-3">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Experience Proof<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className={"tb-my-input "}
+                                                name="experienceProof"
+                                                multiple
+                                                accept=".pdf,.jpg,.png"
+                                                required
+                                                onChange={(e) => setDocExperienceProof(e.target.files[0])}
+                                              />
+                                              <small>Upload proof of Experience, license, certifications (PDF/Image)</small>
+                                            </fieldset>
                                           </div>
+                                        </div>
 
-                                          <div className="row mt-3 mb-3">
+                                        <div className="row mt-3 mb-3">
                                           <label className="text-color-2 fw-6 mb-0">
                                             Degree Proof<span className="text-danger">*</span>
                                           </label>
@@ -1480,12 +1510,12 @@ const [longitude, setLongitude] = useState(null);
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="file"
-                                                className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
-                                                name="documents"
+                                                className={"tb-my-input"}
+                                                name="degreeProof"
                                                 multiple
                                                 accept=".pdf,.jpg,.png"
                                                 required
-                                                onChange={handleDocDocumentsChange}
+                                                onChange={(e) => setDocDegreeProof(e.target.files[0])}
                                               />
                                               <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
                                             </fieldset>
@@ -1493,35 +1523,41 @@ const [longitude, setLongitude] = useState(null);
                                         </div>
 
 
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Clinic Location (Coordinates)<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="mb-3">
-                                            <button
-                                              type="button"
-                                              className="sc-button btn-icon"
-                                              onClick={handleLocationDetection}
-                                            >
-                                              <span>Detect My Location</span>
-                                            </button>
-                                          </div>
-                                          <div className="mr-2">
-                                            {latitude && longitude && (
-                                              <iframe
-                                                title="Google Map"
-                                                width="650"
-                                                height="450"
-                                                style={{ border: 1 }}
-                                                loading="lazy"
-                                                allowFullScreen
-                                                referrerPolicy="no-referrer-when-downgrade"
-                                                src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
-                                              ></iframe>
-                                            )}
-                                          </div>
+                                     <div className="mt-2">
+  <label className="text-color-2 fw-6 mb-0">
+    Clinic Location (Coordinates)<span className="text-danger">*</span>
+  </label>
+  <div className="mb-3">
+    <button
+      type="button"
+      className="sc-button btn-icon"
+      onClick={handleDocLocationDetection}
+    >
+      <span>Detect My Location</span>
+    </button>
+  </div>
 
-                                        </div>
+  {latitude !== null && longitude !== null && (
+    <>
+      <div className="mr-2">
+        <iframe
+          title="Google Map"
+          width="650"
+          height="450"
+          style={{ border: 1 }}
+          loading="lazy"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
+          src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
+        ></iframe>
+      </div>
+      <div className="text-muted mt-1">
+        <small>Latitude: {latitude}, Longitude: {longitude}</small>
+      </div>
+    </>
+  )}
+</div>
+
 
 
                                         <div className="form-group wdth">
@@ -1713,7 +1749,7 @@ const [longitude, setLongitude] = useState(null);
                                               <input style={{ width: "100%" }}
                                                 type="url"
                                                 className="tb-my-input"
-                                                name="website"
+                                                name="vendorWebsite"
                                                 placeholder="Business website URL"
                                                 value={vendorWebsite}
                                                 onChange={(e) => setVendorWebsite(e.target.value)}
@@ -1813,19 +1849,19 @@ const [longitude, setLongitude] = useState(null);
 
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
-                                            Store Descreption<span className="text-danger">*</span>
+                                            Store Description<span className="text-danger">*</span>
                                           </label>
                                           <div className="text-wrap flex form-wg">
                                             <fieldset style={{ width: "100%" }}>
-                                              <input
-                                                type="text"
+                                              <textarea
+                                                type="textarea  "
                                                 className="tb-my-input"
-                                                name="businessName"
-                                                placeholder="Registered business name"
+                                                name="VendorBusinessDescription"
+                                                placeholder="Write about your store, services, or offerings"
                                                 required
-                                                value={vendorBusinessName}
-                                                onChange={(e) => setVendorBusinessName(e.target.value)}
-                                              />
+                                                value={vendorBusinessDescription}
+                                                onChange={(e) => setVendorBusinessDescription(e.target.value)}
+                                              ></textarea>
                                             </fieldset>
                                           </div>
                                         </div>
@@ -1902,10 +1938,10 @@ const [longitude, setLongitude] = useState(null);
                                               <input
                                                 type="file"
                                                 className="tb-my-input"
-                                                name="storeBanner"
+                                                name="vendorRegistrationProof"
                                                 accept="image/*"
                                                 required
-                                                onChange={handleStoreBannerChange}
+                                                onChange={(e) => setVendorRegistrationProof(e.target.files[0])}
                                               />
                                             </fieldset>
                                           </div>
@@ -1920,10 +1956,10 @@ const [longitude, setLongitude] = useState(null);
                                               <input
                                                 type="file"
                                                 className="tb-my-input"
-                                                name="storeLogo"
+                                                name="vendorStoreLogo"
                                                 accept="image/*"
                                                 required
-                                                onChange={handleStoreLogoChange}
+                                                onChange={(e) => setVendorStoreLogo(e.target.files[0])}
                                               />
                                             </fieldset>
                                           </div>
@@ -1940,10 +1976,10 @@ const [longitude, setLongitude] = useState(null);
                                               <input
                                                 type="file"
                                                 className="tb-my-input"
-                                                name="storeBanner"
+                                                name="vendorStoreBanner"
                                                 accept="image/*"
                                                 required
-                                                onChange={handleStoreBannerChange}
+                                                onChange={(e) => setVendorStoreBanner(e.target.files[0])}
                                               />
                                             </fieldset>
                                           </div>
@@ -1958,10 +1994,10 @@ const [longitude, setLongitude] = useState(null);
                                               <input
                                                 type="file"
                                                 className="tb-my-input"
-                                                name="storeImages"
+                                                name="vendorStoreImages"
                                                 accept="image/*"
                                                 multiple
-                                                onChange={handleStoreImagesChange}
+                                                onChange={(e) => setVendorStoreImages(Array.from(e.target.files))}
                                               />
                                               {vendorStoreImages.length > 0 && (
                                                 <div className="d-flex flex-wrap mt-2">
@@ -1981,7 +2017,7 @@ const [longitude, setLongitude] = useState(null);
 
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
-                                            Clinic Location (Coordinates)<span className="text-danger">*</span>
+                                            store Location (Coordinates)<span className="text-danger">*</span>
                                           </label>
                                           <div className="mb-3">
                                             <button
@@ -1993,7 +2029,7 @@ const [longitude, setLongitude] = useState(null);
                                             </button>
                                           </div>
                                           <div className="mr-2">
-                                            {latitude && longitude && (
+                                            {vendorLatitude && vendorLongitude && (
                                               <iframe
                                                 title="Google Map"
                                                 width="650"
@@ -2002,19 +2038,13 @@ const [longitude, setLongitude] = useState(null);
                                                 loading="lazy"
                                                 allowFullScreen
                                                 referrerPolicy="no-referrer-when-downgrade"
-                                                src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
+                                                src={`https://www.google.com/maps?q=${vendorLatitude},${vendorLongitude}&output=embed`}
                                               ></iframe>
                                             )}
                                           </div>
-
                                         </div>
-
-
                                       </>
-
-
                                     )}
-
                                   </div>
 
                                   <hr />
@@ -2045,6 +2075,7 @@ const [longitude, setLongitude] = useState(null);
                                 </form>
                               </div>
                             ) : null}
+
 
                             {/* Veterinary Services */}
                             {step === 4 ? (
