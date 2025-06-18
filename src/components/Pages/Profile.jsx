@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import OrderList from "./OrderList";
+import Wishlist from "./WishList";
 
 const Profile = () => {
   const [userName, setUserName] = useState("");
@@ -179,10 +180,10 @@ const Profile = () => {
                 </div>
 
                 {/* Menu Sections */}
-                <div className="sidebar-menu" style={{marginLeft: '20px'}}>
+                <div className="sidebar-menu" style={{ marginLeft: '20px' }}>
                   <div className="menu-section">
                     <h5 className="menu-title" style={{
-                      
+
                       fontSize: "16px",
                       fontWeight: "600",
                       margin: "15px 0 10px 0",
@@ -193,7 +194,7 @@ const Profile = () => {
                       style={{
                         display: "block",
                         padding: "8px 0",
-                        
+
                         textDecoration: "none"
                       }}
                       onClick={() => setActiveTab("myOrders")}
@@ -204,7 +205,7 @@ const Profile = () => {
 
                   <div className="menu-section">
                     <h5 className="menu-title" style={{
-                 
+
                       fontSize: "16px",
                       fontWeight: "600",
                       margin: "15px 0 10px 0",
@@ -213,7 +214,7 @@ const Profile = () => {
                     <ul className="menu-list" style={{ listStyle: "none", padding: 0 }}>
                       <li className="menu-item" style={{ padding: "8px 0" }}>
                         <Link
-                          style={{  textDecoration: "none" }}
+                          style={{ textDecoration: "none" }}
                           onClick={() => setActiveTab("profile")}
                         >
                           Profile Information
@@ -221,26 +222,19 @@ const Profile = () => {
                       </li>
                       <li className="menu-item" style={{ padding: "8px 0" }}>
                         <Link
-                          style={{textDecoration: "none" }}
+                          style={{ textDecoration: "none" }}
                           onClick={() => setActiveTab("manageAddresses")}
                         >
                           Manage Addresses
                         </Link>
                       </li>
-                      <li className="menu-item" style={{ padding: "8px 0" }}>
-                        <Link
-                          style={{ textDecoration: "none" }}
-                          onClick={() => setActiveTab("panCard")}
-                        >
-                          PAN Card Information
-                        </Link>
-                      </li>
+
                     </ul>
                   </div>
 
                   <div className="menu-section">
                     <h5 className="menu-title" style={{
-                      
+
                       fontSize: "16px",
                       fontWeight: "600",
                       margin: "15px 0 10px 0",
@@ -249,20 +243,13 @@ const Profile = () => {
                     <ul className="menu-list" style={{ listStyle: "none", padding: 0 }}>
                       <li className="menu-item" style={{ padding: "8px 0" }}>
                         <Link
-                          style={{textDecoration: "none" }}
+                          style={{ textDecoration: "none" }}
                           onClick={() => setActiveTab("giftCards")}
                         >
                           Gift Cards
                         </Link>
                       </li>
-                      <li className="menu-item" style={{ padding: "8px 0" }}>
-                        <Link
-                          style={{textDecoration: "none" }}
-                          onClick={() => setActiveTab("savedUPI")}
-                        >
-                          Saved UPI
-                        </Link>
-                      </li>
+
                       <li className="menu-item" style={{ padding: "8px 0" }}>
                         <Link
                           style={{ textDecoration: "none" }}
@@ -276,7 +263,7 @@ const Profile = () => {
 
                   <div className="menu-section">
                     <h5 className="menu-title" style={{
-                   
+
                       fontSize: "16px",
                       fontWeight: "600",
                       margin: "15px 0 10px 0",
@@ -285,7 +272,7 @@ const Profile = () => {
                     <ul className="menu-list" style={{ listStyle: "none", padding: 0 }}>
                       <li className="menu-item" style={{ padding: "8px 0" }}>
                         <Link
-                          style={{textDecoration: "none" }}
+                          style={{ textDecoration: "none" }}
                           onClick={() => setActiveTab("myCoupons")}
                         >
                           My Coupons
@@ -307,14 +294,7 @@ const Profile = () => {
                           All Notifications
                         </Link>
                       </li>
-                      <li className="menu-item" style={{ padding: "8px 0" }}>
-                        <Link
-                          style={{ textDecoration: "none" }}
-                          onClick={() => setActiveTab("myWishlist")}
-                        >
-                          My Wishlist
-                        </Link>
-                      </li>
+
                     </ul>
                   </div>
 
@@ -328,7 +308,7 @@ const Profile = () => {
                         background: "none",
                         border: "1px solid #ddd",
                         borderRadius: "4px",
-                       
+
                         cursor: "pointer",
                         fontWeight: "500"
                       }}
@@ -343,7 +323,7 @@ const Profile = () => {
             {/* // Main Content Section */}
             <div className="col-xl-9 col-lg-8 col-sm-7 pl-0">
               {activeTab === "profile" && (
-                <form className="registration__form checkout__form account__sidebar">
+                <form className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
                   <div className="sub__registration-detials">
                     <div className="row gutter-20">
                       <div className="col-12">
@@ -505,8 +485,300 @@ const Profile = () => {
                   </div>
                 </form>
               )}
+
+              {activeTab === "manageAddresses" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="sub__title">Manage Addresses</h5>
+                    <button className="btn btn-primary">
+                      <i className="fas fa-plus me-2"></i> Add New Address
+                    </button>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6 mb-4">
+                      <div className="card h-100">
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-start mb-3">
+                            <h5 className="card-title mb-0">Home Address</h5>
+                            <span className="badge bg-primary">Default</span>
+                          </div>
+                          <p className="card-text">
+                            123 Main Street<br />
+                            Apt 4B<br />
+                            New York, NY 10001<br />
+                            United States
+                          </p>
+                          <div className="d-flex justify-content-between mt-3">
+                            <button className="btn btn-sm btn-outline-primary">
+                              <i className="fas fa-edit me-1"></i> Edit
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger">
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6 mb-4">
+                      <div className="card h-100">
+                        <div className="card-body">
+                          <h5 className="card-title mb-3">Work Address</h5>
+                          <p className="card-text">
+                            456 Business Ave<br />
+                            Floor 10<br />
+                            New York, NY 10005<br />
+                            United States
+                          </p>
+                          <div className="d-flex justify-content-between mt-3">
+                            <button className="btn btn-sm btn-outline-primary">
+                              <i className="fas fa-edit me-1"></i> Edit
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger">
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "panCard" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">PAN Card Information</h5>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-md-6">
+                          <div className="form-grp">
+                            <label className="r__form__label">PAN Number</label>
+                            <input
+                              type="text"
+                              placeholder="Enter PAN Number"
+                              value="ABCDE1234F"
+                              readOnly
+                            />
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="form-grp">
+                            <label className="r__form__label">Name on PAN</label>
+                            <input
+                              type="text"
+                              placeholder="Name as on PAN"
+                              value={userName}
+                              readOnly
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3">
+                        <p className="text-muted">
+                          PAN card details are verified and cannot be changed.
+                          Contact support for any corrections.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "giftCards" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">Gift Cards</h5>
+                  <div className="alert alert-info">
+                    You don't have any gift cards yet.
+                  </div>
+                  <div className="card">
+                    <div className="card-body">
+                      <h6 className="card-subtitle mb-2 text-muted">Redeem a Gift Card</h6>
+                      <div className="form-grp">
+                        <input
+                          type="text"
+                          placeholder="Enter Gift Card Code"
+                          className="form-control"
+                        />
+                      </div>
+                      <button className="btn btn-primary mt-2">
+                        Redeem Now
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "savedUPI" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">Saved UPI IDs</h5>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                          <h6 className="mb-0">user@upi</h6>
+                          <small className="text-muted">Default UPI ID</small>
+                        </div>
+                        <div>
+                          <button className="btn btn-sm btn-outline-primary me-2">Edit</button>
+                          <button className="btn btn-sm btn-outline-danger">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="btn btn-primary mt-3">
+                    + Add New UPI ID
+                  </button>
+                </div>
+              )}
+
+              {activeTab === "savedCards" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">Saved Cards</h5>
+                  <div className="card mb-3">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <img
+                            src="https://logo.clearbit.com/visa.com"
+                            alt="Visa"
+                            width="40"
+                            className="me-3"
+                          />
+                          <span>Visa ending in 4242</span>
+                        </div>
+                        <div>
+                          <button className="btn btn-sm btn-outline-danger">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <img
+                            src="https://logo.clearbit.com/mastercard.com"
+                            alt="Mastercard"
+                            width="40"
+                            className="me-3"
+                          />
+                          <span>Mastercard ending in 5555</span>
+                        </div>
+                        <div>
+                          <button className="btn btn-sm btn-outline-danger">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="btn btn-primary mt-3">
+                    + Add New Card
+                  </button>
+                </div>
+              )}
+
+              {activeTab === "myCoupons" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">My Coupons</h5>
+                  <div className="card mb-3">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 className="mb-1">WELCOME20</h6>
+                          <small className="text-muted">Get 20% off on first order</small>
+                        </div>
+                        <div>
+                          <span className="badge bg-success">Active</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 className="mb-1">SUMMER15</h6>
+                          <small className="text-muted">15% off on summer collection</small>
+                        </div>
+                        <div>
+                          <span className="badge bg-secondary">Expired</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "myReviews" && (
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">My Reviews & Ratings</h5>
+                  <div className="card mb-3">
+                    <div className="card-body">
+                      <div className="d-flex mb-2">
+                        <div className="rating me-2">
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="far fa-star text-warning"></i>
+                        </div>
+                        <small className="text-muted">2 weeks ago</small>
+                      </div>
+                      <h6>Great product!</h6>
+                      <p>The quality exceeded my expectations. Would definitely recommend.</p>
+                    </div>
+                  </div>
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="d-flex mb-2">
+                        <div className="rating me-2">
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="fas fa-star text-warning"></i>
+                          <i className="far fa-star text-warning"></i>
+                          <i className="far fa-star text-warning"></i>
+                        </div>
+                        <small className="text-muted">1 month ago</small>
+                      </div>
+                      <h6>Average experience</h6>
+                      <p>Product was okay but delivery took longer than expected.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "allNotifications" && (
+                <div className="registration__form checkout__form account__sidebar mt-4" style={{ marginLeft: '10px' }}>
+                  <h5 className="sub__title">All Notifications</h5>
+                  <div className="list-group">
+                    <div className="list-group-item list-group-item-action">
+                      <div className="d-flex w-100 justify-content-between">
+                        <h6 className="mb-1">Order Shipped</h6>
+                        <small>Today</small>
+                      </div>
+                      <p className="mb-1">Your order #12345 has been shipped.</p>
+                    </div>
+                    <div className="list-group-item list-group-item-action">
+                      <div className="d-flex w-100 justify-content-between">
+                        <h6 className="mb-1">Special Offer</h6>
+                        <small>2 days ago</small>
+                      </div>
+                      <p className="mb-1">Get 20% off on your next purchase!</p>
+                    </div>
+                    <div className="list-group-item list-group-item-action">
+                      <div className="d-flex w-100 justify-content-between">
+                        <h6 className="mb-1">Payment Received</h6>
+                        <small>1 week ago</small>
+                      </div>
+                      <p className="mb-1">We've received your payment for order #12345.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === "appointments" && (
-                <div className="container">
+                <div className="registration__form checkout__form account__sidebar">
                   <h3 className="mb-3">Appointment List</h3>
                   <table className="table">
                     <thead className="table-info">
@@ -536,7 +808,7 @@ const Profile = () => {
                 </div>
               )}
               {activeTab === "favourites" && (
-                <div className="container">
+                <div className="registration__form checkout__form account__sidebar">
                   <h3 className="mb-3">My all time favourites!</h3>
                   <div className="row justify-content-left ">
                     {allDoctors.map((v) => {
@@ -585,7 +857,7 @@ const Profile = () => {
                 </div>
               )}
               {activeTab === "notifications" && (
-                <div className="container mt-4">
+                <div className="registration__form checkout__form account__sidebar mt-4">
                   <h3 className="mb-3">Notifications List</h3>
                   <table className="table">
                     <thead className="table-info">
@@ -688,11 +960,16 @@ const Profile = () => {
               )}
 
               {activeTab === "myOrders" && (
-                <div className="container " >
+                <div className="registration__form checkout__form account__sidebar" style={{ marginLeft: '10px' }}>
                   <OrderList />
                 </div>
               )}
 
+              {/* {activeTab === "wishlist" && (
+                <div className="container " >
+                  <Wishlist />
+                </div>
+              )} */}
 
             </div>
           </div>

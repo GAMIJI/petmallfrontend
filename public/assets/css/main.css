@@ -7525,10 +7525,10 @@ textarea {
 }
 
 .product__details-content .buy-btn {
-  max-width: 465px;
-  display: block;
-  text-align: center;
-  font-size: 18px;
+    max-width: 465px;
+    display: block;
+    text-align: center;
+    font-size: 18px;
   font-family: var(--tg-heading-font-family);
   color: var(--tg-theme-secondary);
   background: #F3F3F3;
@@ -15971,7 +15971,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .checkout__btn {
-  display: flex;
+  display: flex; 
   justify-content: center;
 }
 
@@ -16085,4 +16085,20 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .donor-checkbox:checked~.adoption__form {
   display: block;
+}
+
+.is-invalid {
+  border-color: #dc3545 !important;
+}
+
+.is-invalid-select {
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+}
+
+.invalid-feedback {
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
 }
