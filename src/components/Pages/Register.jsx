@@ -19,7 +19,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 const Register = () => {
   const [activeTab, setActiveTab] = useState("customer");
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const API_URLS = import.meta.env.VITE_API_URLS;
   const api = import.meta.env.VITE_API_URL;
   const [step, setStep] = useState(1);
   const [roles, setRoles] = useState({
@@ -31,20 +31,7 @@ const Register = () => {
 
 
 
-  const categories = ["Pet Food", "Toys", "Grooming", "Accessories", "Health", "Apparel"];
-  const [selected, setSelected] = useState([]);
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef(null);
 
-  const toggleDropdown = () => setOpen(prev => !prev);
-
-  const handleSelect = (value) => {
-    if (selected.includes(value)) {
-      setSelected(selected.filter(item => item !== value));
-    } else {
-      setSelected([...selected, value]);
-    }
-  };
 
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -65,88 +52,60 @@ const Register = () => {
   }, [step]);
 
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
   const [status, setStatus] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
   const [openIndex, setOpenIndex] = useState(null);
-  const [clinicType, setClinicType] = useState('');
 
 
-  // State variables for doctor registration
-  const [docProfilePreview, setDocProfilePreview] = useState(null);
-  const [availableDays, setAvailableDays] = useState([]);
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [documents, setDocuments] = useState([]);
-  const [docProfilePicture, setDocProfilePicture] = useState(null);
-  const [docName, setDocName] = useState("");
-  const [docEmail, setDocEmail] = useState("");
-  const [docPassword, setDocPassword] = useState("");
-  const [docConfirmPassword, setDocConfirmPassword] = useState("");
-  const [docPhone, setDocPhone] = useState("");
-  const [docEducation, setDocEducation] = useState("");
-  const [docExperience, setDocExperience] = useState("");
-  const [docCollege, setDocCollege] = useState("");
-  const [docSpecialization, setDocSpecialization] = useState("");
-  const [docLicenseNumber, setDocLicenseNumber] = useState("");
-  const [docConsultationFee, setDocConsultationFee] = useState("");
-  const [docClinicAddress, setDocClinicAddress] = useState("");
 
-  const [docClinicName, setDocClinicName] = useState("");
-  const [docAvailableDays, setDocAvailableDays] = useState([]);
-  const [docTimings, setDocTimings] = useState({ start: "09:00", end: "18:00" });
-  const [docServices, setDocServices] = useState([]);
+  // const [docProfilePreview, setDocProfilePreview] = useState(null);
+  // const [availableDays, setAvailableDays] = useState([]);
+  // const [startTime, setStartTime] = useState("");
+  // const [endTime, setEndTime] = useState("");
+  // const [documents, setDocuments] = useState([]);
+  // const [docProfilePicture, setDocProfilePicture] = useState(null);
+  // const [docName, setDocName] = useState("");
+  // const [docEmail, setDocEmail] = useState("");
+  // const [docPassword, setDocPassword] = useState("");
+  // const [docConfirmPassword, setDocConfirmPassword] = useState("");
+  // const [docPhone, setDocPhone] = useState("");
+  // const [docEducation, setDocEducation] = useState("");
+  // const [docExperience, setDocExperience] = useState("");
+  // const [docCollege, setDocCollege] = useState("");
+  // const [docSpecialization, setDocSpecialization] = useState("");
+  // const [docLicenseNumber, setDocLicenseNumber] = useState("");
+  // const [docConsultationFee, setDocConsultationFee] = useState("");
+  // const [docClinicAddress, setDocClinicAddress] = useState("");
+
+  // const [docClinicName, setDocClinicName] = useState("");
+  // const [docAvailableDays, setDocAvailableDays] = useState([]);
+  // const [docTimings, setDocTimings] = useState({ start: "09:00", end: "18:00" });
+  // const [docServices, setDocServices] = useState([]);
 
 
   // State variables for customer registration
-  const [profilePreview, setProfilePreview] = useState(null);
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
-  const [userConfirmPassword, setUserConfirmPassword] = useState("");
-  const [userPhone, setUserPhone] = useState("");
-  const [profilePicture, setProfilePicture] = useState(null);
+  // const [profilePreview, setProfilePreview] = useState(null);
+  // const [userName, setUserName] = useState("");
+  // const [userEmail, setUserEmail] = useState("");
+  // const [userPassword, setUserPassword] = useState("");
+  // const [userConfirmPassword, setUserConfirmPassword] = useState("");
+  // const [userPhone, setUserPhone] = useState("");
+  // const [profilePicture, setProfilePicture] = useState(null);
 
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [locationError, setLocationError] = useState('');
-
-
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLatitude(position.coords.latitude.toFixed(6));
-        setLongitude(position.coords.longitude.toFixed(6));
-        setLocationError('');
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        setLocationError('Unable to retrieve your location. Please allow permission.');
-      }
-    );
-  };
-
-  // const handleDocProfileChange = (e) => {
-  //   setDocProfilePicture(e.target.files[0]);
-  // };
-  const handleDocDocumentsChange = (e) => { setDocDocuments([...e.target.files]); };
-
-
-  const toggleNavbar = () => {
-    setIsOpen(!isOpen);
-  };
-
-
-
-  const newPage = () => {
-    navigate("/DashBoard");
-  };
 
   const handleSupportClick = () => {
     setStatus(!status);
@@ -185,201 +144,534 @@ const Register = () => {
     },
   ];
 
-  const daysOptions = [
-    { value: "Mon", label: "Monday" },
-    { value: "Tue", label: "Tuesday" },
-    { value: "Wed", label: "Wednesday" },
-    { value: "Thu", label: "Thursday" },
-    { value: "Fri", label: "Friday" },
-    { value: "Sat", label: "Saturday" },
-    { value: "Sun", label: "Sunday" },
-  ];
 
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-  };
-
-  const handleProfileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfilePicture(file);
-      setProfilePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleDocProfileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setDocProfilePicture(file);
-      setDocProfilePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleDrop = (acceptedFiles) => {
-    setDocuments((prev) => [...prev, ...acceptedFiles]);
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: handleDrop,
-    accept: {
-      "application/pdf": [],
-      "image/jpeg": [],
-      "image/png": [],
-    },
-    multiple: true,
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (userPassword !== userConfirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    setIsLoading(true);
-
-    const formData = new FormData();
-    formData.append("name", userName);
-    formData.append("userEmail", userEmail);
-    formData.append("password", userPassword);
-    formData.append("phone", userPhone);
-    if (profilePicture) {
-      formData.append("profilePicture", profilePicture);
-    }
-
-    try {
-      const response = await axios.post(
-        `${apiUrl}api/user/registerUser`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        console.log("User registered successfully:", response.data);
-        navigate("/verifyOtp", {
-          state: {
-            otp: response.data.user.otp,
-            phone: response.data.user.phone,
-          },
-        });
-      }
-    } catch (error) {
-      console.error(
-        "Registration failed:",
-        error.response?.data || error.message
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVendorSubmit = async (e) => {
-    e.preventDefault();
-
-    if (userPassword !== userConfirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    setIsLoading(true);
-
-    const formData = new FormData();
-    formData.append("role", "vendor");
-    formData.append("name", userName);
-    formData.append("userEmail", userEmail);
-    formData.append("password", userPassword);
-    formData.append("phone", userPhone);
-    if (profilePicture) {
-      formData.append("profilePicture", profilePicture);
-    }
-
-    try {
-      const response = await axios.post(
-        `${apiUrl}api/user/registerUser`,
-        {
-          name: userName,
-          userEmail: userEmail,
-          password: userPassword,
-          phone: userPhone,
-          role: "vendor",
-        },
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        console.log("User registered successfully:", response.data);
-        navigate("/verifyOtp", {
-          state: {
-            otp: response.data.user.otp,
-            phone: response.data.user.phone,
-          },
-        });
-      }
-    } catch (error) {
-      console.error(
-        "Registration failed:",
-        error.response?.data || error.message
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const toggleFAQ = (index) => {
     setOpenIndex((prevIndex) => (prevIndex === index ? null : index));
   }
 
-  const handleDocSubmit = async (e) => {
-    e.preventDefault();
+  const handleRoleSelect = (role, value) => {
+    setRoles((prev) => ({ ...prev, [role]: value }));
+  };
 
-    if (docPassword !== docConfirmPassword) {
-      alert("Passwords do not match!");
+
+
+
+  const [visitedSteps, setVisitedSteps] = useState([1]);
+  const [Name, setName] = useState('');
+  const [Email, setEmail] = useState('');
+  const [Phone, setPhone] = useState('');
+  const [gender, setGenderType] = useState('');
+
+  const [Password, setPassword] = useState('');
+  const [idProof, setIdProof] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+
+
+// State for doctor professional details
+const [docClinicName, setDocClinicName] = useState("");
+const [docClinicAddress, setDocClinicAddress] = useState("");
+const [docSpecialization, setDocSpecialization] = useState("");
+const [docMedicalRegistration, setDocMedicalRegistration] = useState("");
+const [docMedicalCouncil, setDocMedicalCouncil] = useState("");
+const [docRegistrationYear, setDocRegistrationYear] = useState("");
+const [docEducation, setDocEducation] = useState("");
+const [docExperience, setDocExperience] = useState("");
+const [docConsultationFee, setDocConsultationFee] = useState("");
+const [docVideoConsultationFee, setDocVideoConsultationFee] = useState("");
+const [docAvailableDays, setDocAvailableDays] = useState([]);
+const [docTimings, setDocTimings] = useState({
+  start: "",
+  end: ""
+});
+const [docDocuments, setDocDocuments] = useState([]);
+const [docServices, setDocServices] = useState([]);
+const [latitude, setLatitude] = useState(null);
+const [longitude, setLongitude] = useState(null);
+
+
+  const [vendorBusinessName, setVendorBusinessName] = useState("");
+  const [vendorStoreAddress, setVendorStoreAddress] = useState("");
+  const [vendorWebsite, setVendorWebsite] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [vendorRegistrationNumber, setVendorRegistrationNumber] = useState("");
+  const [vendorBusinessType, setVendorBusinessType] = useState("");
+  const [vendorYearsInBusiness, setVendorYearsInBusiness] = useState("");
+  const [vendorGstNumber, setVendorGstNumber] = useState("");
+  const [vendorStoreLogo, setVendorStoreLogo] = useState(null);
+  const [vendorStoreBanner, setVendorStoreBanner] = useState(null);
+  const [vendorStoreImages, setVendorStoreImages] = useState([]);
+
+  // For category dropdown
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const categories = [
+    "Pet Food",
+    "Pet Accessories",
+    "Pet Grooming",
+    "Pet Toys",
+    "Pet Health",
+    "Pet Clothing",
+    "Pet Furniture"
+  ];
+
+  // Veterinary registration states
+  const [vetRegistrationNumber, setVetRegistrationNumber] = useState("");
+  const [vetLicenseFile, setVetLicenseFile] = useState(null);
+  const [vetExperience, setVetExperience] = useState("");
+  const [vetClinicName, setVetClinicName] = useState("");
+  const [vetClinicAddress, setVetClinicAddress] = useState("");
+  const [vetConsultationFee, setVetConsultationFee] = useState("");
+  const [vetTimings, setVetTimings] = useState({
+    start: "",
+    end: ""
+  });
+  // Veterinary specific states
+  const [vetEducation, setVetEducation] = useState("");
+  const [vetCollege, setVetCollege] = useState("");
+  const [vetSpecialization, setVetSpecialization] = useState("");
+  const [vetAvailableDays, setVetAvailableDays] = useState([]);
+  const [vetServices, setVetServices] = useState([]);
+  const [vetLatitude, setVetLatitude] = useState(null);
+  const [vetLongitude, setVetLongitude] = useState(null);
+
+  const [validationAttempted, setValidationAttempted] = useState({
+    1: false,
+    2: false,
+    3: false,
+    4: false
+  });
+
+  const goToStep = (newStep) => {
+    let isValid = true;
+
+    // Validate only the current step before proceeding
+    if (step === 1) isValid = validateStep1();
+    else if (step === 2) isValid = validateStep2();
+    else if (step === 3) isValid = validateStep3();
+    else if (step === 4) isValid = validateStep4();
+
+    // Mark this step as validation attempted
+    setValidationAttempted(prev => ({ ...prev, [step]: true }));
+
+    if (isValid) {
+      setStep(newStep);
+      if (!visitedSteps.includes(newStep)) {
+        setVisitedSteps([...visitedSteps, newStep]);
+      }
+    } else {
+      scrollToFirstInvalid();
+    }
+  };
+
+  const scrollToFirstInvalid = () => {
+    const firstInvalid = document.querySelector('.is-invalid');
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstInvalid.focus();
+    }
+  };
+
+
+
+  const handleIdProofChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
+      setIdProof(file);
+    } else {
+      alert("File is too large. Max size is 5MB.");
+      e.target.value = null;
+    }
+  };
+
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.size <= 5 * 1024 * 1024) { // 5MB limit
+      setProfilePicture(file);
+    } else {
+      alert("File is too large. Max size is 5MB.");
+      e.target.value = null;
+    }
+  };
+
+  // Handler for document uploads
+  const handleDocDocumentsChange = (e) => {
+    const files = Array.from(e.target.files);
+    setDocDocuments(files);
+  };
+
+  // Handler for available days selection
+  const handleDaySelection = (day) => {
+    if (docAvailableDays.includes(day)) {
+      setDocAvailableDays(docAvailableDays.filter(d => d !== day));
+    } else {
+      setDocAvailableDays([...docAvailableDays, day]);
+    }
+  };
+
+  // Handler for services selection
+  const handleServiceSelection = (service) => {
+    if (docServices.includes(service)) {
+      setDocServices(docServices.filter(s => s !== service));
+    } else {
+      setDocServices([...docServices, service]);
+    }
+  };
+
+  const handleLocationDetection = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
       return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        alert("Error getting your location. Please try again or enter manually.");
+      }
+    );
+  };
+
+  // Handler for store logo upload
+  const handleStoreLogoChange = (e) => {
+    setVendorStoreLogo(e.target.files[0]);
+  };
+
+  // Handler for store banner upload
+  const handleStoreBannerChange = (e) => {
+    setVendorStoreBanner(e.target.files[0]);
+  };
+
+  // Handler for store images upload
+  const handleStoreImagesChange = (e) => {
+    setVendorStoreImages(Array.from(e.target.files));
+  };
+
+  // Handler for category selection
+  const handleSelect = (category) => {
+    if (selectedCategories.includes(category)) {
+      setSelectedCategories(selectedCategories.filter(c => c !== category));
+    } else {
+      setSelectedCategories([...selectedCategories, category]);
+    }
+  };
+
+  // Toggle dropdown
+  const toggleDropdown = () => {
+    setOpen(!open);
+  };
+
+
+
+  // Handler for license file upload
+  const handleLicenseFileChange = (e) => {
+    setVetLicenseFile(e.target.files[0]);
+  };
+
+
+  const handleVetDaySelection = (day) => {
+    if (vetAvailableDays.includes(day)) {
+      setVetAvailableDays(vetAvailableDays.filter(d => d !== day));
+    } else {
+      setVetAvailableDays([...vetAvailableDays, day]);
+    }
+  };
+
+  const handleVetServiceSelection = (service) => {
+    if (vetServices.includes(service)) {
+      setVetServices(vetServices.filter(s => s !== service));
+    } else {
+      setVetServices([...vetServices, service]);
+    }
+  };
+
+  const handleVetLocationDetection = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setVetLatitude(position.coords.latitude);
+        setVetLongitude(position.coords.longitude);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        alert("Error getting your location. Please try again or enter manually.");
+      }
+    );
+  };
+
+  const validateAllSteps = () => {
+    if (!validateStep1()) return false;
+    if (roles.doctor === "yes" && !validateStep2()) return false;
+    if (roles.vendor === "yes" && !validateStep3()) return false;
+    if (roles.venory === "yes" && !validateStep4()) return false;
+    return true;
+  };
+
+  // Validation for Step 1 (Personal Information)
+  const validateStep1 = () => {
+    if (!Name.trim()) return false;
+    if (!Email.trim() || !/^\S+@\S+\.\S+$/.test(Email)) return false;
+    if (!Phone.trim() || !/^\d{10,15}$/.test(Phone)) return false;
+    if (!Password || Password.length < 8) return false;
+    if (!idProof) return false;
+    if (!profilePicture) return false;
+    if (!gender) return false;
+
+    // Only return true if all validations pass
+    return true;
+  };
+
+  // Validation for Step 2 (Doctor Information)
+  const validateStep2 = () => {
+    if (roles.doctor === "yes") {
+      if (!docClinicName.trim()) {
+        alert("Please enter your clinic/hospital name");
+        return false;
+      }
+      if (!docClinicAddress.trim()) {
+        alert("Please enter your clinic address");
+        return false;
+      }
+      if (!docSpecialization.trim()) {
+        alert("Please enter your specialization");
+        return false;
+      }
+      if (isNaN(docExperience) || docExperience < 0) {
+        alert("Please enter valid years of experience");
+        return false;
+      }
+      if (isNaN(docConsultationFee) || docConsultationFee < 0) {
+        alert("Please enter a valid consultation fee");
+        return false;
+      }
+      if (docAvailableDays.length === 0) {
+        alert("Please select at least one available day");
+        return false;
+      }
+      if (!docTimings.start || !docTimings.end) {
+        alert("Please set your operating hours");
+        return false;
+      }
+      if (!latitude || !longitude) {
+        alert("Please set your clinic location");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Validation for Step 3 (Vendor Information)
+  const validateStep3 = () => {
+    if (roles.vendor === "yes") {
+      if (!vendorBusinessName.trim()) {
+        alert("Please enter your business name");
+        return false;
+      }
+      if (!vendorStoreAddress.trim()) {
+        alert("Please enter your store address");
+        return false;
+      }
+      if (selectedCategories.length === 0) {
+        alert("Please select at least one product category");
+        return false;
+      }
+      if (!vendorRegistrationNumber.trim()) {
+        alert("Please enter your registration number");
+        return false;
+      }
+      if (!vendorBusinessType) {
+        alert("Please select your business type");
+        return false;
+      }
+      if (isNaN(vendorYearsInBusiness) || vendorYearsInBusiness < 0) {
+        alert("Please enter valid years in business");
+        return false;
+      }
+      if (!vendorStoreLogo) {
+        alert("Please upload your store logo");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Validation for Step 4 (Veterinary Information)
+  const validateStep4 = () => {
+    if (roles.venory === "yes") {
+      if (!vetClinicName.trim()) {
+        alert("Please enter your clinic name");
+        return false;
+      }
+      if (!vetClinicAddress.trim()) {
+        alert("Please enter your clinic address");
+        return false;
+      }
+      if (!vetRegistrationNumber.trim()) {
+        alert("Please enter your registration number");
+        return false;
+      }
+      if (!vetLicenseFile) {
+        alert("Please upload your license document");
+        return false;
+      }
+      if (isNaN(vetExperience) || vetExperience < 0) {
+        alert("Please enter valid years of experience");
+        return false;
+      }
+      if (isNaN(vetConsultationFee) || vetConsultationFee < 0) {
+        alert("Please enter a valid consultation fee");
+        return false;
+      }
+      if (vetAvailableDays.length === 0) {
+        alert("Please select at least one available day");
+        return false;
+      }
+      if (!vetTimings.start || !vetTimings.end) {
+        alert("Please set your operating hours");
+        return false;
+      }
+      if (!vetLatitude || !vetLongitude) {
+        alert("Please set your clinic location");
+        return false;
+      }
+    }
+    return true;
+  };
+
+
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Mark all steps as validation attempted
+    setValidationAttempted({
+      1: true,
+      2: true,
+      3: true,
+      4: true
+    });
+
+    if (!validateAllSteps()) {
+      alert("Please complete all required fields in all steps");
+      scrollToFirstInvalid();
+      return;
+    }
+
 
     setIsLoading(true);
 
     const formData = new FormData();
-    formData.append("role", "doctor");
-    formData.append("name", docName);
-    formData.append("userEmail", docEmail);
-    formData.append("password", docPassword);
-    formData.append("phone", docPhone);
-    formData.append("education", docEducation);
-    formData.append("experience", docExperience);
-    formData.append("college", docCollege);
-    formData.append("specialization", docSpecialization);
-    formData.append("licenseNumber", docLicenseNumber);
-    formData.append("consultationFee", docConsultationFee);
-    formData.append("clinicAddress", docClinicAddress);
-    if (docProfilePicture) {
-      formData.append("profilePicture", docProfilePicture);
+
+
+
+    formData.append("roles", JSON.stringify([
+      roles.doctor === "yes" && "Doctor",
+      roles.vendor === "yes" && "VENDOR",
+      roles.venory === "yes" && "VETERINARY"
+    ].filter(Boolean)));
+
+
+
+    formData.append("name", Name);
+    formData.append("email", Email);
+    formData.append("password", Password);
+    formData.append("phone", Phone);
+    formData.append("gender", gender);
+
+
+    if (profilePicture) {
+      formData.append("profilePicture", profilePicture);
     }
-    if (documents.length > 0) {
-      documents.forEach((file) => {
-        formData.append("documents", file);
+    if (idProof) {
+      formData.append("idProof", idProof);
+    }
+
+
+    if (roles.doctor === "yes") {
+      formData.append("isDoctor", true);
+      formData.append("clinicName", docClinicName);
+      formData.append("clinicAddress", docClinicAddress);
+      formData.append("specialization", docSpecialization);
+      formData.append("licenseNumber", docLicenseNumber);
+      formData.append("education", docEducation);
+      formData.append("experience", docExperience);
+      formData.append("consultationFee", docConsultationFee);
+      formData.append("availableDays", JSON.stringify(docAvailableDays));
+      formData.append("timings", JSON.stringify(docTimings));
+      formData.append("services", JSON.stringify(docServices));
+      formData.append("latitude", latitude);
+      formData.append("longitude", longitude);
+
+
+      if (docDocuments && docDocuments.length > 0) {
+        docDocuments.forEach((file) => {
+          formData.append("documents", file);
+        });
+      }
+    } else {
+      formData.append("isDoctor", false);
+    }
+
+
+    if (roles.vendor === "yes") {
+      formData.append("isVendor", true);
+      formData.append("businessName", vendorBusinessName);
+      formData.append("storeAddress", vendorStoreAddress);
+      formData.append("website", vendorWebsite);
+      formData.append("categories", JSON.stringify(selectedCategories));
+      formData.append("registrationNumber", vendorRegistrationNumber);
+      formData.append("businessType", vendorBusinessType);
+      formData.append("yearsInBusiness", vendorYearsInBusiness);
+      formData.append("gstNumber", vendorGstNumber);
+
+      if (vendorStoreLogo) formData.append("storeProfileImage", vendorStoreLogo);
+      if (vendorStoreBanner) formData.append("storeBanner", vendorStoreBanner);
+
+      vendorStoreImages.forEach((image, index) => {
+        formData.append("storeImages", image);
       });
+    } else {
+      formData.append("isVendor", false);
     }
-    availableDays.forEach((day) => {
-      formData.append("availableDays", day.value);
-    });
-    formData.append(
-      "timings",
-      JSON.stringify({ start: startTime, end: endTime })
-    );
+
+
+    if (roles.venory === "yes") {
+      formData.append("isVeterinary", true);
+      formData.append("vetRegistrationNumber", vetRegistrationNumber);
+      formData.append("vetExperience", vetExperience);
+      formData.append("vetClinicName", vetClinicName);
+      formData.append("vetClinicAddress", vetClinicAddress);
+      formData.append("vetConsultationFee", vetConsultationFee);
+      formData.append("vetTimings", JSON.stringify(vetTimings));
+      formData.append("vetEducation", vetEducation);
+      formData.append("vetCollege", vetCollege);
+      formData.append("vetSpecialization", vetSpecialization);
+
+      formData.append("vetAvailableDays", JSON.stringify(vetAvailableDays));
+      formData.append("vetServices", JSON.stringify(vetServices));
+
+      formData.append("vetLatitude", vetLatitude);
+      formData.append("vetLongitude", vetLongitude);
+
+      if (vetLicenseFile) formData.append("vetLicenseFile", vetLicenseFile);
+    } else {
+      formData.append("isVeterinary", false);
+    }
+
+
 
     try {
       const response = await axios.post(
-        `${api}api/user/registerUser`,
+        `${API_URLS}api/user/registerPartner`,
         formData,
         {
           headers: {
@@ -389,55 +681,27 @@ const Register = () => {
       );
 
       if (response.status === 200) {
-        console.log("Doctor registered successfully:", response.data);
+        console.log("Registration successful:", response.data);
+
         navigate("/verifyOtp", {
           state: {
             otp: response.data.user.otp,
             phone: response.data.user.phone,
           },
         });
+
+        setStep(5);
       }
     } catch (error) {
       console.error(
         "Registration failed:",
         error.response?.data || error.message
       );
+      alert("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
-  const [hidepersonal, setHidePersonal] = useState("Hide");
-  const [selectedRole, setSelectedRole] = useState("");
-  const [selectedRoles, setSelectedRoles] = useState([]);
-  const [error, setError] = useState(false);
-  const handleRoleChange = (role) => {
-    setError(false); // Reset error when user interacts
-    if (selectedRoles.includes(role)) {
-      // Remove role if already selected
-      setSelectedRoles(selectedRoles.filter(r => r !== role));
-    } else {
-      // Add role if not selected
-      setSelectedRoles([...selectedRoles, role]);
-    }
-  };
-
-  // Validate before proceeding
-  const handleNextStep = () => {
-    if (selectedRoles.length === 0) {
-      setError(true); // Show error if nothing selected
-      return;
-    }
-    setHidePersonal("DoctorProfessionalDetails"); // Proceed if valid
-  };
-
-
-
-
-  const handleRoleSelect = (role, value) => {
-    setRoles((prev) => ({ ...prev, [role]: value }));
-  };
-
 
   return (
     <div >
@@ -544,7 +808,7 @@ const Register = () => {
 
       <main className="fix" >
 
-        <section className="registration__area-two " style={{ padding: "10px",marginTop:"80px" }}>
+        <section className="registration__area-two " style={{ padding: "10px", marginTop: "80px" }}>
           <div>
             <div className="registration__inner-wrap-two" >
               <div className="row justify-content-center" >
@@ -577,6 +841,7 @@ const Register = () => {
                       <div className="row">
                         <div className="col-lg-12 mb-4">
                           <div id="comments" className="comments cfd">
+                            {/* // basic information */}
                             {step === 1 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
@@ -596,7 +861,7 @@ const Register = () => {
                                     method="post"
                                     id="contactform"
                                     className="ghrt comment-form form-submit p-3 bg-white"
-                                    action="./contact/contact-process.php"
+                                    onSubmit={handleSubmit}
                                     acceptCharset="utf-8"
                                     noValidate="novalidate"
                                   >
@@ -622,13 +887,16 @@ const Register = () => {
                                       <fieldset style={{ width: "100%" }}>
                                         <input
                                           type="text"
-                                          className="tb-my-input"
+                                          className={`tb-my-input ${!Name.trim() && validationAttempted[1] ? 'is-invalid' : ''}`}
                                           name="name"
                                           placeholder="Full Name"
                                           required
-                                          value={docName}
-                                          onChange={(e) => setDocName(e.target.value)}
+                                          value={Name}
+                                          onChange={(e) => setName(e.target.value)}
                                         />
+                                        {!Name.trim() && validationAttempted[1] && (
+                                          <div className="invalid-feedback">Please enter your full name</div>
+                                        )}
                                       </fieldset>
                                     </div>
 
@@ -639,13 +907,16 @@ const Register = () => {
                                       <fieldset style={{ width: "100%" }}>
                                         <input
                                           type="email"
-                                          className="tb-my-input"
+                                          className={`tb-my-input ${(!Email.trim() || !/^\S+@\S+\.\S+$/.test(Email)) && validationAttempted[1] ? 'is-invalid' : ''}`}
                                           name="email"
                                           placeholder="Email Address"
                                           required
-                                          value={docEmail}
-                                          onChange={(e) => setDocEmail(e.target.value)}
+                                          value={Email}
+                                          onChange={(e) => setEmail(e.target.value)}
                                         />
+                                        {(!Email.trim() || !/^\S+@\S+\.\S+$/.test(Email)) && validationAttempted[1] && (
+                                          <div className="invalid-feedback">Please enter a valid email address</div>
+                                        )}
                                       </fieldset>
                                     </div>
 
@@ -656,14 +927,35 @@ const Register = () => {
                                       <fieldset style={{ width: "100%" }}>
                                         <input style={{ width: "100%" }}
                                           type="tel"
-                                          className="tb-my-input"
+                                          className={`tb-my-input ${(!Phone.trim() || !/^\d{10,15}$/.test(Phone)) && validationAttempted[1] ? 'is-invalid' : ''}`}
                                           name="phone"
                                           placeholder="Phone Number"
                                           required
-                                          value={docPhone}
-                                          onChange={(e) => setDocPhone(e.target.value)}
+                                          value={Phone}
+                                          onChange={(e) => setPhone(e.target.value)}
                                         />
+                                        {(!Phone.trim() || !/^\d{10,15}$/.test(Phone)) && validationAttempted[1] && (
+                                          <div className="invalid-feedback">Please enter a valid phone number (10-15 digits)</div>
+                                        )}
                                       </fieldset>
+                                    </div>
+
+
+                                    <div className="mt-2">
+                                      <label className="text-color-2 fw-6 mb-0">
+                                        Gender<span className="text-danger">*</span>
+                                      </label>
+                                      <div className="relative" style={{ width: "100%" }}>
+                                        <select className="nice-select current list style" style={{ width: "100%" }} name="businessType" required
+                                          value={gender}
+                                          onChange={(e) => setGenderType(e.target.value)}
+                                        >
+                                          <option value="" disabled selected>Choose Gender</option>
+                                          <option value="Male">Male</option>
+                                          <option value="Female">Female</option>
+                                          <option value="Other">Other</option>
+                                        </select>
+                                      </div>
                                     </div>
 
                                     <label className="text-color-2 fw-6 mb-0">
@@ -673,17 +965,20 @@ const Register = () => {
                                       <fieldset style={{ width: "100%" }}>
                                         <input
                                           type="password"
-                                          className="tb-my-input"
+                                          className={`tb-my-input ${(!Password || Password.length < 8) && validationAttempted[1] ? 'is-invalid' : ''}`}
                                           name="password"
                                           placeholder="Create a password (8+ characters)"
                                           required
-                                          value={docPassword}
-                                          onChange={(e) => setDocPassword(e.target.value)}
+                                          value={Password}
+                                          onChange={(e) => setPassword(e.target.value)}
                                         />
+                                        {(!Password || Password.length < 8) && validationAttempted[1] && (
+                                          <div className="invalid-feedback">Password must be at least 8 characters</div>
+                                        )}
                                       </fieldset>
                                     </div>
 
-                                    <label className="text-color-2 fw-6 mb-0">
+                                    {/* <label className="text-color-2 fw-6 mb-0">
                                       License Number<span className="text-danger">*</span>
                                     </label>
                                     <div className="text-wrap flex form-wg">
@@ -698,9 +993,9 @@ const Register = () => {
                                           onChange={(e) => setDocLicenseNumber(e.target.value)}
                                         />
                                       </fieldset>
-                                    </div>
+                                    </div> */}
 
-                                    <label className="text-color-2 fw-6 mb-0">
+                                    {/* <label className="text-color-2 fw-6 mb-0">
                                       Education/Degrees<span className="text-danger">*</span>
                                     </label>
 
@@ -716,9 +1011,9 @@ const Register = () => {
                                           onChange={(e) => setDocEducation(e.target.value)}
                                         />
                                       </fieldset>
-                                    </div>
+                                    </div> */}
 
-                                    <label className="text-color-2 fw-6 mb-0">
+                                    {/* <label className="text-color-2 fw-6 mb-0">
                                       College/University<span className="text-danger">*</span>
                                     </label>
                                     <div className="text-wrap flex form-wg">
@@ -733,21 +1028,9 @@ const Register = () => {
                                           onChange={(e) => setDocCollege(e.target.value)}
                                         />
                                       </fieldset>
-                                    </div>
+                                    </div> */}
 
-                                    <label className="text-color-2 fw-6 mb-0">
-                                      Website (optional)
-                                    </label>
-                                    <div className="text-wrap flex form-wg">
-                                      <fieldset style={{ width: "100%" }}>
-                                        <input style={{ width: "100%" }}
-                                          type="url"
-                                          className="tb-my-input"
-                                          name="website"
-                                          placeholder="Business website URL"
-                                        />
-                                      </fieldset>
-                                    </div>
+
                                     <label className="text-color-2 fw-6 mb-0">
                                       ID Proof (Passport/Driving License)<span className="text-danger">*</span>
                                       <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
@@ -756,11 +1039,15 @@ const Register = () => {
                                       <fieldset style={{ width: "100%" }}>
                                         <input
                                           type="file"
-                                          className="tb-my-input"
+                                          className={`tb-my-input ${!idProof && validationAttempted[1] ? 'is-invalid' : ''}`}
                                           name="idProof"
                                           accept=".pdf,.jpg,.jpeg,.png"
                                           required
+                                          onChange={handleIdProofChange}
                                         />
+                                        {!idProof && validationAttempted[1] && (
+                                          <div className="invalid-feedback">Please upload your ID proof</div>
+                                        )}
                                       </fieldset>
                                     </div>
 
@@ -773,38 +1060,28 @@ const Register = () => {
                                       <fieldset style={{ width: "100%" }}>
                                         <input
                                           type="file"
-                                          className="tb-my-input"
+                                          className={`tb-my-input ${!profilePicture && validationAttempted[1] ? 'is-invalid' : ''}`}
                                           name="profilePicture"
                                           accept="image/*"
                                           required
-                                          onChange={handleDocProfileChange}
+                                          onChange={handleProfileChange}
                                         />
+                                        {!profilePicture && validationAttempted[1] && (
+                                          <div className="invalid-feedback">Please upload your profile picture</div>
+                                        )}
                                       </fieldset>
                                     </div>
 
                                     <hr />
                                     <div className="jsy">
                                       <div>
-                                        {/* <button
-                                          style={{ backgroundColor: "rgb(229 228 228)" }}
-                                          onClick={() => {
-                                            setHidePersonal("Hide");
-                                          }}
-                                          className="sc-button btn-icon"
-                                          name="submit"
-                                          type="button"
-                                        >
-                                          <span className="text-color-1" style={{ color: "black" }}>Back</span>
-                                        </button> */}
+
                                       </div>
                                       <div className="lh-16">
+
                                         <button
-                                          onClick={() => {
-                                            setStep(2); // Next step
-                                          }}
+                                          onClick={() => goToStep(step + 1)}
                                           className="sc-button btn-icon"
-                                          name="submit"
-                                          type="button"
                                         >
                                           <span>Next</span>
                                         </button>
@@ -829,11 +1106,11 @@ const Register = () => {
                                 <form method="post"
                                   id="contactform"
                                   className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
+                                  onSubmit={handleSubmit}
                                   acceptCharset="utf-8"
                                   noValidate="novalidate">
                                   <div className="mb-4">
-                                    <label  className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Doctor?</label>
+                                    <label className="fw-6 mb-2" style={{ color: "#05576e" }}>Do you want to register as a Doctor?</label>
                                     <div className="d-flex gap-3">
                                       <label>
                                         <input
@@ -869,13 +1146,17 @@ const Register = () => {
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="text"
-                                                className="tb-my-input"
+                                                className={`tb-my-input ${!docClinicName.trim() && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
+
                                                 name="clinicName"
                                                 placeholder="Clinic or hospital name"
                                                 required
                                                 value={docClinicName}
                                                 onChange={(e) => setDocClinicName(e.target.value)}
                                               />
+                                              {!docClinicName.trim() && visitedSteps.includes(2) && roles.doctor === "yes" && (
+                                                <div className="invalid-feedback">Please enter clinic name</div>
+                                              )}
                                             </fieldset>
                                           </div>
                                         </div>
@@ -888,7 +1169,7 @@ const Register = () => {
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="text"
-                                                className="tb-my-input"
+                                                className={`tb-my-input ${!docClinicAddress.trim() && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                 name="clinicAddress"
                                                 placeholder="Full clinic address"
                                                 required
@@ -907,7 +1188,7 @@ const Register = () => {
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="text"
-                                                className="tb-my-input"
+                                                className={`tb-my-input ${!docSpecialization.trim() && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                 name="specialization"
                                                 placeholder="e.g. Cardiologist, Dermatologist"
                                                 required
@@ -917,6 +1198,94 @@ const Register = () => {
                                             </fieldset>
                                           </div>
                                         </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Medical Registration Number<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className={`tb-my-input ${!docMedicalRegistration.trim() && validationAttempted[2] ? 'is-invalid' : ''}`}
+                                                name="medicalRegistration"
+                                                placeholder="Medical registration number"
+                                                required
+                                                value={docMedicalRegistration}
+                                                onChange={(e) => setDocMedicalRegistration(e.target.value)}
+                                              />
+                                              {!docMedicalRegistration.trim() && validationAttempted[2] && (
+                                                <div className="invalid-feedback">Please enter your medical registration number</div>
+                                              )}
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Medical Council<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className={`tb-my-input ${!docMedicalCouncil.trim() && validationAttempted[2] ? 'is-invalid' : ''}`}
+                                                name="medicalCouncil"
+                                                placeholder="Medical council name"
+                                                required
+                                                value={docMedicalCouncil}
+                                                onChange={(e) => setDocMedicalCouncil(e.target.value)}
+                                              />
+                                              {!docMedicalCouncil.trim() && validationAttempted[2] && (
+                                                <div className="invalid-feedback">Please enter medical council</div>
+                                              )}
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Registration Year<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className={`tb-my-input ${!docRegistrationYear && validationAttempted[2] ? 'is-invalid' : ''}`}
+                                                name="registrationYear"
+                                                placeholder="Year of registration"
+                                                required
+                                                value={docRegistrationYear}
+                                                onChange={(e) => setDocRegistrationYear(e.target.value)}
+                                              />
+                                              {!docRegistrationYear && validationAttempted[2] && (
+                                                <div className="invalid-feedback">Please enter registration year</div>
+                                              )}
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Education/Degrees<span className="text-danger">*</span>
+                                          </label>
+
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className={`tb-my-input ${!docEducation.trim() && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
+                                                name="education"
+                                                placeholder="e.g. MBBS, MD, BAMS"
+                                                required
+                                                value={docEducation}
+                                                onChange={(e) => setDocEducation(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
                                             Years of Experience<span className="text-danger">*</span>
@@ -925,13 +1294,22 @@ const Register = () => {
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="number"
-                                                className="tb-my-input"
+                                                className={`tb-my-input ${(isNaN(docExperience) || docExperience < 0) && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                 name="experience"
                                                 placeholder="Years of experience"
                                                 required
                                                 value={docExperience}
-                                                onChange={(e) => setDocExperience(e.target.value)}
+                                                onChange={(e) => {
+                                                  const value = e.target.value;
+                                                  if (value === '' || !isNaN(value)) {
+                                                    setDocExperience(value);
+                                                  }
+                                                }}
+
                                               />
+                                              {(isNaN(docExperience) || docExperience < 0) && visitedSteps.includes(2) && roles.doctor === "yes" && (
+                                                <div className="invalid-feedback">Please enter valid experience</div>
+                                              )}
                                             </fieldset>
                                           </div>
                                         </div>
@@ -944,12 +1322,43 @@ const Register = () => {
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="number"
-                                                className="tb-my-input"
+                                                className={`tb-my-input ${(isNaN(docConsultationFee) || docConsultationFee < 0) && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                 name="consultationFee"
                                                 placeholder="Consultation fee in local currency"
                                                 required
                                                 value={docConsultationFee}
-                                                onChange={(e) => setDocConsultationFee(e.target.value)}
+                                                onChange={(e) => {
+                                                  const value = e.target.value;
+                                                  if (value === '' || !isNaN(value)) {
+                                                    setDocConsultationFee(value);
+                                                  }
+                                                }}
+
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            video Consulting Fees<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="number"
+                                                className={`tb-my-input ${(isNaN(docConsultationFee) || docConsultationFee < 0) && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
+                                                name="consultationFee"
+                                                placeholder="Consultation fee in local currency"
+                                                required
+                                                value={docVideoConsultationFee}
+                                                onChange={(e) => {
+                                                  const value = e.target.value;
+                                                  if (value === '' || !isNaN(value)) {
+                                                    setDocVideoConsultationFee(value);
+                                                  }
+                                                }}
+
                                               />
                                             </fieldset>
                                           </div>
@@ -962,20 +1371,14 @@ const Register = () => {
                                           <div className="form-group wdth">
                                             <div className="d-flex flex-wrap gap-2" >
                                               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                                                <label key={day} className="d-flex align-items-center" style={{color :"#05576e"}}>
+                                                <label key={day} className="d-flex align-items-center" style={{ color: "#05576e" }}>
                                                   <input
                                                     className="chkhgh"
                                                     name="availableDays"
                                                     type="checkbox"
                                                     value={day}
                                                     checked={docAvailableDays.includes(day)}
-                                                    onChange={(e) => {
-                                                      if (e.target.checked) {
-                                                        setDocAvailableDays([...docAvailableDays, day]);
-                                                      } else {
-                                                        setDocAvailableDays(docAvailableDays.filter(d => d !== day));
-                                                      }
-                                                    }}
+                                                    onChange={() => handleDaySelection(day)}
                                                   />
                                                   <span className="btn-checkbox ms-2" />
                                                   <span className="mt-1 fs-13 fw-6 ms-2">{day}</span>
@@ -998,7 +1401,7 @@ const Register = () => {
                                                 <fieldset style={{ width: "100%" }}>
                                                   <input
                                                     type="time"
-                                                    className="tb-my-input"
+                                                    className={`tb-my-input ${!docTimings.start && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                     name="startTime"
                                                     required
                                                     value={docTimings.start}
@@ -1015,7 +1418,7 @@ const Register = () => {
                                                 <fieldset style={{ width: "100%" }}>
                                                   <input
                                                     type="time"
-                                                    className="tb-my-input"
+                                                    className={`tb-my-input ${!docTimings.end && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                     name="endTime"
                                                     required
                                                     value={docTimings.end}
@@ -1031,13 +1434,53 @@ const Register = () => {
 
                                         <div className="row mt-3 mb-3">
                                           <label className="text-color-2 fw-6 mb-0">
-                                            Professional Documents<span className="text-danger">*</span>
+                                            Medical Registration Proof<span className="text-danger">*</span>
                                           </label>
                                           <div className="text-wrap flex form-wg">
                                             <fieldset style={{ width: "100%" }}>
                                               <input
                                                 type="file"
-                                                className="tb-my-input"
+                                                className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
+                                                name="documents"
+                                                multiple
+                                                accept=".pdf,.jpg,.png"
+                                                required
+                                                onChange={handleDocRegistrationChange}
+                                              />
+                                              <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                          <div className="row mt-3 mb-3">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Experience Proof<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="file"
+                                                  className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
+                                                  name="documents"
+                                                  multiple
+                                                  accept=".pdf,.jpg,.png"
+                                                  required
+                                                  onChange={handleDocDocumentsChange}
+                                                />
+                                                <small>Upload proof of degrees, license, certifications (PDF/Image)</small>
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="row mt-3 mb-3">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Degree Proof<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className={`tb-my-input ${docDocuments.length === 0 && visitedSteps.includes(2) && roles.doctor === "yes" ? 'is-invalid' : ''}`}
                                                 name="documents"
                                                 multiple
                                                 accept=".pdf,.jpg,.png"
@@ -1049,6 +1492,7 @@ const Register = () => {
                                           </div>
                                         </div>
 
+
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
                                             Clinic Location (Coordinates)<span className="text-danger">*</span>
@@ -1057,17 +1501,7 @@ const Register = () => {
                                             <button
                                               type="button"
                                               className="sc-button btn-icon"
-                                              onClick={() => {
-                                                navigator.geolocation.getCurrentPosition(
-                                                  (position) => {
-                                                    setLatitude(position.coords.latitude);
-                                                    setLongitude(position.coords.longitude);
-                                                  },
-                                                  (error) => {
-                                                    console.error("Error getting location:", error);
-                                                  }
-                                                );
-                                              }}
+                                              onClick={handleLocationDetection}
                                             >
                                               <span>Detect My Location</span>
                                             </button>
@@ -1096,23 +1530,16 @@ const Register = () => {
                                               Please select the services you provide<span className="text-danger">*</span>
                                             </label>
                                             <label className="d-flex align-items-center">
-
                                               <input
                                                 className="chkhgh"
                                                 name="services"
                                                 type="checkbox"
                                                 value="General Checkups"
                                                 checked={docServices.includes("General Checkups")}
-                                                onChange={(e) => {
-                                                  if (e.target.checked) {
-                                                    setDocServices([...docServices, "General Checkups"]);
-                                                  } else {
-                                                    setDocServices(docServices.filter(s => s !== "General Checkups"));
-                                                  }
-                                                }}
+                                                onChange={() => handleServiceSelection("General Checkups")}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>General Checkups</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>General Checkups</span>
                                             </label>
 
                                             <label className="d-flex align-items-center">
@@ -1120,37 +1547,27 @@ const Register = () => {
                                                 className="chkhgh"
                                                 name="services"
                                                 type="checkbox"
-                                                value="Vaccinations"
+                                                value="General Checkups"
                                                 checked={docServices.includes("Vaccinations")}
-                                                onChange={(e) => {
-                                                  if (e.target.checked) {
-                                                    setDocServices([...docServices, "Vaccinations"]);
-                                                  } else {
-                                                    setDocServices(docServices.filter(s => s !== "Vaccinations"));
-                                                  }
-                                                }}
+                                                onChange={() => handleServiceSelection("Vaccinations")}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Vaccinations</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>Vaccinations</span>
                                             </label>
+
+
 
                                             <label className="d-flex align-items-center">
                                               <input
                                                 className="chkhgh"
                                                 name="services"
                                                 type="checkbox"
-                                                value="Surgery"
+                                                value="General Checkups"
                                                 checked={docServices.includes("Surgery")}
-                                                onChange={(e) => {
-                                                  if (e.target.checked) {
-                                                    setDocServices([...docServices, "Surgery"]);
-                                                  } else {
-                                                    setDocServices(docServices.filter(s => s !== "Surgery"));
-                                                  }
-                                                }}
+                                                onChange={() => handleServiceSelection("Surgery")}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Surgery</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>Surgery</span>
                                             </label>
 
                                             <label className="d-flex align-items-center">
@@ -1158,18 +1575,12 @@ const Register = () => {
                                                 className="chkhgh"
                                                 name="services"
                                                 type="checkbox"
-                                                value="Dental Care"
+                                                value="General Checkups"
                                                 checked={docServices.includes("Dental Care")}
-                                                onChange={(e) => {
-                                                  if (e.target.checked) {
-                                                    setDocServices([...docServices, "Dental Care"]);
-                                                  } else {
-                                                    setDocServices(docServices.filter(s => s !== "Dental Care"));
-                                                  }
-                                                }}
+                                                onChange={() => handleServiceSelection("Dental Care")}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Dental Care</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>Dental Care"</span>
                                             </label>
                                           </div>
                                         </div>
@@ -1193,13 +1604,10 @@ const Register = () => {
                                       </button>
                                     </div>
                                     <div className="lh-16">
+
                                       <button
-                                        onClick={() => {
-                                          setStep(3); // Next step
-                                        }}
+                                        onClick={() => goToStep(step + 1)}
                                         className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
                                       >
                                         <span>Next</span>
                                       </button>
@@ -1210,7 +1618,7 @@ const Register = () => {
                               </div>
                             ) : null}
 
-                            {/* Doctor Clinic Information */}
+                            {/* vendor detail */}
                             {step === 3 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
@@ -1225,12 +1633,12 @@ const Register = () => {
                                   method="post"
                                   id="contactform"
                                   className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
+                                  onSubmit={handleSubmit}
                                   acceptCharset="utf-8"
                                   noValidate="novalidate"
                                 >
                                   <div className="mb-4">
-                                    <label className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Vendor?</label>
+                                    <label className="fw-6 mb-2" style={{ color: "#05576e" }}>Do you want to register as a Vendor?</label>
                                     <div className="d-flex gap-3">
                                       <label>
                                         <input
@@ -1268,6 +1676,8 @@ const Register = () => {
                                                 name="businessName"
                                                 placeholder="Registered business name"
                                                 required
+                                                value={vendorBusinessName}
+                                                onChange={(e) => setVendorBusinessName(e.target.value)}
                                               />
                                             </fieldset>
                                           </div>
@@ -1285,6 +1695,8 @@ const Register = () => {
                                                 placeholder="Full physical location"
                                                 required
                                                 rows="3"
+                                                value={vendorStoreAddress}
+                                                onChange={(e) => setVendorStoreAddress(e.target.value)}
                                               />
                                             </fieldset>
                                           </div>
@@ -1303,6 +1715,8 @@ const Register = () => {
                                                 className="tb-my-input"
                                                 name="website"
                                                 placeholder="Business website URL"
+                                                value={vendorWebsite}
+                                                onChange={(e) => setVendorWebsite(e.target.value)}
                                               />
                                             </fieldset>
                                           </div>
@@ -1328,7 +1742,7 @@ const Register = () => {
                                               onClick={toggleDropdown}
                                             >
                                               <span className="current">
-                                                {selected.length > 0 ? selected.join(", ") : "Choose product categories"}
+                                                {selectedCategories.length > 0 ? selectedCategories.join(", ") : "Choose product categories"}
                                               </span>
                                               <div
                                                 className="arrow"
@@ -1365,7 +1779,7 @@ const Register = () => {
                                                       <input
                                                         type="checkbox"
                                                         value={category}
-                                                        checked={selected.includes(category)}
+                                                        checked={selectedCategories.includes(category)}
                                                         onChange={() => handleSelect(category)}
                                                         className="me-2"
                                                       />
@@ -1375,6 +1789,44 @@ const Register = () => {
                                                 ))}
                                               </ul>
                                             )}
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Type<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="relative" style={{ width: "100%" }}>
+                                            <select className="nice-select current list style" style={{ width: "100%" }} name="businessType" required
+                                              value={vendorBusinessType}
+                                              onChange={(e) => setVendorBusinessType(e.target.value)}
+                                            >
+                                              <option value="" disabled selected>Choose business type</option>
+                                              <option value="retailer">Retailer</option>
+                                              <option value="wholesaler">Wholesaler</option>
+                                              <option value="manufacturer">Manufacturer</option>
+                                              <option value="dropshipper">Dropshipper</option>
+                                              <option value="distributor">Distributor</option>
+                                            </select>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Descreption<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="text"
+                                                className="tb-my-input"
+                                                name="businessName"
+                                                placeholder="Registered business name"
+                                                required
+                                                value={vendorBusinessName}
+                                                onChange={(e) => setVendorBusinessName(e.target.value)}
+                                              />
+                                            </fieldset>
                                           </div>
                                         </div>
 
@@ -1390,29 +1842,12 @@ const Register = () => {
                                                 name="registrationNumber"
                                                 placeholder="Business registration number"
                                                 required
+                                                value={vendorRegistrationNumber}
+                                                onChange={(e) => setVendorRegistrationNumber(e.target.value)}
                                               />
                                             </fieldset>
                                           </div>
                                         </div>
-
-
-
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Store Type<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="relative" style={{ width: "100%" }}>
-                                            <select className="nice-select current list style" style={{ width: "100%" }} name="businessType" required>
-                                              <option value="" disabled selected>Choose business type</option>
-                                              <option value="retailer">Retailer</option>
-                                              <option value="wholesaler">Wholesaler</option>
-                                              <option value="manufacturer">Manufacturer</option>
-                                              <option value="dropshipper">Dropshipper</option>
-                                              <option value="distributor">Distributor</option>
-                                            </select>
-                                          </div>
-                                        </div>
-
 
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
@@ -1427,6 +1862,14 @@ const Register = () => {
                                                 placeholder="Number of years in business"
                                                 min="0"
                                                 required
+                                                value={vendorYearsInBusiness}
+                                                onChange={(e) => {
+                                                  const value = e.target.value;
+                                                  if (value === '' || !isNaN(value)) {
+                                                    setVendorYearsInBusiness(value);
+                                                  }
+                                                }}
+
                                               />
                                             </fieldset>
                                           </div>
@@ -1434,7 +1877,7 @@ const Register = () => {
 
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
-                                            GST Number (optional)
+                                            GST Number
                                           </label>
                                           <div className="text-wrap flex form-wg">
                                             <fieldset style={{ width: "100%" }}>
@@ -1443,6 +1886,44 @@ const Register = () => {
                                                 className="tb-my-input"
                                                 name="gstNumber"
                                                 placeholder="GST or tax identification number"
+                                                value={vendorGstNumber}
+                                                onChange={(e) => setVendorGstNumber(e.target.value)}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Registration Proof<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className="tb-my-input"
+                                                name="storeBanner"
+                                                accept="image/*"
+                                                required
+                                                onChange={handleStoreBannerChange}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Logo<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className="tb-my-input"
+                                                name="storeLogo"
+                                                accept="image/*"
+                                                required
+                                                onChange={handleStoreLogoChange}
                                               />
                                             </fieldset>
                                           </div>
@@ -1450,10 +1931,90 @@ const Register = () => {
 
 
 
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Banner<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className="tb-my-input"
+                                                name="storeBanner"
+                                                accept="image/*"
+                                                required
+                                                onChange={handleStoreBannerChange}
+                                              />
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Store Images (up to 5)
+                                          </label>
+                                          <div className="text-wrap flex form-wg">
+                                            <fieldset style={{ width: "100%" }}>
+                                              <input
+                                                type="file"
+                                                className="tb-my-input"
+                                                name="storeImages"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={handleStoreImagesChange}
+                                              />
+                                              {vendorStoreImages.length > 0 && (
+                                                <div className="d-flex flex-wrap mt-2">
+                                                  {vendorStoreImages.map((image, index) => (
+                                                    <img
+                                                      key={index}
+                                                      src={URL.createObjectURL(image)}
+                                                      alt={`Store Image ${index + 1}`}
+                                                      style={{ width: "80px", height: "80px", margin: "5px" }}
+                                                    />
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </fieldset>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <label className="text-color-2 fw-6 mb-0">
+                                            Clinic Location (Coordinates)<span className="text-danger">*</span>
+                                          </label>
+                                          <div className="mb-3">
+                                            <button
+                                              type="button"
+                                              className="sc-button btn-icon"
+                                              onClick={handleLocationDetection}
+                                            >
+                                              <span>Detect My Location</span>
+                                            </button>
+                                          </div>
+                                          <div className="mr-2">
+                                            {latitude && longitude && (
+                                              <iframe
+                                                title="Google Map"
+                                                width="650"
+                                                height="450"
+                                                style={{ border: 1 }}
+                                                loading="lazy"
+                                                allowFullScreen
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                                src={`https://www.google.com/maps?q=${latitude},${longitude}&output=embed`}
+                                              ></iframe>
+                                            )}
+                                          </div>
+
+                                        </div>
+
+
                                       </>
 
 
                                     )}
+
                                   </div>
 
                                   <hr />
@@ -1472,13 +2033,10 @@ const Register = () => {
                                       </button>
                                     </div>
                                     <div className="lh-16">
+
                                       <button
-                                        onClick={() => {
-                                          setStep(4); // Next step
-                                        }}
+                                        onClick={() => goToStep(step + 1)}
                                         className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
                                       >
                                         <span>Next</span>
                                       </button>
@@ -1498,18 +2056,17 @@ const Register = () => {
                                 <div className="w3-border mb-1 bgh">
                                   <div className="w3-grey ert prgs3"></div>
                                 </div>
-                                <p className="fs-18 mb-3">Step 3 of 4</p>
+                                <p className="fs-18 mb-3">Step 4 of 4</p>
                                 <form
                                   method="post"
                                   id="contactform"
                                   className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
+                                  onSubmit={handleSubmit}
                                   acceptCharset="utf-8"
                                   noValidate="novalidate"
                                 >
-
                                   <div className="mb-4">
-                                    <label className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Veterinary?</label>
+                                    <label className="fw-6 mb-2" style={{ color: "#05576e" }}>Do you want to register as a Veterinary?</label>
                                     <div className="d-flex gap-3">
                                       <label>
                                         <input
@@ -1535,160 +2092,442 @@ const Register = () => {
 
                                     {roles.venory === "yes" && (
                                       <>
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Registration Number<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="text-wrap flex form-wg">
-                                            <fieldset style={{ width: "100%" }}>
-                                              <input
-                                                type="text"
-                                                className="tb-my-input"
-                                                name="registrationNumber"
-                                                placeholder="Veterinary council registration number"
-                                                required
-                                              />
-                                            </fieldset>
-                                          </div>
-                                        </div>
+                                        {/* Professional Information */}
+                                        <div className="mt-4">
+                                          <h4 className="text-color-2 fw-6 mb-3 border-bottom pb-2">Professional Information</h4>
 
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            License Document<span className="text-danger">*</span>
-                                            <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
-                                          </label>
-                                          <div className="text-wrap flex form-wg">
-                                            <fieldset style={{ width: "100%" }}>
-                                              <input
-                                                type="file"
-                                                className="tb-my-input"
-                                                name="licenseFile"
-                                                accept=".pdf,.jpg,.jpeg,.png"
-                                                required
-                                              />
-                                            </fieldset>
-                                          </div>
-                                        </div>
-
-
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Years of Experience<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="text-wrap flex form-wg">
-                                            <fieldset style={{ width: "100%" }}>
-                                              <input
-                                                type="number"
-                                                className="tb-my-input"
-                                                name="experience"
-                                                placeholder="Number of years in practice"
-                                                min="0"
-                                                required
-                                              />
-                                            </fieldset>
-                                          </div>
-                                        </div>
-
-                                        <div className="mt-2">
-
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Clinic Name<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="text-wrap flex form-wg">
-                                            <fieldset style={{ width: "100%" }}>
-                                              <input
-                                                type="text"
-                                                className="tb-my-input"
-                                                name="clinicName"
-                                                placeholder="Name of your veterinary clinic"
-                                                required
-                                              />
-                                            </fieldset>
-                                          </div>
-                                        </div>
-
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Clinic Address<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="text-wrap flex form-wg">
-                                            <fieldset style={{ width: "100%" }}>
-                                              <input style={{ width: "100%" }}
-                                                className="tb-my-input"
-                                                name="clinicAddress"
-                                                placeholder="Full address of your clinic"
-                                                required
-                                                rows="3"
-                                              />
-                                            </fieldset>
-                                          </div>
-                                        </div>
-
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Operating Hours<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="row mt-3">
-                                            <div className="col-md-6">
-                                              <label className="text-color-2 fw-6 mb-0">
-                                                Start Time<span className="text-danger">*</span>
-                                              </label>
-                                              <div className="text-wrap flex form-wg">
-                                                <fieldset style={{ width: "100%" }}>
-                                                  <input
-                                                    type="time"
-                                                    className="tb-my-input"
-                                                    name="startTime"
-                                                    required
-                                                    value={docTimings.start}
-                                                    onChange={(e) => setDocTimings({ ...docTimings, start: e.target.value })}
-                                                  />
-                                                </fieldset>
-                                              </div>
-                                            </div>
-                                            <div className="col-md-6">
-                                              <label className="text-color-2 fw-6 mb-0">
-                                                End Time<span className="text-danger">*</span>
-                                              </label>
-                                              <div className="text-wrap flex form-wg">
-                                                <fieldset style={{ width: "100%" }}>
-                                                  <input
-                                                    type="time"
-                                                    className="tb-my-input"
-                                                    name="endTime"
-                                                    required
-                                                    value={docTimings.end}
-                                                    onChange={(e) => setDocTimings({ ...docTimings, end: e.target.value })}
-                                                  />
-                                                </fieldset>
-                                              </div>
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Registration Number<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className="tb-my-input"
+                                                  name="vetRegistrationNumber"
+                                                  placeholder="Veterinary council registration number"
+                                                  required
+                                                  value={vetRegistrationNumber}
+                                                  onChange={(e) => setVetRegistrationNumber(e.target.value)}
+                                                />
+                                              </fieldset>
                                             </div>
                                           </div>
 
-
-                                        </div>
-
-
-                                        <div className="mt-2">
-                                          <label className="text-color-2 fw-6 mb-0">
-                                            Consultation Fee (₹)<span className="text-danger">*</span>
-                                          </label>
-                                          <div className="text-wrap flex form-wg">
-                                            <fieldset style={{ width: "100%" }}>
-                                              <input
-                                                type="number"
-                                                className="tb-my-input"
-                                                name="consultationFee"
-                                                placeholder="Base consultation fee in INR"
-                                                min="0"
-                                                required
-                                              />
-                                            </fieldset>
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Medical Council<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className={`tb-my-input ${!docMedicalCouncil.trim() && validationAttempted[2] ? 'is-invalid' : ''}`}
+                                                  name="medicalCouncil"
+                                                  placeholder="Medical council name"
+                                                  required
+                                                  value={docMedicalCouncil}
+                                                  onChange={(e) => setDocMedicalCouncil(e.target.value)}
+                                                />
+                                                {!docMedicalCouncil.trim() && validationAttempted[2] && (
+                                                  <div className="invalid-feedback">Please enter medical council</div>
+                                                )}
+                                              </fieldset>
+                                            </div>
                                           </div>
 
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Registration Year<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="number"
+                                                  className={`tb-my-input ${!docRegistrationYear && validationAttempted[2] ? 'is-invalid' : ''}`}
+                                                  name="registrationYear"
+                                                  placeholder="Year of registration"
+                                                  required
+                                                  value={docRegistrationYear}
+                                                  onChange={(e) => setDocRegistrationYear(e.target.value)}
+                                                />
+                                                {!docRegistrationYear && validationAttempted[2] && (
+                                                  <div className="invalid-feedback">Please enter registration year</div>
+                                                )}
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Medical Registration Proof<span className="text-danger">*</span>
+                                              <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="file"
+                                                  className="tb-my-input"
+                                                  name="licenseFile"
+                                                  accept=".pdf,.jpg,.jpeg,.png"
+                                                  required
+                                                  onChange={handleLicenseFileChange}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Education/Degrees<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className="tb-my-input"
+                                                  name="vetEducation"
+                                                  placeholder="e.g. BVSc, MVSc, PhD"
+                                                  required
+                                                  value={vetEducation}
+                                                  onChange={(e) => setVetEducation(e.target.value)}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Degree Proof<span className="text-danger">*</span>
+                                              <small className="text-muted"> (PDF/JPG/PNG, max 5MB)</small>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="file"
+                                                  className="tb-my-input"
+                                                  name="licenseFile"
+                                                  accept=".pdf,.jpg,.jpeg,.png"
+                                                  required
+                                                  onChange={handleLicenseFileChange}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              GST Number
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className="tb-my-input"
+                                                  name="gstNumber"
+                                                  placeholder="GST or tax identification number"
+                                                  value={vendorGstNumber}
+                                                  onChange={(e) => setVendorGstNumber(e.target.value)}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              College/University<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className="tb-my-input"
+                                                  name="vetCollege"
+                                                  placeholder="College or university attended"
+                                                  required
+                                                  value={vetCollege}
+                                                  onChange={(e) => setVetCollege(e.target.value)}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Specialization<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className="tb-my-input"
+                                                  name="vetSpecialization"
+                                                  placeholder="e.g. Surgery, Dermatology, Dentistry"
+                                                  required
+                                                  value={vetSpecialization}
+                                                  onChange={(e) => setVetSpecialization(e.target.value)}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Years of Experience<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="number"
+                                                  className="tb-my-input"
+                                                  name="vetExperience"
+                                                  placeholder="Number of years in practice"
+                                                  min="0"
+                                                  required
+                                                  value={vetExperience}
+                                                  onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || !isNaN(value)) {
+                                                      setVetExperience(value);
+                                                    }
+                                                  }}
+
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        {/* Clinic Information */}
+                                        <div className="mt-4">
+                                          <h4 className="text-color-2 fw-6 mb-3 border-bottom pb-2">Clinic Information</h4>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Clinic Name<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="text"
+                                                  className="tb-my-input"
+                                                  name="vetClinicName"
+                                                  placeholder="Name of your veterinary clinic"
+                                                  required
+                                                  value={vetClinicName}
+                                                  onChange={(e) => setVetClinicName(e.target.value)}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Clinic Address<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <textarea
+                                                  className="tb-my-input"
+                                                  name="vetClinicAddress"
+                                                  placeholder="Full address of your clinic"
+                                                  required
+                                                  rows="3"
+                                                  value={vetClinicAddress}
+                                                  onChange={(e) => setVetClinicAddress(e.target.value)}
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          {/* Location Detection */}
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Clinic Location<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="mb-3">
+                                              <button
+                                                type="button"
+                                                className="sc-button btn-icon"
+                                                onClick={handleVetLocationDetection}
+                                              >
+                                                <span>Detect My Location</span>
+                                              </button>
+                                            </div>
+                                            {vetLatitude && vetLongitude && (
+                                              <div className="mr-2">
+                                                <iframe
+                                                  title="Google Map"
+                                                  width="100%"
+                                                  height="300"
+                                                  style={{ border: 1 }}
+                                                  loading="lazy"
+                                                  allowFullScreen
+                                                  referrerPolicy="no-referrer-when-downgrade"
+                                                  src={`https://www.google.com/maps?q=${vetLatitude},${vetLongitude}&output=embed`}
+                                                ></iframe>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Services & Availability */}
+                                        <div className="mt-4">
+                                          <h4 className="text-color-2 fw-6 mb-3 border-bottom pb-2">Services & Availability</h4>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Available Days<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="form-group wdth">
+                                              <div className="d-flex flex-wrap gap-2">
+                                                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                                                  <label key={day} className="d-flex align-items-center" style={{ color: "#05576e" }}>
+                                                    <input
+                                                      className="chkhgh"
+                                                      name="vetAvailableDays"
+                                                      type="checkbox"
+                                                      value={day}
+                                                      checked={vetAvailableDays.includes(day)}
+                                                      onChange={() => handleVetDaySelection(day)}
+                                                    />
+                                                    <span className="btn-checkbox ms-2" />
+                                                    <span className="mt-1 fs-13 fw-6 ms-2">{day}</span>
+                                                  </label>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Operating Hours<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="row mt-3">
+                                              <div className="col-md-6">
+                                                <label className="text-color-2 fw-6 mb-0">
+                                                  Start Time<span className="text-danger">*</span>
+                                                </label>
+                                                <div className="text-wrap flex form-wg">
+                                                  <fieldset style={{ width: "100%" }}>
+                                                    <input
+                                                      type="time"
+                                                      className="tb-my-input"
+                                                      name="vetStartTime"
+                                                      required
+                                                      value={vetTimings.start}
+                                                      onChange={(e) => setVetTimings({ ...vetTimings, start: e.target.value })}
+                                                    />
+
+                                                  </fieldset>
+                                                </div>
+                                              </div>
+                                              <div className="col-md-6">
+                                                <label className="text-color-2 fw-6 mb-0">
+                                                  End Time<span className="text-danger">*</span>
+                                                </label>
+                                                <div className="text-wrap flex form-wg">
+                                                  <fieldset style={{ width: "100%" }}>
+                                                    <input
+                                                      type="time"
+                                                      className="tb-my-input"
+                                                      name="vetEndTime"
+                                                      required
+                                                      value={vetTimings.end}
+                                                      onChange={(e) => setVetTimings({ ...vetTimings, end: e.target.value })}
+                                                    />
+                                                  </fieldset>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          {/* <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Services Offered<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="form-group wdth">
+                                              <div className="d-flex flex-column gap-2">
+                                                {[
+                                                  "General Checkups",
+                                                  "Vaccinations",
+                                                  "Surgery",
+                                                  "Dental Care",
+                                                  "Emergency Care",
+                                                  "Grooming",
+                                                  "Diagnostics"
+                                                ].map(service => (
+                                                  <label key={service} className="d-flex align-items-center">
+                                                    <input
+                                                      className="chkhgh"
+                                                      name="vetServices"
+                                                      type="checkbox"
+                                                      value={service}
+                                                      checked={vetServices.includes(service)}
+                                                      onChange={() => handleVetServiceSelection(service)}
+                                                    />
+                                                    <span className="btn-checkbox ms-2" />
+                                                    <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>{service}</span>
+                                                  </label>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          </div> */}
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Consultation Fee (₹)<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="number"
+                                                  className="tb-my-input"
+                                                  name="vetConsultationFee"
+                                                  placeholder="Base consultation fee in INR"
+                                                  min="0"
+                                                  required
+                                                  value={vetConsultationFee}
+                                                  onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || !isNaN(value)) {
+                                                      setVetConsultationFee(value);
+                                                    }
+                                                  }}
+
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
+
+                                          <div className="mt-2">
+                                            <label className="text-color-2 fw-6 mb-0">
+                                              Video Consulting Fees (₹)<span className="text-danger">*</span>
+                                            </label>
+                                            <div className="text-wrap flex form-wg">
+                                              <fieldset style={{ width: "100%" }}>
+                                                <input
+                                                  type="number"
+                                                  className="tb-my-input"
+                                                  name="vetConsultationFee"
+                                                  placeholder="Base consultation fee in INR"
+                                                  min="0"
+                                                  required
+                                                  value={vetConsultationFee}
+                                                  onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || !isNaN(value)) {
+                                                      setVetConsultationFee(value);
+                                                    }
+                                                  }}
+
+                                                />
+                                              </fieldset>
+                                            </div>
+                                          </div>
                                         </div>
                                       </>
-
                                     )}
                                   </div>
                                   <hr />
@@ -1697,7 +2536,7 @@ const Register = () => {
                                       <button
                                         style={{ backgroundColor: "rgb(229 228 228)" }}
                                         onClick={() => {
-                                          setStep(3); // Next step
+                                          setStep(3); // Previous step
                                         }}
                                         className="sc-button btn-icon"
                                         name="submit"
@@ -1708,12 +2547,15 @@ const Register = () => {
                                     </div>
                                     <div className="lh-16">
                                       <button
-                                        onClick={() => {
-                                          setStep(5); // Next step
+                                        type="button"
+                                        onClick={async (e) => {
+                                          if (validateStep4()) {
+
+                                            await handleSubmit(e);
+                                            setStep(5);
+                                          }
                                         }}
                                         className="sc-button btn-icon"
-                                        name="submit"
-                                        type="button"
                                       >
                                         <span>Complete Registration</span>
                                       </button>
@@ -1724,7 +2566,7 @@ const Register = () => {
                             ) : null}
 
 
-                            {/* Doctor Complete */}
+                            {/* registration Complete */}
                             {step === 5 ? (
                               <div className="respond-comment">
                                 <div className="jsy">
@@ -1738,7 +2580,7 @@ const Register = () => {
                                   method="post"
                                   id="contactform"
                                   className="ghrt comment-form form-submit p-3 bg-white"
-                                  action="./contact/contact-process.php"
+                                  onSubmit={handleSubmit}
                                   acceptCharset="utf-8"
                                   noValidate="novalidate"
                                 >
@@ -1758,9 +2600,9 @@ const Register = () => {
                                                 backgroundColor: "rgb(228 249 239 / 51%)",
                                                 border: "2px solid rgb(130 223 182 / 51%)",
                                                 fontFamily: 'sans-serif',
-                                                gap:'px'
-          
-                                                
+                                                gap: 'px'
+
+
                                               }}
                                             >
                                               Thank you for registering as a veterinary professional on MyPetMall.
