@@ -69,6 +69,8 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [openIndex, setOpenIndex] = useState(null);
   const [clinicType, setClinicType] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+
 
 
   // State variables for doctor registration
@@ -544,7 +546,7 @@ const Register = () => {
 
       <main className="fix" >
 
-        <section className="registration__area-two " style={{ padding: "10px",marginTop:"80px" }}>
+        <section className="registration__area-two " style={{ padding: "10px", marginTop: "80px" }}>
           <div>
             <div className="registration__inner-wrap-two" >
               <div className="row justify-content-center" >
@@ -833,7 +835,7 @@ const Register = () => {
                                   acceptCharset="utf-8"
                                   noValidate="novalidate">
                                   <div className="mb-4">
-                                    <label  className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Doctor?</label>
+                                    <label className="fw-6 mb-2" style={{ color: "#05576e" }}>Do you want to register as a Doctor?</label>
                                     <div className="d-flex gap-3">
                                       <label>
                                         <input
@@ -962,7 +964,7 @@ const Register = () => {
                                           <div className="form-group wdth">
                                             <div className="d-flex flex-wrap gap-2" >
                                               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                                                <label key={day} className="d-flex align-items-center" style={{color :"#05576e"}}>
+                                                <label key={day} className="d-flex align-items-center" style={{ color: "#05576e" }}>
                                                   <input
                                                     className="chkhgh"
                                                     name="availableDays"
@@ -1112,7 +1114,7 @@ const Register = () => {
                                                 }}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>General Checkups</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>General Checkups</span>
                                             </label>
 
                                             <label className="d-flex align-items-center">
@@ -1131,7 +1133,7 @@ const Register = () => {
                                                 }}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Vaccinations</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>Vaccinations</span>
                                             </label>
 
                                             <label className="d-flex align-items-center">
@@ -1150,7 +1152,7 @@ const Register = () => {
                                                 }}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Surgery</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>Surgery</span>
                                             </label>
 
                                             <label className="d-flex align-items-center">
@@ -1169,7 +1171,7 @@ const Register = () => {
                                                 }}
                                               />
                                               <span className="btn-checkbox ms-2" />
-                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{color:"#05576e"}}>Dental Care</span>
+                                              <span className="mt-1 fs-13 fw-6 ms-2" style={{ color: "#05576e" }}>Dental Care</span>
                                             </label>
                                           </div>
                                         </div>
@@ -1230,7 +1232,7 @@ const Register = () => {
                                   noValidate="novalidate"
                                 >
                                   <div className="mb-4">
-                                    <label className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Vendor?</label>
+                                    <label className="fw-6 mb-2" style={{ color: "#05576e" }}>Do you want to register as a Vendor?</label>
                                     <div className="d-flex gap-3">
                                       <label>
                                         <input
@@ -1307,7 +1309,6 @@ const Register = () => {
                                             </fieldset>
                                           </div>
                                         </div>
-
                                         <div className="mt-2">
                                           <label className="text-color-2 fw-6 mb-0">
                                             Product Categories<span className="text-danger">*</span>
@@ -1340,7 +1341,6 @@ const Register = () => {
                                                 }}
                                               >
                                                 {open ? <FiChevronUp /> : <FiChevronDown />}
-
                                               </div>
                                             </div>
 
@@ -1352,31 +1352,55 @@ const Register = () => {
                                                   width: "100%",
                                                   border: "1px solid #ced4da",
                                                   borderRadius: "4px",
-                                                  marginTop: "-13 px",
+                                                  marginTop: "-13px",
                                                   zIndex: 10,
-                                                  maxHeight: "200px",
+                                                  maxHeight: "250px",
                                                   overflowY: "auto",
                                                   padding: "10px",
                                                 }}
                                               >
-                                                {categories.map((category) => (
-                                                  <li key={category} className="option" onClick={(e) => e.stopPropagation()}>
-                                                    <label className="d-flex align-items-center mb-1">
-                                                      <input
-                                                        type="checkbox"
-                                                        value={category}
-                                                        checked={selected.includes(category)}
-                                                        onChange={() => handleSelect(category)}
-                                                        className="me-2"
-                                                      />
-                                                      {category}
-                                                    </label>
-                                                  </li>
-                                                ))}
+                                                {/* Search Box */}
+                                                <li className="mb-2">
+                                                  <input
+                                                    type="text"
+                                                    placeholder="Search categories..."
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    style={{
+                                                      width: "100%",
+                                                      padding: "8px",
+                                                      border: "1px solid #ced4da",
+                                                      borderRadius: "4px",
+                                                      fontSize: "14px",
+                                                    }}
+                                                  />
+                                                </li>
+
+                                                {/* Filtered Categories */}
+                                                {categories
+                                                  .filter((category) =>
+                                                    category.toLowerCase().includes(searchTerm.toLowerCase())
+                                                  )
+                                                  .map((category) => (
+                                                    <li key={category} className="option" onClick={(e) => e.stopPropagation()}>
+                                                      <label className="d-flex align-items-center mb-1">
+                                                        <input
+                                                          type="checkbox"
+                                                          value={category}
+                                                          checked={selected.includes(category)}
+                                                          onChange={() => handleSelect(category)}
+                                                          className="me-2"
+                                                        />
+                                                        {category}
+                                                      </label>
+                                                    </li>
+                                                  ))}
                                               </ul>
                                             )}
                                           </div>
                                         </div>
+
 
                                         <div className="mt-4">
                                           <label className="text-color-2 fw-6 mb-0">
@@ -1509,7 +1533,7 @@ const Register = () => {
                                 >
 
                                   <div className="mb-4">
-                                    <label className="fw-6 mb-2" style={{color :"#05576e"}}>Do you want to register as a Veterinary?</label>
+                                    <label className="fw-6 mb-2" style={{ color: "#05576e" }}>Do you want to register as a Veterinary?</label>
                                     <div className="d-flex gap-3">
                                       <label>
                                         <input
@@ -1758,9 +1782,9 @@ const Register = () => {
                                                 backgroundColor: "rgb(228 249 239 / 51%)",
                                                 border: "2px solid rgb(130 223 182 / 51%)",
                                                 fontFamily: 'sans-serif',
-                                                gap:'px'
-          
-                                                
+                                                gap: 'px'
+
+
                                               }}
                                             >
                                               Thank you for registering as a veterinary professional on MyPetMall.
